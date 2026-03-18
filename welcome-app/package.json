@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start -p 4009"
   },
   "dependencies": {
     "better-auth": "^1.5.5",
