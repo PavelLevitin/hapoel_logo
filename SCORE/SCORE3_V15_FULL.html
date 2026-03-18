@@ -1,0 +1,1153 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Final Score 1080x1080</title>
+  <style>
+    *{ box-sizing:border-box; }
+    body{ margin:0; font-family:Arial, Helvetica, sans-serif; background:#111; color:#fff; }
+    .app{ display:flex; gap:20px; padding:20px; align-items:flex-start; flex-wrap:wrap; }
+    .controls{ width:440px; background:#1a1a1a; border:1px solid #333; border-radius:14px; padding:16px; position:sticky; top:20px; max-height:calc(100vh - 40px); overflow:auto; }
+    .controls h2{ margin:0 0 14px; font-size:22px; }
+    .group{ margin-bottom:18px; padding-bottom:16px; border-bottom:1px solid #333; }
+    .group:last-child{ border-bottom:none; margin-bottom:0; padding-bottom:0; }
+    .group h3{ margin:0 0 10px; font-size:16px; color:#ffdbdb; }
+    .subTitle,.note{ font-size:12px; color:#bbb; line-height:1.45; }
+    .subTitle{ margin:8px 0 10px; font-weight:700; color:#ffdbdb; }
+    label{ display:block; margin:8px 0 4px; font-size:13px; color:#ddd; }
+    input[type="file"], select, input[type="range"], input[type="text"], input[type="number"], button{ width:100%; margin-bottom:8px; }
+    select, button, input[type="file"], input[type="text"], input[type="number"]{ background:#262626; color:#fff; border:1px solid #444; border-radius:8px; padding:10px; }
+    input[type="range"]{ width:100%; }
+    button{ cursor:pointer; font-weight:700; }
+    button:hover{ background:#333; }
+    hr.sep{ border:none; border-top:1px solid #333; margin:14px 0; }
+    .hidden{ display:none !important; }
+    .preview-wrap{ flex:1; min-width:320px; display:flex; justify-content:center; align-items:flex-start; }
+    .stage-scale{ width:min(92vw, 880px); }
+    .stage{ width:1080px; height:1080px; position:relative; overflow:hidden; background:#AF1419; transform-origin:top center; border:2px solid #333; }
+
+    .third{ position:absolute; top:0; height:1080px; background:#AF1419; }
+    .third1{ right:0; width:360px; overflow:hidden; z-index:1; }
+    .third2{ right:360px; width:360px; overflow:hidden; z-index:1; }
+    .third3{ right:720px; width:360px; overflow:hidden; z-index:1; }
+
+    .third1Texture,.leftBgTexture,.playerStripBg,.playerStripOverlay{ position:absolute; background-size:cover; background-position:center; background-repeat:no-repeat; pointer-events:none; }
+    .third1Texture{ inset:0; z-index:1; }
+    .leftBgTexture{ top:0; left:0; width:720px; height:1080px; z-index:2; }
+
+    .imgArea{ position:absolute; top:0; left:0; width:720px; height:1080px; overflow:hidden; z-index:3; }
+    .clubBgLogoWrap{ position:absolute; inset:0; display:none; align-items:center; justify-content:center; z-index:0; pointer-events:none; }
+    .clubBgLogo{ width:420px; height:420px; object-fit:contain; display:block; opacity:.35; }
+    .imgThird2,.imgThird3{ position:absolute; top:0; width:360px; height:1080px; overflow:hidden; z-index:1; }
+    .imgThird2{ left:360px; }
+    .imgThird3{ left:0; }
+    .layer{ position:absolute; top:0; left:0; background-repeat:no-repeat; pointer-events:none; z-index:1; }
+    .layer-continuous{ width:720px; height:1080px; background-size:contain; background-position:center; }
+    .layer-third{ width:360px; height:1080px; background-size:contain; background-position:center; }
+
+    .dividerWhite{ position:absolute; right:356px; width:2px; background:#fff; z-index:9; }
+    .dividerWhiteTop{ top:0; height:520px; }
+    .dividerWhiteBottom{ top:560px; height:520px; }
+
+    .logoBox{ position:absolute; top:35px; right:90px; width:180px; height:180px; display:flex; align-items:center; justify-content:center; z-index:6; }
+    .logoBox img{ width:180px; height:180px; object-fit:contain; display:block; }
+    .ifaLogoBox{ position:absolute; top:24px; left:24px; width:220px; height:220px; display:flex; align-items:flex-start; justify-content:flex-start; z-index:12; pointer-events:none; overflow:visible; }
+    .ifaLogoBox img{ max-height:none; max-width:none; width:auto; height:100px; object-fit:contain; display:block; }
+
+    .finalScoreText{ position:absolute; top:250px; right:0; width:360px; text-align:center; z-index:6; font-family:"Courier New", monospace; font-size:50px; line-height:.95; transform:skewY(-14deg); font-weight:700; white-space:pre-line; }
+
+    .ageBadge{ position:absolute; right:0; bottom:72px; width:360px; text-align:center; z-index:6; font-family:"Courier New", monospace; font-size:34px; line-height:1.05; font-weight:700; white-space:pre-line; }
+    .leagueBadge{ position:absolute; right:0; bottom:40px; width:360px; text-align:center; z-index:6; font-family:"Courier New", monospace; font-size:24px; line-height:1; font-weight:700; transform:skewX(-20deg); transform-origin:center; }
+
+    .scoreArea{ position:absolute; top:360px; right:280px; width:160px; height:360px; z-index:10; }
+    .scoreBox{ width:160px; height:160px; background:#000; border:2px solid #fff; display:flex; align-items:center; justify-content:center; color:#fff; font-family:"Courier New", monospace; font-size:135px; font-weight:700; }
+    .scoreBox.top{ position:absolute; top:0; right:0; }
+    .scoreBox.bottom{ position:absolute; top:200px; right:0; }
+    .scoreX{ position:absolute; top:160px; right:0; width:160px; height:40px; display:flex; align-items:center; justify-content:center; font-family:"Courier New", monospace; font-size:35px; font-weight:700; color:#fff; }
+    .teamWrap{ position:absolute; width:170px; z-index:11; text-align:center; color:#fff; }
+    .teamWrap.top{ top:360px; right:70px; }
+    .teamWrap.bottom{ top:560px; right:70px; }
+    .teamCode{ width:100%; height:78px; display:flex; align-items:flex-end; justify-content:center; color:#fff; font-family:"Courier New", monospace; font-size:60px; font-weight:700; text-align:center; direction:ltr; line-height:1; white-space:nowrap; }
+    .teamFullName{ width:100%; margin-top:8px; font-size:15px; line-height:1.1; font-weight:700; text-align:center; direction:rtl; white-space:normal; }
+
+    .scorersBlock{ position:absolute; top:735px; right:20px; width:320px; min-height:230px; z-index:12; color:#fff; font-family:Arial, sans-serif; direction:rtl; text-align:center; display:flex; flex-direction:column; align-items:center; gap:4px; padding:0 8px; }
+    .scorersTitle{ width:100%; font-size:28px; font-weight:700; line-height:1.1; margin-bottom:6px; white-space:nowrap; }
+    .scorerLine{ width:100%; font-size:21px; font-weight:700; line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .scorerEntry{ display:grid; grid-template-columns:1fr 90px; gap:8px; margin-bottom:6px; direction:ltr; }
+    .scorerEntry input{ margin-bottom:0; }
+
+    .playerStrip{ position:absolute; left:0; top:924px; width:720px; height:130px; z-index:14; display:none; }
+    .playerStripBg{ inset:0; background:#AF1419; opacity:.30; }
+    .playerStripInner{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; gap:14px; padding:0 16px; }
+    .playerThumb{ width:130px; height:130px; object-fit:contain; display:block; }
+
+    .matchStatus{ font-size:12px; color:#9fd5a8; margin-top:4px; line-height:1.45; }
+    .matchStatus.warn{ color:#ffc36d; }
+
+    @media (max-width:1200px){
+      .controls{ width:100%; position:static; max-height:none; }
+      .stage-scale{ width:min(96vw, 720px); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="controls">
+      <h2>הגדרות גרפיקה</h2>
+
+      <div class="group">
+        <h3>תיקיית ACADEMY PLAYERS</h3>
+        <label for="academyFolderInput">טען את תיקיית השורש עם U14 עד U19</label>
+        <input id="academyFolderInput" type="file" webkitdirectory directory multiple accept="image/*">
+        <div class="note">המערכת תחפש אוטומטית את תמונת הכובש לפי חלק מהשם, רק בתיקייה של השנתון שתבחר.</div>
+        <div id="academyFolderStatus" class="matchStatus warn">עדיין לא נטענה תיקיית שחקנים.</div>
+      </div>
+
+      <div class="group">
+        <h3>רקע תוצאה</h3>
+        <label for="textureInput">טען רקע תוצאה</label>
+        <input id="textureInput" type="file" accept="image/*">
+        <button id="resetTextureBtn" type="button">איפוס רקע תוצאה</button>
+      </div>
+
+      <div class="group">
+        <h3>רקע שחקן</h3>
+        <label for="leftBgInput">טען רקע שחקן</label>
+        <input id="leftBgInput" type="file" accept="image/*">
+        <button id="resetLeftBgBtn" type="button">איפוס רקע שחקן</button>
+      </div>
+
+      <div class="group">
+        <h3>לוגו מועדון</h3>
+        <label for="logoInput">טען לוגו מועדון</label>
+        <input id="logoInput" type="file" accept="image/*">
+        <button id="resetLogoBtn" type="button">איפוס לוגו מועדון</button>
+
+        <label for="showClubBehind">הצג לוגו מועדון מאחורי תמונת השחקן</label>
+        <select id="showClubBehind">
+          <option value="off" selected>לא</option>
+          <option value="on">כן</option>
+        </select>
+
+        <label for="clubBehindOpacity">שקיפות לוגו מאחורי שחקן</label>
+        <input id="clubBehindOpacity" type="range" min="0" max="100" step="1" value="65">
+      </div>
+      <div class="group">
+        <h3>לוגו התאחדות</h3>
+        <label for="ifaLogoInput">העלאת לוגו התאחדות</label>
+        <input id="ifaLogoInput" type="file" accept="image/*">
+        <button id="resetIfaLogoBtn" type="button">איפוס לוגו התאחדות</button>
+
+        <label for="ifaX">הזזת לוגו התאחדות ימינה / שמאלה</label>
+        <input id="ifaX" type="range" min="-300" max="300" step="1" value="0">
+
+        <label for="ifaY">הזזת לוגו התאחדות למעלה / למטה</label>
+        <input id="ifaY" type="range" min="-300" max="300" step="1" value="0">
+
+        <label for="ifaSize">גובה לוגו התאחדות (80-200)</label>
+        <input id="ifaSize" type="number" min="80" max="200" step="1" value="100">
+      </div>
+
+      <div class="group">
+        <h3>העלאת תמונת שחקן ראשי או תמונה אחרת</h3>
+        <label for="imageMode">בחר מצב תמונה</label>
+        <select id="imageMode">
+          <option value="continuous">תמונת שחקן רציפה לשליש 2+3</option>
+          <option value="separate">תמונת שחקן נפרדת לכל שליש</option>
+        </select>
+
+        <div id="continuousWrap">
+          <label for="continuousInput">טען תמונת שחקן רציפה</label>
+          <input id="continuousInput" type="file" accept="image/*">
+          <button id="resetContinuousBtn" type="button">איפוס תמונה רציפה</button>
+
+          <label for="continuousScale">גודל תמונה רציפה</label>
+          <input id="continuousScale" type="range" min="0.4" max="3" step="0.01" value="1">
+
+          <label for="continuousX">הזזה ימינה / שמאלה</label>
+          <input id="continuousX" type="range" min="-700" max="700" step="1" value="0">
+
+          <label for="continuousY">הזזה למעלה / למטה</label>
+          <input id="continuousY" type="range" min="-700" max="700" step="1" value="0">
+        </div>
+
+        <div id="separateWrap" class="hidden">
+          <label for="third2Input">טען תמונת שחקן לשליש 2</label>
+          <input id="third2Input" type="file" accept="image/*">
+
+          <label for="third2Scale">גודל תמונה שליש 2</label>
+          <input id="third2Scale" type="range" min="0.4" max="3" step="0.01" value="1">
+
+          <label for="third2X">הזזה ימינה / שמאלה שליש 2</label>
+          <input id="third2X" type="range" min="-500" max="500" step="1" value="0">
+
+          <label for="third2Y">הזזה למעלה / למטה שליש 2</label>
+          <input id="third2Y" type="range" min="-500" max="500" step="1" value="0">
+
+          <button id="resetThird2Btn" type="button">איפוס תמונת שליש 2</button>
+
+          <hr class="sep">
+
+          <label for="third3Input">טען תמונת שחקן לשליש 3</label>
+          <input id="third3Input" type="file" accept="image/*">
+
+          <label for="third3Scale">גודל תמונה שליש 3</label>
+          <input id="third3Scale" type="range" min="0.4" max="3" step="0.01" value="1">
+
+          <label for="third3X">הזזה ימינה / שמאלה שליש 3</label>
+          <input id="third3X" type="range" min="-500" max="500" step="1" value="0">
+
+          <label for="third3Y">הזזה למעלה / למטה שליש 3</label>
+          <input id="third3Y" type="range" min="-500" max="500" step="1" value="0">
+
+          <button id="resetThird3Btn" type="button">איפוס תמונת שליש 3</button>
+        </div>
+      </div>
+
+      <div class="group">
+        <h3>שנתון</h3>
+        <label for="ageSelect">בחר שנתון</label>
+        <select id="ageSelect">
+          <option value="U14">U14</option>
+          <option value="U15">U15</option>
+          <option value="U16">U16</option>
+          <option value="U17">U17</option>
+          <option value="U18">U18</option>
+          <option value="U19" selected>U19</option>
+        </select>
+      </div>
+
+      <div class="group">
+        <h3>תוצאה</h3>
+        <label for="scoreTop">תוצאה ריבוע עליון</label>
+        <select id="scoreTop"></select>
+
+        <label for="scoreBottom">תוצאה ריבוע תחתון</label>
+        <select id="scoreBottom"></select>
+      </div>
+
+      <div class="group">
+        <h3>קבוצות</h3>
+        <label for="teamTop">קבוצה עליונה</label>
+        <select id="teamTop"></select>
+
+        <label for="teamBottom">קבוצה תחתונה</label>
+        <select id="teamBottom"></select>
+      </div>
+
+
+      <div class="group">
+        <h3>פס כובשים</h3>
+        <label for="stripOpacity">שקיפות פס הכובשים</label>
+        <input id="stripOpacity" type="range" min="0" max="100" step="1" value="30">
+
+        <label for="stripY">הזזת פס הכובשים למעלה / למטה</label>
+        <input id="stripY" type="range" min="820" max="950" step="1" value="924">
+      </div>
+
+      <div class="group">
+        <h3>כובשים – קבוצה עליונה</h3>
+        <div class="subTitle">מספר השורות נקבע לפי התוצאה העליונה</div>
+        <div id="topScorersFields"></div>
+      </div>
+
+      <div class="group">
+        <h3>כובשים – קבוצה תחתונה</h3>
+        <div class="subTitle">מספר השורות נקבע לפי התוצאה התחתונה</div>
+        <div id="bottomScorersFields"></div>
+        <div id="playerMatchStatus" class="matchStatus warn">אין כובשי HBS להצגה כרגע.</div>
+      </div>
+
+      <div class="group">
+        <h3>ייצוא</h3>
+        <button id="exportBtn" type="button">ייצא PNG ‏1080x1080</button>
+        <button id="exportBtn2160" type="button">ייצא PNG ‏2160x2160</button>
+        <div class="note">הקובץ נשמר כ־PNG בגודל 1080x1080. ניתן להעלות לוגו התאחדות ידנית בלי תלות בלינק חיצוני.</div>
+      </div>
+    </div>
+
+    <div class="preview-wrap">
+      <div class="stage-scale" id="stageScale">
+        <div class="stage" id="stage">
+          <div class="third third1">
+            <div class="third1Texture" id="third1Texture"></div>
+
+            <div class="logoBox">
+              <img id="logoPreview" class="hidden" alt="logo">
+            </div>
+
+            <div class="finalScoreText">FINAL
+SCORE</div>
+
+            <div class="ageBadge" id="ageBadgePreview">U19</div>
+            <div class="leagueBadge" id="leagueBadgePreview">LEAGUE</div>
+
+            <div class="scorersBlock" id="scorersPreview">
+              <div class="scorersTitle">רשימת כובשים</div>
+            </div>
+          </div>
+
+          <div class="third third2"></div>
+          <div class="third third3"></div>
+          <div class="ifaLogoBox"><img id="ifaLogo" class="hidden" alt="IFA logo"></div>
+          <div class="dividerWhite dividerWhiteTop"></div>
+          <div class="dividerWhite dividerWhiteBottom"></div>
+
+          <div class="leftBgTexture" id="leftBgTexture"></div>
+
+          <div class="imgArea">
+            <div class="clubBgLogoWrap" id="clubBgLogoWrap">
+              <img id="clubBgLogo" class="clubBgLogo hidden" alt="club background logo">
+            </div>
+            <div id="continuousPreviewWrap">
+              <div class="layer layer-continuous" id="continuousBase"></div>
+            </div>
+            <div id="separatePreviewWrap" class="hidden">
+              <div class="imgThird2"><div class="layer layer-third" id="third2Base"></div></div>
+              <div class="imgThird3"><div class="layer layer-third" id="third3Base"></div></div>
+            </div>
+          </div>
+
+          <div class="playerStrip" id="playerStrip">
+            <div class="playerStripBg"></div>
+            <div class="playerStripInner" id="playerStripInner"></div>
+          </div>
+
+          <div class="scoreArea">
+            <div class="scoreBox top" id="scoreTopPreview">0</div>
+            <div class="scoreX">X</div>
+            <div class="scoreBox bottom" id="scoreBottomPreview">0</div>
+          </div>
+
+          <div class="teamWrap top">
+            <div class="teamCode" id="teamTopPreview">HBS</div>
+            <div class="teamFullName" id="teamTopFullPreview">הפועל באר שבע</div>
+          </div>
+          <div class="teamWrap bottom">
+            <div class="teamCode" id="teamBottomPreview">MCH</div>
+            <div class="teamFullName" id="teamBottomFullPreview">מכבי חיפה</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const teams = [
+      { name: "הפועל באר שבע", code: "HBS" },
+      { name: "מכבי חיפה", code: "MCH" },
+      { name: "מכבי תל אביב", code: "MTA" },
+      { name: "הפועל תל אביב", code: "HPT" },
+      { name: "הפועל פתח תקווה", code: "HPK" },
+      { name: "מכבי פתח תקווה", code: "MPK" },
+      { name: "ביתר ירושלים", code: "BJR" },
+      { name: "מכבי נתניה", code: "MNT" },
+      { name: "בני יהודה ת\"א", code: "BYT" },
+      { name: "הפועל כפר סבא", code: "HKS" },
+      { name: "מ.ס אשדוד", code: "SCA" },
+      { name: "הפועל ראשון לציון", code: "HRZ" },
+      { name: "מכבי הרצליה", code: "MHZ" },
+      { name: "הפועל רעננה", code: "HPR" },
+      { name: "הפועל חיפה", code: "HPH" },
+      { name: "הפועל קרית שמונה", code: "HKS" },
+      { name: "הפועל ניר רמת השרון", code: "HRS" },
+      { name: "הפועל עכו", code: "HAA" }
+    ];
+
+    const $ = (id) => document.getElementById(id);
+    const textureInput = $('textureInput');
+    const logoInput = $('logoInput');
+    const ifaLogoInput = $('ifaLogoInput');
+    const leftBgInput = $('leftBgInput');
+    const academyFolderInput = $('academyFolderInput');
+    const ifaX = $('ifaX');
+    const ifaY = $('ifaY');
+    const ifaSize = $('ifaSize');
+    const academyFolderStatus = $('academyFolderStatus');
+    const playerMatchStatus = $('playerMatchStatus');
+    const ageSelect = $('ageSelect');
+    const ageBadgePreview = $('ageBadgePreview');
+    const leagueBadgePreview = $('leagueBadgePreview');
+    const stripOpacity = $('stripOpacity');
+    const stripY = $('stripY');
+    const showClubBehind = $('showClubBehind');
+    const clubBehindOpacity = $('clubBehindOpacity');
+
+    const third1Texture = $('third1Texture');
+    const leftBgTexture = $('leftBgTexture');
+    const logoPreview = $('logoPreview');
+    const ifaLogo = $('ifaLogo');
+    const clubBgLogoWrap = $('clubBgLogoWrap');
+    const clubBgLogo = $('clubBgLogo');
+    const playerStrip = $('playerStrip');
+    const playerStripInner = $('playerStripInner');
+    const playerStripBg = document.querySelector('.playerStripBg');
+    const ifaLogoBox = document.querySelector('.ifaLogoBox');
+
+    const imageMode = $('imageMode');
+    const continuousWrap = $('continuousWrap');
+    const separateWrap = $('separateWrap');
+    const continuousPreviewWrap = $('continuousPreviewWrap');
+    const separatePreviewWrap = $('separatePreviewWrap');
+
+    const continuousInput = $('continuousInput');
+    const continuousScale = $('continuousScale');
+    const continuousX = $('continuousX');
+    const continuousY = $('continuousY');
+    const continuousBase = $('continuousBase');
+
+    const third2Input = $('third2Input');
+    const third2Scale = $('third2Scale');
+    const third2X = $('third2X');
+    const third2Y = $('third2Y');
+    const third2Base = $('third2Base');
+
+    const third3Input = $('third3Input');
+    const third3Scale = $('third3Scale');
+    const third3X = $('third3X');
+    const third3Y = $('third3Y');
+    const third3Base = $('third3Base');
+
+    const scoreTop = $('scoreTop');
+    const scoreBottom = $('scoreBottom');
+    const teamTop = $('teamTop');
+    const teamBottom = $('teamBottom');
+    const scoreTopPreview = $('scoreTopPreview');
+    const scoreBottomPreview = $('scoreBottomPreview');
+    const teamTopPreview = $('teamTopPreview');
+    const teamBottomPreview = $('teamBottomPreview');
+    const teamTopFullPreview = $('teamTopFullPreview');
+    const teamBottomFullPreview = $('teamBottomFullPreview');
+    const topScorersFields = $('topScorersFields');
+    const bottomScorersFields = $('bottomScorersFields');
+    const scorersPreview = $('scorersPreview');
+    const exportBtn = $('exportBtn');
+    const stage = $('stage');
+
+    const stageScale = $('stageScale');
+
+    let textureData = null, leftBgData = null, logoData = null, ifaLogoData = null, continuousData = null, third2Data = null, third3Data = null;
+    const stripSettings = { y: 924, opacity: 0.30, height: 130 };
+    const clubBehindSettings = { enabled: false, opacity: 0.35 };
+    const ifaSettings = { x: 0, y: 0, size: 100 };
+    let academyIndex = { U14: [], U15: [], U16: [], U17: [], U18: [], U19: [] };
+    let playerObjectUrls = [];
+    let currentMatchedPlayers = [];
+
+    const imageMetrics = {
+      continuous: { width:720, height:1080 },
+      third2: { width:360, height:1080 },
+      third3: { width:360, height:1080 }
+    };
+
+    function normalizeName(text){
+      return (text || '')
+        .toLowerCase()
+        .replace(/\.[a-z0-9]+$/gi, '')
+        .replace(/[_\-]+/g, ' ')
+        .replace(/[()\[\]{}'".,]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function fileNameWithoutExt(name){
+      return (name || '').replace(/\.[^.]+$/, '');
+    }
+
+    function revokePlayerUrls(){
+      playerObjectUrls.forEach(url => URL.revokeObjectURL(url));
+      playerObjectUrls = [];
+    }
+
+    function buildAcademyIndex(files){
+      revokePlayerUrls();
+      academyIndex = { U14: [], U15: [], U16: [], U17: [], U18: [], U19: [] };
+      let count = 0;
+      Array.from(files).forEach(file => {
+        const rel = file.webkitRelativePath || file.name;
+        const parts = rel.split('/');
+        const ageFolder = parts.find(p => /^U1[4-9]$/i.test(p));
+        if(!ageFolder) return;
+        const ageKey = ageFolder.toUpperCase();
+        if(!academyIndex[ageKey]) return;
+        const url = URL.createObjectURL(file);
+        playerObjectUrls.push(url);
+        academyIndex[ageKey].push({
+          file,
+          url,
+          fileName: file.name,
+          displayName: fileNameWithoutExt(file.name),
+          normalized: normalizeName(fileNameWithoutExt(file.name))
+        });
+        count += 1;
+      });
+      academyFolderStatus.textContent = count ? `נטענו ${count} תמונות שחקנים.` : 'לא נמצאו תמונות בתיקיות U14-U19.';
+      academyFolderStatus.className = count ? 'matchStatus' : 'matchStatus warn';
+    }
+
+    function fillScoreSelect(selectEl, selected = 0){
+      selectEl.innerHTML = '';
+      for(let i=0;i<=10;i++){
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = i;
+        if(i === selected) opt.selected = true;
+        selectEl.appendChild(opt);
+      }
+    }
+
+    function getTeamByCode(code){
+      return teams.find(team => team.code === code) || null;
+    }
+
+    function fillTeamSelect(selectEl, defaultCode){
+      selectEl.innerHTML = '';
+      teams.forEach(team => {
+        const opt = document.createElement('option');
+        opt.value = team.code;
+        opt.textContent = `${team.name} (${team.code})`;
+        if(team.code === defaultCode) opt.selected = true;
+        selectEl.appendChild(opt);
+      });
+    }
+
+    fillScoreSelect(scoreTop, 0); fillScoreSelect(scoreBottom, 0);
+    fillTeamSelect(teamTop, 'HBS'); fillTeamSelect(teamBottom, 'MCH');
+
+    function readFileAsDataURL(file){
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function getFittedSize(imgW, imgH, boxW, boxH, scale){
+      const ratio = Math.min(boxW / imgW, boxH / imgH);
+      return { width: imgW * ratio * scale, height: imgH * ratio * scale };
+    }
+
+    function updateScale(){
+      const visibleWidth = Math.min(window.innerWidth * 0.92, 880);
+      const scale = visibleWidth / 1080;
+      stage.style.transform = `scale(${scale})`;
+      stageScale.style.height = `${1080 * scale}px`;
+    }
+    window.addEventListener('resize', updateScale);
+    updateScale();
+
+    function setBg(el, src, size, posX, posY, opacity = 1){
+      el.style.backgroundImage = src ? `url(${src})` : 'none';
+      el.style.backgroundSize = size;
+      el.style.backgroundPosition = `${posX}px ${posY}px`;
+      el.style.opacity = opacity;
+      el.style.backgroundRepeat = 'no-repeat';
+    }
+
+    function applyContinuousPreview(){
+      if(!continuousData){ setBg(continuousBase, null, 'contain', 0, 0, 1); return; }
+      const fitted = getFittedSize(imageMetrics.continuous.width, imageMetrics.continuous.height, 720, 1080, parseFloat(continuousScale.value));
+      setBg(continuousBase, continuousData, `${fitted.width}px ${fitted.height}px`, parseInt(continuousX.value,10), parseInt(continuousY.value,10), 1);
+    }
+
+    function applySeparatePreview(){
+      if(third2Data){
+        const fitted = getFittedSize(imageMetrics.third2.width, imageMetrics.third2.height, 360, 1080, parseFloat(third2Scale.value));
+        setBg(third2Base, third2Data, `${fitted.width}px ${fitted.height}px`, parseInt(third2X.value,10), parseInt(third2Y.value,10), 1);
+      } else setBg(third2Base, null, 'contain', 0, 0, 1);
+
+      if(third3Data){
+        const fitted = getFittedSize(imageMetrics.third3.width, imageMetrics.third3.height, 360, 1080, parseFloat(third3Scale.value));
+        setBg(third3Base, third3Data, `${fitted.width}px ${fitted.height}px`, parseInt(third3X.value,10), parseInt(third3Y.value,10), 1);
+      } else setBg(third3Base, null, 'contain', 0, 0, 1);
+    }
+
+    function updateClubBgLogoPreview(){
+      clubBehindSettings.enabled = showClubBehind.value === 'on' && !!logoData;
+      clubBehindSettings.opacity = 1 - (parseInt(clubBehindOpacity.value, 10) / 100);
+      if(clubBehindSettings.enabled){
+        clubBgLogo.src = logoData;
+        clubBgLogo.classList.remove('hidden');
+        clubBgLogo.style.opacity = String(clubBehindSettings.opacity);
+        clubBgLogoWrap.style.display = 'flex';
+      } else {
+        clubBgLogo.src = '';
+        clubBgLogo.classList.add('hidden');
+        clubBgLogoWrap.style.display = 'none';
+      }
+    }
+
+    function updatePlayerStripStyle(){
+      stripSettings.y = parseInt(stripY.value, 10);
+      stripSettings.opacity = 1 - (parseInt(stripOpacity.value, 10) / 100);
+      playerStrip.style.top = `${stripSettings.y}px`;
+      playerStripBg.style.opacity = String(stripSettings.opacity);
+    }
+
+    function updateIfaLogoPreview(){
+      ifaSettings.x = parseInt(ifaX.value || 0, 10);
+      ifaSettings.y = parseInt(ifaY.value || 0, 10);
+      let size = parseInt(ifaSize.value || 100, 10);
+      if(Number.isNaN(size)) size = 100;
+      size = Math.max(80, Math.min(200, size));
+      ifaSize.value = size;
+      ifaSettings.size = size;
+      ifaLogo.style.height = `${size}px`;
+      ifaLogo.style.width = 'auto';
+      ifaLogo.style.transform = `translate(${ifaSettings.x}px, ${ifaSettings.y}px)`;
+      ifaLogo.style.transformOrigin = 'top left';
+    }
+
+    function switchImageMode(){
+      const mode = imageMode.value;
+      continuousWrap.classList.toggle('hidden', mode !== 'continuous');
+      separateWrap.classList.toggle('hidden', mode !== 'separate');
+      continuousPreviewWrap.classList.toggle('hidden', mode !== 'continuous');
+      separatePreviewWrap.classList.toggle('hidden', mode !== 'separate');
+    }
+
+    function createScorerEntry(teamKey, index){
+      const row = document.createElement('div');
+      row.className = 'scorerEntry';
+      const nameInput = document.createElement('input');
+      nameInput.type = 'text';
+      nameInput.placeholder = `שם כובש ${index + 1}`;
+      nameInput.dataset.team = teamKey; nameInput.dataset.type = 'name'; nameInput.dataset.index = index;
+      const minuteInput = document.createElement('input');
+      minuteInput.type = 'number'; minuteInput.min = '0'; minuteInput.max = '130'; minuteInput.placeholder = 'דקה';
+      minuteInput.dataset.team = teamKey; minuteInput.dataset.type = 'minute'; minuteInput.dataset.index = index;
+      nameInput.addEventListener('input', () => { renderScorersPreview(); updatePlayerStrip();
+
+// ----- drag logos -----
+function makeDraggable(el){
+ let down=false,offX=0,offY=0;
+ el.style.cursor='move';
+ el.addEventListener('mousedown',e=>{
+  down=true;
+  offX=e.clientX-el.offsetLeft;
+  offY=e.clientY-el.offsetTop;
+ });
+ window.addEventListener('mouseup',()=>down=false);
+ window.addEventListener('mousemove',e=>{
+  if(!down) return;
+  el.style.left=(e.clientX-offX)+'px';
+  el.style.top=(e.clientY-offY)+'px';
+ });
+}
+makeDraggable(document.querySelector('.ifaLogoBox'));
+makeDraggable(document.querySelector('.logoBox'));
+ });
+      minuteInput.addEventListener('input', () => { renderScorersPreview(); updatePlayerStrip();
+
+// ----- drag logos -----
+function makeDraggable(el){
+ let down=false,offX=0,offY=0;
+ el.style.cursor='move';
+ el.addEventListener('mousedown',e=>{
+  down=true;
+  offX=e.clientX-el.offsetLeft;
+  offY=e.clientY-el.offsetTop;
+ });
+ window.addEventListener('mouseup',()=>down=false);
+ window.addEventListener('mousemove',e=>{
+  if(!down) return;
+  el.style.left=(e.clientX-offX)+'px';
+  el.style.top=(e.clientY-offY)+'px';
+ });
+}
+makeDraggable(document.querySelector('.ifaLogoBox'));
+makeDraggable(document.querySelector('.logoBox'));
+ });
+      row.appendChild(nameInput); row.appendChild(minuteInput);
+      return row;
+    }
+
+    function getScorersData(teamKey){
+      const names = document.querySelectorAll(`input[data-team="${teamKey}"][data-type="name"]`);
+      const minutes = document.querySelectorAll(`input[data-team="${teamKey}"][data-type="minute"]`);
+      const rows = [];
+      const count = Math.max(names.length, minutes.length);
+      for(let i=0;i<count;i++) rows.push({ name: names[i] ? names[i].value : '', minute: minutes[i] ? minutes[i].value : '' });
+      return rows;
+    }
+
+    function restoreScorersData(teamKey, data){
+      const names = document.querySelectorAll(`input[data-team="${teamKey}"][data-type="name"]`);
+      const minutes = document.querySelectorAll(`input[data-team="${teamKey}"][data-type="minute"]`);
+      data.forEach((item, i) => { if(names[i]) names[i].value = item.name || ''; if(minutes[i]) minutes[i].value = item.minute || ''; });
+    }
+
+    function rebuildScorerFields(){
+      const topCount = parseInt(scoreTop.value,10), bottomCount = parseInt(scoreBottom.value,10);
+      const oldTop = getScorersData('top'), oldBottom = getScorersData('bottom');
+      topScorersFields.innerHTML = ''; bottomScorersFields.innerHTML = '';
+      for(let i=0;i<topCount;i++) topScorersFields.appendChild(createScorerEntry('top', i));
+      for(let i=0;i<bottomCount;i++) bottomScorersFields.appendChild(createScorerEntry('bottom', i));
+      restoreScorersData('top', oldTop); restoreScorersData('bottom', oldBottom);
+    }
+
+    function formatScorerLine(name, minute){
+      const cleanName = (name || '').trim();
+      const cleanMinute = (minute || '').toString().trim();
+      if(!cleanName && !cleanMinute) return '';
+      if(cleanName && cleanMinute) return `${cleanName} ${cleanMinute}'`;
+      if(cleanName) return cleanName;
+      return `${cleanMinute}'`;
+    }
+
+    function getHbsScorers(){
+      const lines = [];
+      if(teamTop.value === 'HBS'){
+        getScorersData('top').forEach(item => { if((item.name || '').trim()) lines.push({ name:item.name.trim(), minute:item.minute || '' }); });
+      }
+      if(teamBottom.value === 'HBS'){
+        getScorersData('bottom').forEach(item => { if((item.name || '').trim()) lines.push({ name:item.name.trim(), minute:item.minute || '' }); });
+      }
+      return lines;
+    }
+
+    function updateTeamLabels(){
+      const topTeam = getTeamByCode(teamTop.value);
+      const bottomTeam = getTeamByCode(teamBottom.value);
+      teamTopPreview.textContent = teamTop.value;
+      teamBottomPreview.textContent = teamBottom.value;
+      teamTopFullPreview.textContent = topTeam ? topTeam.name : '';
+      teamBottomFullPreview.textContent = bottomTeam ? bottomTeam.name : '';
+    }
+
+    function renderScorersPreview(){
+      const lines = getHbsScorers();
+      scorersPreview.innerHTML = '<div class="scorersTitle">רשימת כובשים</div>';
+      lines.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'scorerLine';
+        div.textContent = formatScorerLine(item.name, item.minute);
+        scorersPreview.appendChild(div);
+      });
+    }
+
+    function findPlayerMatch(name, ageKey, usedNames = new Set()){
+      const pool = academyIndex[ageKey] || [];
+      const query = normalizeName(name);
+      if(!query) return null;
+
+      const exact = pool.find(p => !usedNames.has(p.normalized) && (p.normalized === query || p.normalized.includes(query) || query.includes(p.normalized)));
+      if(exact) return exact;
+
+      const tokens = query.split(' ').filter(Boolean);
+      if(!tokens.length) return null;
+      const scored = pool
+        .filter(p => !usedNames.has(p.normalized))
+        .map(p => ({
+          player: p,
+          score: tokens.reduce((sum, token) => sum + (p.normalized.includes(token) ? token.length : 0), 0)
+        }))
+        .filter(x => x.score > 0)
+        .sort((a,b) => b.score - a.score || a.player.normalized.length - b.player.normalized.length);
+      return scored[0] ? scored[0].player : null;
+    }
+
+    function updatePlayerStrip(){
+      const hbsScorers = getHbsScorers();
+      const ageKey = ageSelect.value;
+      const used = new Set();
+      currentMatchedPlayers = [];
+      playerStripInner.innerHTML = '';
+
+      hbsScorers.forEach(scorer => {
+        const match = findPlayerMatch(scorer.name, ageKey, used);
+        if(match){
+          used.add(match.normalized);
+          currentMatchedPlayers.push({ ...match, scorerName: scorer.name });
+        }
+      });
+
+      if(!hbsScorers.length){
+        playerStrip.style.display = 'none';
+        playerMatchStatus.textContent = 'אין כובשי HBS להצגה כרגע.';
+        playerMatchStatus.className = 'matchStatus warn';
+        return;
+      }
+
+      playerStrip.style.display = 'block';
+      currentMatchedPlayers.forEach(item => {
+        const img = document.createElement('img');
+        img.className = 'playerThumb';
+        img.src = item.url;
+        img.alt = item.displayName;
+        img.title = item.displayName;
+        playerStripInner.appendChild(img);
+      });
+
+      if(currentMatchedPlayers.length === hbsScorers.length){
+        playerMatchStatus.textContent = `נמצאו ${currentMatchedPlayers.length} תמונות כובשים בתיקיית ${ageKey}.`;
+        playerMatchStatus.className = 'matchStatus';
+      } else {
+        playerMatchStatus.textContent = `נמצאו ${currentMatchedPlayers.length} מתוך ${hbsScorers.length} כובשי HBS בתיקיית ${ageKey}.`;
+        playerMatchStatus.className = 'matchStatus warn';
+      }
+    }
+
+    function loadImage(src){
+      return new Promise((resolve, reject) => {
+        if(!src) return resolve(null);
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
+        img.src = src;
+      });
+    }
+
+    function drawContainImage(ctx, img, x, y, w, h){
+      const ratio = Math.min(w / img.width, h / img.height);
+      const drawW = img.width * ratio, drawH = img.height * ratio;
+      const dx = x + (w - drawW) / 2, dy = y + (h - drawH) / 2;
+      ctx.drawImage(img, dx, dy, drawW, drawH);
+    }
+
+    function drawImageCustom(ctx, img, clipX, clipY, clipW, clipH, drawX, drawY, drawW, drawH, alpha = 1){
+      if(!img) return;
+      ctx.save(); ctx.beginPath(); ctx.rect(clipX, clipY, clipW, clipH); ctx.clip(); ctx.globalAlpha = alpha; ctx.drawImage(img, drawX, drawY, drawW, drawH); ctx.restore();
+    }
+
+    function drawSkewedText(ctx, lines, xCenter, yTop, fontSize, fontFamily, lineHeight, skewDeg){
+      ctx.save(); ctx.translate(xCenter, yTop); ctx.transform(1, Math.tan(skewDeg * Math.PI / 180), 0, 1, 0, 0); ctx.textAlign='center'; ctx.textBaseline='top'; ctx.fillStyle='#fff'; ctx.font=`700 ${fontSize}px ${fontFamily}`; lines.forEach((line, i) => ctx.fillText(line, 0, i * lineHeight)); ctx.restore();
+    }
+
+    function drawScorerLines(ctx){
+      const lines = getHbsScorers();
+      ctx.save(); ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.textBaseline='top'; ctx.direction='rtl';
+      ctx.font='700 28px Arial, sans-serif'; ctx.fillText('רשימת כובשים', 900, 735);
+      ctx.font='700 21px Arial, sans-serif';
+      lines.forEach((item, i) => ctx.fillText(formatScorerLine(item.name, item.minute), 900, 773 + (i * 27)));
+      ctx.restore();
+    }
+
+    async function exportPng(){
+      const canvas = document.createElement('canvas');
+      const exportScale = 2;
+      canvas.width = 1080 * exportScale; canvas.height = 1080 * exportScale;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(exportScale, exportScale);
+
+      const [textureImg, leftBgImg, logoImg, ifaLogoImg, clubBgLogoImg, continuousImg, third2Img, third3Img, ...stripImgs] = await Promise.all([
+        loadImage(textureData),
+        loadImage(leftBgData),
+        loadImage(logoData),
+        loadImage(ifaLogoData),
+        loadImage(clubBehindSettings.enabled ? logoData : null),
+        loadImage(continuousData),
+        loadImage(third2Data),
+        loadImage(third3Data),
+        ...currentMatchedPlayers.map(p => loadImage(p.url))
+      ]);
+
+      ctx.fillStyle = '#AF1419';
+      ctx.fillRect(0, 0, 1080, 1080);
+
+      if(leftBgImg){ ctx.save(); ctx.beginPath(); ctx.rect(0, 0, 720, 1080); ctx.clip(); ctx.drawImage(leftBgImg, 0, 0, 720, 1080); ctx.restore(); }
+      if(textureImg){ ctx.save(); ctx.beginPath(); ctx.rect(720, 0, 360, 1080); ctx.clip(); ctx.drawImage(textureImg, 720, 0, 360, 1080); ctx.restore(); }
+
+      if(clubBgLogoImg){
+        ctx.save();
+        ctx.globalAlpha = clubBehindSettings.opacity;
+        drawContainImage(ctx, clubBgLogoImg, 150, 330, 420, 420);
+        ctx.restore();
+      }
+
+      if(imageMode.value === 'continuous' && continuousImg){
+        const fitted = getFittedSize(continuousImg.width, continuousImg.height, 720, 1080, parseFloat(continuousScale.value));
+        drawImageCustom(ctx, continuousImg, 0, 0, 720, 1080, parseInt(continuousX.value,10), parseInt(continuousY.value,10), fitted.width, fitted.height, 1);
+      }
+      if(imageMode.value === 'separate'){
+        if(third2Img){ const fitted = getFittedSize(third2Img.width, third2Img.height, 360, 1080, parseFloat(third2Scale.value)); drawImageCustom(ctx, third2Img, 360, 0, 360, 1080, 360 + parseInt(third2X.value,10), parseInt(third2Y.value,10), fitted.width, fitted.height, 1); }
+        if(third3Img){ const fitted = getFittedSize(third3Img.width, third3Img.height, 360, 1080, parseFloat(third3Scale.value)); drawImageCustom(ctx, third3Img, 0, 0, 360, 1080, parseInt(third3X.value,10), parseInt(third3Y.value,10), fitted.width, fitted.height, 1); }
+      }
+
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(724, 0, 2, 520);
+      ctx.fillRect(724, 560, 2, 520);
+
+      
+if(ifaLogoImg){
+ const stageRect = stage.getBoundingClientRect();
+ const logoRect = ifaLogo.getBoundingClientRect();
+ const x = (logoRect.left - stageRect.left);
+ const y = (logoRect.top - stageRect.top);
+ const h = ifaLogo.offsetHeight;
+ const w = h * (ifaLogoImg.width / ifaLogoImg.height);
+ ctx.drawImage(ifaLogoImg, x, y, w, h);
+}
+
+      if(logoImg) drawContainImage(ctx, logoImg, 801, 26, 216, 216);
+      drawSkewedText(ctx, ['FINAL','SCORE'], 900, 250, 50, '"Courier New", monospace', 48, -14);
+      ctx.save();
+      ctx.fillStyle = '#fff';
+      ctx.font = '700 34px "Courier New", monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillText(ageSelect.value, 900, 958);
+      ctx.restore();
+      drawSkewedText(ctx, ['LEAGUE'], 900, 1000, 24, '"Courier New", monospace', 24, -20);
+
+      function drawScoreBox(x, y, value){ ctx.fillStyle='#000'; ctx.fillRect(x, y, 160, 160); ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.strokeRect(x, y, 160, 160); ctx.fillStyle='#fff'; ctx.font='700 135px "Courier New", monospace'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(String(value), x + 80, y + 88); }
+      drawScoreBox(640, 360, scoreTop.value); drawScoreBox(640, 560, scoreBottom.value);
+      ctx.fillStyle='#fff'; ctx.font='700 35px "Courier New", monospace'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('X', 720, 540);
+      ctx.font='700 60px "Courier New", monospace'; ctx.direction='ltr'; ctx.fillText(teamTop.value, 900, 440); ctx.fillText(teamBottom.value, 900, 640);
+
+      drawScorerLines(ctx);
+
+      if(getHbsScorers().length){
+        ctx.save();
+        ctx.globalAlpha = stripSettings.opacity;
+        ctx.fillStyle = '#AF1419';
+        ctx.fillRect(0, stripSettings.y, 720, stripSettings.height);
+        ctx.restore();
+        const n = stripImgs.length;
+        const gap = 14;
+        const itemW = stripSettings.height;
+        const totalW = n > 0 ? (n * itemW) + ((n - 1) * gap) : 0;
+        let startX = (720 - totalW) / 2;
+        stripImgs.forEach((img, i) => { if(img) drawContainImage(ctx, img, startX + i * (itemW + gap), stripSettings.y, stripSettings.height, stripSettings.height); });
+      }
+
+      const link = document.createElement('a');
+      link.download = 'final-score-1080x1080.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+
+    academyFolderInput.addEventListener('change', (e) => { buildAcademyIndex(e.target.files || []); updatePlayerStrip();
+
+// ----- drag logos -----
+function makeDraggable(el){
+ let down=false,offX=0,offY=0;
+ el.style.cursor='move';
+ el.addEventListener('mousedown',e=>{
+  down=true;
+  offX=e.clientX-el.offsetLeft;
+  offY=e.clientY-el.offsetTop;
+ });
+ window.addEventListener('mouseup',()=>down=false);
+ window.addEventListener('mousemove',e=>{
+  if(!down) return;
+  el.style.left=(e.clientX-offX)+'px';
+  el.style.top=(e.clientY-offY)+'px';
+ });
+}
+makeDraggable(document.querySelector('.ifaLogoBox'));
+makeDraggable(document.querySelector('.logoBox'));
+ });
+    ageSelect.addEventListener('change', () => { ageBadgePreview.textContent = ageSelect.value; updatePlayerStrip();
+
+// ----- drag logos -----
+function makeDraggable(el){
+ let down=false,offX=0,offY=0;
+ el.style.cursor='move';
+ el.addEventListener('mousedown',e=>{
+  down=true;
+  offX=e.clientX-el.offsetLeft;
+  offY=e.clientY-el.offsetTop;
+ });
+ window.addEventListener('mouseup',()=>down=false);
+ window.addEventListener('mousemove',e=>{
+  if(!down) return;
+  el.style.left=(e.clientX-offX)+'px';
+  el.style.top=(e.clientY-offY)+'px';
+ });
+}
+makeDraggable(document.querySelector('.ifaLogoBox'));
+makeDraggable(document.querySelector('.logoBox'));
+ });
+
+    textureInput.addEventListener('change', async e => { const file = e.target.files[0]; if(!file) return; textureData = await readFileAsDataURL(file); third1Texture.style.backgroundImage = `url(${textureData})`; });
+    $('resetTextureBtn').addEventListener('click', () => { textureData = null; textureInput.value=''; third1Texture.style.backgroundImage='none'; });
+
+    leftBgInput.addEventListener('change', async e => { const file = e.target.files[0]; if(!file) return; leftBgData = await readFileAsDataURL(file); leftBgTexture.style.backgroundImage = `url(${leftBgData})`; });
+    $('resetLeftBgBtn').addEventListener('click', () => { leftBgData = null; leftBgInput.value=''; leftBgTexture.style.backgroundImage='none'; });
+
+    logoInput.addEventListener('change', async e => { const file = e.target.files[0]; if(!file) return; logoData = await readFileAsDataURL(file); logoPreview.src = logoData; logoPreview.classList.remove('hidden'); updateClubBgLogoPreview(); });
+    $('resetLogoBtn').addEventListener('click', () => { logoData = null; logoInput.value=''; logoPreview.src=''; logoPreview.classList.add('hidden'); updateClubBgLogoPreview(); });
+
+    ifaLogoInput.addEventListener('change', async e => { const file = e.target.files[0]; if(!file) return; ifaLogoData = await readFileAsDataURL(file); ifaLogo.src = ifaLogoData; ifaLogo.classList.remove('hidden'); updateIfaLogoPreview(); });
+    $('resetIfaLogoBtn').addEventListener('click', () => { ifaLogoData = null; ifaLogoInput.value=''; ifaLogo.src=''; ifaLogo.classList.add('hidden'); updateIfaLogoPreview(); });
+
+    continuousInput.addEventListener('change', async e => { const file = e.target.files[0]; if(!file) return; continuousData = await readFileAsDataURL(file); const img = await loadImage(continuousData); if(img){ imageMetrics.continuous.width = img.width; imageMetrics.continuous.height = img.height; } applyContinuousPreview(); });
+    $('resetContinuousBtn').addEventListener('click', () => { continuousData = null; continuousInput.value=''; applyContinuousPreview(); });
+    [continuousScale, continuousX, continuousY].forEach(el => el.addEventListener('input', applyContinuousPreview));
+
+    third2Input.addEventListener('change', async e => { const file = e.target.files[0]; if(!file) return; third2Data = await readFileAsDataURL(file); const img = await loadImage(third2Data); if(img){ imageMetrics.third2.width = img.width; imageMetrics.third2.height = img.height; } applySeparatePreview(); });
+    third3Input.addEventListener('change', async e => { const file = e.target.files[0]; if(!file) return; third3Data = await readFileAsDataURL(file); const img = await loadImage(third3Data); if(img){ imageMetrics.third3.width = img.width; imageMetrics.third3.height = img.height; } applySeparatePreview(); });
+    [third2Scale, third2X, third2Y, third3Scale, third3X, third3Y].forEach(el => el.addEventListener('input', applySeparatePreview));
+    $('resetThird2Btn').addEventListener('click', () => { third2Data = null; third2Input.value=''; applySeparatePreview(); });
+    $('resetThird3Btn').addEventListener('click', () => { third3Data = null; third3Input.value=''; applySeparatePreview(); });
+
+    imageMode.addEventListener('change', switchImageMode);
+    showClubBehind.addEventListener('change', updateClubBgLogoPreview);
+    clubBehindOpacity.addEventListener('input', updateClubBgLogoPreview);
+    ifaX.addEventListener('input', updateIfaLogoPreview);
+    ifaY.addEventListener('input', updateIfaLogoPreview);
+    ifaSize.addEventListener('input', updateIfaLogoPreview);
+    stripOpacity.addEventListener('input', updatePlayerStripStyle);
+    stripY.addEventListener('input', updatePlayerStripStyle);
+    scoreTop.addEventListener('change', () => { scoreTopPreview.textContent = scoreTop.value; rebuildScorerFields(); renderScorersPreview(); updatePlayerStrip();
+
+// ----- drag logos -----
+function makeDraggable(el){
+ let down=false,offX=0,offY=0;
+ el.style.cursor='move';
+ el.addEventListener('mousedown',e=>{
+  down=true;
+  offX=e.clientX-el.offsetLeft;
+  offY=e.clientY-el.offsetTop;
+ });
+ window.addEventListener('mouseup',()=>down=false);
+ window.addEventListener('mousemove',e=>{
+  if(!down) return;
+  el.style.left=(e.clientX-offX)+'px';
+  el.style.top=(e.clientY-offY)+'px';
+ });
+}
+makeDraggable(document.querySelector('.ifaLogoBox'));
+makeDraggable(document.querySelector('.logoBox'));
+ });
+    scoreBottom.addEventListener('change', () => { scoreBottomPreview.textContent = scoreBottom.value; rebuildScorerFields(); renderScorersPreview(); updatePlayerStrip();
+
+// ----- drag logos -----
+function makeDraggable(el){
+ let down=false,offX=0,offY=0;
+ el.style.cursor='move';
+ el.addEventListener('mousedown',e=>{
+  down=true;
+  offX=e.clientX-el.offsetLeft;
+  offY=e.clientY-el.offsetTop;
+ });
+ window.addEventListener('mouseup',()=>down=false);
+ window.addEventListener('mousemove',e=>{
+  if(!down) return;
+  el.style.left=(e.clientX-offX)+'px';
+  el.style.top=(e.clientY-offY)+'px';
+ });
+}
+makeDraggable(document.querySelector('.ifaLogoBox'));
+makeDraggable(document.querySelector('.logoBox'));
+ });
+    teamTop.addEventListener('change', () => { updateTeamLabels(); renderScorersPreview(); updatePlayerStrip();
+
+// ----- drag logos -----
+function makeDraggable(el){
+ let down=false,offX=0,offY=0;
+ el.style.cursor='move';
+ el.addEventListener('mousedown',e=>{
+  down=true;
+  offX=e.clientX-el.offsetLeft;
+  offY=e.clientY-el.offsetTop;
+ });
+ window.addEventListener('mouseup',()=>down=false);
+ window.addEventListener('mousemove',e=>{
+  if(!down) return;
+  el.style.left=(e.clientX-offX)+'px';
+  el.style.top=(e.clientY-offY)+'px';
+ });
+}
+makeDraggable(document.querySelector('.ifaLogoBox'));
+makeDraggable(document.querySelector('.logoBox'));
+ });
+    teamBottom.addEventListener('change', () => { updateTeamLabels(); renderScorersPreview(); updatePlayerStrip();
+
+// ----- drag logos -----
+function makeDraggable(el){
+ let down=false,offX=0,offY=0;
+ el.style.cursor='move';
+ el.addEventListener('mousedown',e=>{
+  down=true;
+  offX=e.clientX-el.offsetLeft;
+  offY=e.clientY-el.offsetTop;
+ });
+ window.addEventListener('mouseup',()=>down=false);
+ window.addEventListener('mousemove',e=>{
+  if(!down) return;
+  el.style.left=(e.clientX-offX)+'px';
+  el.style.top=(e.clientY-offY)+'px';
+ });
+}
+makeDraggable(document.querySelector('.ifaLogoBox'));
+makeDraggable(document.querySelector('.logoBox'));
+ });
+    
+exportBtn.addEventListener('click', exportPng);
+const exportBtn2160=document.getElementById('exportBtn2160');
+if(exportBtn2160){
+ exportBtn2160.addEventListener('click', ()=>{
+  const canvas=document.createElement('canvas');
+  const ctx=canvas.getContext('2d');
+  canvas.width=2160;
+  canvas.height=2160;
+  ctx.scale(2,2);
+  exportPng();
+ });
+}
+
+
+    rebuildScorerFields();
+    renderScorersPreview();
+    switchImageMode();
+    updatePlayerStripStyle();
+    updateTeamLabels();
+    updateClubBgLogoPreview();
+    updateIfaLogoPreview();
+    updatePlayerStrip();
+
+// ----- drag logos -----
+function makeDraggable(el){
+ let down=false,offX=0,offY=0;
+ el.style.cursor='move';
+ el.addEventListener('mousedown',e=>{
+  down=true;
+  offX=e.clientX-el.offsetLeft;
+  offY=e.clientY-el.offsetTop;
+ });
+ window.addEventListener('mouseup',()=>down=false);
+ window.addEventListener('mousemove',e=>{
+  if(!down) return;
+  el.style.left=(e.clientX-offX)+'px';
+  el.style.top=(e.clientY-offY)+'px';
+ });
+}
+makeDraggable(document.querySelector('.ifaLogoBox'));
+makeDraggable(document.querySelector('.logoBox'));
+
+  
+// ---- save settings ----
+function saveSettings(){
+ const inputs=document.querySelectorAll('input,select');
+ const data={};
+ inputs.forEach(i=>{
+  if(i.type==='file') return;
+  data[i.id]=i.value;
+ });
+ localStorage.setItem('scoreGraphicSettings',JSON.stringify(data));
+}
+
+function loadSettings(){
+ const raw=localStorage.getItem('scoreGraphicSettings');
+ if(!raw) return;
+ const data=JSON.parse(raw);
+ Object.keys(data).forEach(k=>{
+  const el=document.getElementById(k);
+  if(el) el.value=data[k];
+ });
+}
+
+document.querySelectorAll('input,select').forEach(el=>{
+ el.addEventListener('change',saveSettings);
+});
+
+loadSettings();
+
+</script>
+</body>
+</html>

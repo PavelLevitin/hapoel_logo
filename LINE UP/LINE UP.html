@@ -1,0 +1,1788 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>מחולל הרכבים 1024x1536</title>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    *{box-sizing:border-box;}
+
+    :root{
+      --left-fade-opacity:0;
+      --players-font-size:25px;
+    }
+
+    html,body{
+      margin:0;
+      padding:0;
+      font-family:"Rubik",Arial,sans-serif;
+      background:#2a0202;
+      color:#fff;
+    }
+
+    body{
+      background:
+        radial-gradient(circle at 15% 15%, rgba(255,255,255,.05), transparent 18%),
+        radial-gradient(circle at 80% 30%, rgba(255,255,255,.04), transparent 20%),
+        linear-gradient(135deg,#4f0000 0%,#980404 50%,#6f0000 100%);
+    }
+
+    .layout{
+      max-width:1550px;
+      margin:0 auto;
+      padding:18px;
+      display:grid;
+      grid-template-columns:390px 1fr;
+      gap:18px;
+      align-items:start;
+    }
+
+    .panel{
+      background:rgba(0,0,0,.42);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:20px;
+      padding:16px;
+      position:sticky;
+      top:18px;
+      height:max-content;
+      z-index:10;
+      backdrop-filter:blur(8px);
+    }
+
+    .panel h1{
+      margin:0 0 12px;
+      font-size:26px;
+      font-weight:900;
+    }
+
+    .box{
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:16px;
+      padding:14px;
+      margin-bottom:14px;
+      background:rgba(255,255,255,.04);
+    }
+
+    .box h2{
+      margin:0 0 10px;
+      font-size:16px;
+      font-weight:800;
+    }
+
+    label{
+      display:block;
+      margin:0 0 6px;
+      font-size:13px;
+      color:rgba(255,255,255,.88);
+    }
+
+    input[type="text"], textarea{
+      width:100%;
+      border:none;
+      border-radius:12px;
+      padding:11px 12px;
+      margin-bottom:10px;
+      font-size:14px;
+      background:#fff;
+      color:#111;
+      font-family:"Rubik",Arial,sans-serif;
+    }
+
+    textarea{
+      min-height:120px;
+      resize:vertical;
+      line-height:1.45;
+    }
+
+    input[type="file"]{
+      width:100%;
+      margin-bottom:10px;
+      color:#fff;
+      font-family:"Rubik",Arial,sans-serif;
+    }
+
+    input[type="range"]{
+      width:100%;
+      margin:6px 0 10px;
+      accent-color:#fff;
+    }
+
+    .range-line{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      font-size:12px;
+      color:rgba(255,255,255,.85);
+      margin-bottom:2px;
+    }
+
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    button{
+      border:none;
+      border-radius:12px;
+      padding:12px 16px;
+      font-weight:800;
+      cursor:pointer;
+      transition:.18s ease;
+      font-family:"Rubik",Arial,sans-serif;
+    }
+
+    button:hover{ transform:translateY(-1px); }
+
+    .primary{ background:#fff; color:#a30000; }
+    .dark{ background:#1f1f1f; color:#fff; border:1px solid rgba(255,255,255,.15); }
+    .danger{ background:#8d0000; color:#fff; }
+    .toggle.active{ background:#fff; color:#a30000; }
+
+    .status{
+      font-size:13px;
+      line-height:1.55;
+      color:rgba(255,255,255,.88);
+      white-space:pre-line;
+    }
+
+    .preview-wrap{
+      overflow:auto;
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+      padding-top:8px;
+    }
+
+    .poster-scale{
+      transform:scale(.62);
+      transform-origin:top center;
+      margin-bottom:-520px;
+    }
+
+    .poster{
+      position:relative;
+      width:1024px;
+      height:1536px;
+      border-radius:26px;
+      overflow:hidden;
+      background:#b10505;
+      box-shadow:0 18px 50px rgba(0,0,0,.35);
+      isolation:isolate;
+    }
+
+    .bg-fallback{
+      position:absolute;
+      inset:0;
+      z-index:0;
+      background:
+        radial-gradient(circle at 18% 22%, rgba(255,255,255,.05), transparent 18%),
+        radial-gradient(circle at 82% 12%, rgba(255,255,255,.035), transparent 18%),
+        radial-gradient(circle at 75% 75%, rgba(0,0,0,.08), transparent 22%),
+        linear-gradient(135deg,#7b0202 0%,#ca0808 45%,#9d0202 100%);
+    }
+
+    .bg-image{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      object-position:center;
+      display:none;
+      z-index:0;
+    }
+
+    /* חצי שמאל של הרקע בלבד */
+    .bg-left-half{
+      position:absolute;
+      left:0;
+      top:0;
+      width:50%;
+      height:100%;
+      overflow:hidden;
+      z-index:1;
+      pointer-events:none;
+      display:none;
+    }
+
+    .bg-left-half img{
+      position:absolute;
+      left:0;
+      top:0;
+      width:200%;
+      height:100%;
+      object-fit:cover;
+      object-position:left center;
+      display:block;
+    }
+
+    /* השקיפות יושבת רק על חצי שמאל של הרקע */
+    .left-fade-overlay{
+      position:absolute;
+      left:0;
+      top:0;
+      width:50%;
+      height:100%;
+      z-index:2;
+      pointer-events:none;
+      display:none;
+      background:linear-gradient(
+        to right,
+        rgba(255,255,255,var(--left-fade-opacity)) 0%,
+        rgba(255,255,255,calc(var(--left-fade-opacity) * .92)) 18%,
+        rgba(255,255,255,calc(var(--left-fade-opacity) * .72)) 34%,
+        rgba(255,255,255,calc(var(--left-fade-opacity) * .42)) 44%,
+        rgba(255,255,255,0) 100%
+      );
+      mix-blend-mode:screen;
+    }
+
+    .texture{
+      position:absolute;
+      inset:0;
+      z-index:3;
+      opacity:.34;
+      pointer-events:none;
+      background-image:
+        radial-gradient(circle at 10% 20%, rgba(255,255,255,.17) 0 2px, transparent 3px),
+        radial-gradient(circle at 70% 40%, rgba(255,255,255,.10) 0 2px, transparent 3px),
+        radial-gradient(circle at 30% 80%, rgba(255,255,255,.08) 0 2px, transparent 3px),
+        radial-gradient(circle at 80% 85%, rgba(255,255,255,.09) 0 3px, transparent 4px),
+        repeating-radial-gradient(circle at 50% 50%, rgba(0,0,0,.05) 0 1px, transparent 2px 8px),
+        repeating-linear-gradient(25deg, rgba(0,0,0,.05) 0 1px, transparent 1px 12px),
+        repeating-linear-gradient(120deg, rgba(255,255,255,.025) 0 2px, transparent 2px 16px);
+      mix-blend-mode:overlay;
+    }
+
+    .darken{
+      position:absolute;
+      inset:0;
+      z-index:4;
+      pointer-events:none;
+      background:
+        radial-gradient(circle at 50% 50%, transparent 40%, rgba(0,0,0,.10) 100%),
+        linear-gradient(to bottom, rgba(0,0,0,.04), rgba(0,0,0,.12));
+    }
+
+    .bg-logo{
+      position:absolute;
+      top:58px;
+      left:36px;
+      width:150px;
+      height:150px;
+      opacity:.11;
+      object-fit:contain;
+      object-position:center;
+      display:none;
+      z-index:5;
+    }
+
+    .player-area{
+      position:absolute;
+      left:0;
+      top:0;
+      width:36%;
+      height:100%;
+      z-index:6;
+      overflow:hidden;
+    }
+
+    .player-area img{
+      position:absolute;
+      left:0;
+      bottom:0;
+      height:100%;
+      width:auto;
+      max-width:none;
+      display:none;
+      object-fit:contain;
+      object-position:left bottom;
+      filter:drop-shadow(0 18px 28px rgba(0,0,0,.28));
+      transform-origin:left bottom;
+    }
+
+    .player-area::after{
+      content:"";
+      position:absolute;
+      right:0;
+      top:0;
+      width:92px;
+      height:100%;
+      background:linear-gradient(to right, transparent, rgba(126,0,0,.92));
+      pointer-events:none;
+    }
+
+    .top-center{
+      position:absolute;
+      top:20px;
+      left:34%;
+      right:0;
+      width:auto;
+      z-index:9;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      pointer-events:none;
+      text-align:center;
+    }
+
+    .top-logo-frame{
+      width:100px;
+      height:100px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      margin:0 auto 8px auto;
+      overflow:hidden;
+    }
+
+    .top-logo{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      object-position:center;
+      display:none;
+      filter:drop-shadow(0 6px 16px rgba(0,0,0,.24));
+    }
+
+    .top-center .mini{
+      font-size:21px;
+      line-height:1.1;
+      letter-spacing:1px;
+      font-weight:900;
+      margin:0 auto;
+      text-align:center;
+      text-shadow:0 2px 8px rgba(0,0,0,.18);
+    }
+
+    .logos{
+      position:absolute;
+      top:18px;
+      right:18px;
+      display:flex;
+      flex-direction:row;
+      align-items:center;
+      gap:18px;
+      z-index:9;
+    }
+
+    .logo-slot{
+      width:62px;
+      height:62px;
+      min-width:62px;
+      min-height:62px;
+      border-radius:14px;
+      background:rgba(255,255,255,.10);
+      border:1px solid rgba(255,255,255,.16);
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      overflow:hidden;
+      box-shadow:0 6px 18px rgba(0,0,0,.15);
+      padding:6px;
+    }
+
+    .logo-slot img{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      object-position:center;
+      display:none;
+      flex-shrink:0;
+    }
+
+    .versus-x{
+      width:26px;
+      text-align:center;
+      font-size:28px;
+      font-weight:900;
+      line-height:1;
+      color:#fff;
+      text-shadow:0 3px 10px rgba(0,0,0,.25);
+    }
+
+    .content{
+      position:relative;
+      z-index:8;
+      margin-left:34%;
+      padding:150px 26px 22px 14px;
+      height:100%;
+      display:flex;
+      flex-direction:column;
+    }
+
+    .match-header{
+      text-align:center;
+      margin-bottom:14px;
+      padding:0 2px;
+    }
+
+    .match-line{
+      font-size:19px;
+      font-weight:700;
+      line-height:1.32;
+      margin-bottom:8px;
+      text-align:center;
+      white-space:normal;
+      word-break:break-word;
+      text-shadow:0 2px 8px rgba(0,0,0,.15);
+    }
+
+    .location-line{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      font-size:18px;
+      font-weight:800;
+      line-height:1.2;
+      margin-bottom:10px;
+      text-align:center;
+      text-shadow:0 2px 8px rgba(0,0,0,.15);
+    }
+
+    .location-line svg{
+      width:18px;
+      height:18px;
+      flex:0 0 18px;
+      display:block;
+    }
+
+    .team-title{
+      font-size:42px;
+      font-weight:900;
+      line-height:1.02;
+      margin-bottom:8px;
+      text-align:center;
+      white-space:normal;
+      word-break:break-word;
+      text-shadow:0 2px 12px rgba(0,0,0,.17);
+    }
+
+    .opponent-title{
+      font-size:24px;
+      font-weight:900;
+      margin-bottom:14px;
+      text-align:center;
+      white-space:normal;
+      word-break:break-word;
+      text-shadow:0 2px 8px rgba(0,0,0,.15);
+    }
+
+    .stamp{
+      width:100%;
+      text-align:center;
+      background:rgba(255,255,255,.10);
+      border:1px solid rgba(255,255,255,.14);
+      padding:8px 16px;
+      font-size:22px;
+      font-weight:900;
+      margin:0 0 14px 0;
+      box-shadow:0 8px 18px rgba(0,0,0,.15);
+      backdrop-filter:blur(2px);
+      border-radius:14px;
+      letter-spacing:.5px;
+    }
+
+    .card{
+      background:rgba(115,0,0,.18);
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:18px;
+      padding:14px;
+      margin-bottom:12px;
+      backdrop-filter:blur(2px);
+      box-shadow:0 8px 24px rgba(0,0,0,.08);
+    }
+
+    .starting-card{
+      margin-top:0;
+    }
+
+    .card-head{
+      display:grid;
+      grid-template-columns:1fr;
+      align-items:center;
+      gap:10px;
+      margin-bottom:12px;
+    }
+
+    .card-head h3{
+      margin:0;
+      font-size:var(--players-font-size);
+      font-weight:900;
+      line-height:1.1;
+      text-align:center;
+    }
+
+    .starter-row{
+      display:grid;
+      grid-template-columns:56px 1fr 58px;
+      align-items:center;
+      column-gap:10px;
+      background:rgba(255,255,255,.055);
+      border-radius:12px;
+      padding:8px 12px;
+      margin-bottom:8px;
+      min-height:46px;
+      text-align:right;
+    }
+
+    .badges{
+      display:flex;
+      align-items:center;
+      justify-content:flex-start;
+      gap:6px;
+      flex-wrap:wrap;
+      min-width:56px;
+    }
+
+    .role-badge{
+      min-width:25px;
+      height:25px;
+      padding:0 6px;
+      border-radius:6px;
+      background:#fff;
+      color:#a10000;
+      border:2px solid #fff;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-size:12px;
+      font-weight:900;
+      line-height:1;
+      box-shadow:0 3px 8px rgba(0,0,0,.22);
+    }
+
+    .starter-main{
+      display:block;
+      min-width:0;
+      text-align:right;
+    }
+
+    .starter-row .num{
+      font-size:22px;
+      font-weight:900;
+      line-height:1;
+      width:58px;
+      text-align:left;
+      justify-self:end;
+      padding-left:2px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .starter-row .name{
+      font-size:var(--players-font-size);
+      font-weight:900;
+      text-align:right;
+      direction:rtl;
+      line-height:1.15;
+      white-space:normal;
+      overflow-wrap:anywhere;
+      min-width:0;
+    }
+
+    .coach-above-subs{
+      font-size:var(--players-font-size);
+      font-weight:900;
+      line-height:1.1;
+      text-align:center;
+      margin:6px 0 14px 0;
+      white-space:normal;
+      word-break:break-word;
+      text-shadow:0 2px 8px rgba(0,0,0,.15);
+    }
+
+    .subs-inline{
+      font-size:var(--players-font-size);
+      font-weight:800;
+      line-height:1.55;
+      text-align:center;
+      word-break:break-word;
+      margin-top:18px;
+      margin-bottom:14px;
+    }
+
+    .subs-card{
+      padding-top:18px;
+    }
+
+    .bottom-club-logo-wrap{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      min-height:116px;
+      margin-top:10px;
+    }
+
+    .bottom-logo-frame{
+      width:116px;
+      height:116px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+    }
+
+    .bottom-club-logo{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      object-position:center;
+      display:none;
+      filter:drop-shadow(0 6px 18px rgba(0,0,0,.22));
+    }
+
+    .footer{
+      margin-top:auto;
+      padding-top:10px;
+      font-size:14px;
+      font-weight:700;
+      color:rgba(255,255,255,.93);
+      text-align:right;
+      min-height:24px;
+    }
+
+    #poster-export-clone img,
+    .poster img{
+      image-rendering:auto;
+    }
+
+    #poster-export-clone .top-logo,
+    #poster-export-clone .bottom-club-logo,
+    #poster-export-clone .logo-slot img{
+      object-fit:contain !important;
+      object-position:center !important;
+      width:100% !important;
+      height:100% !important;
+      max-width:none !important;
+      max-height:none !important;
+    }
+
+    @media (max-width:1360px){
+      .layout{ grid-template-columns:1fr; }
+      .panel{ position:relative; top:0; }
+      .preview-wrap{ justify-content:flex-start; }
+      .poster-scale{
+        transform:scale(.48);
+        transform-origin:top right;
+        margin-bottom:-690px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="panel">
+      <h1>מחולל הרכבים</h1>
+
+      <div class="box">
+        <h2>PDF</h2>
+        <label>קובץ PDF</label>
+        <input type="file" id="pdfFile" accept="application/pdf">
+        <div class="row">
+          <button class="primary" id="loadPdfBtn" type="button">טען PDF</button>
+          <button class="dark" id="clearBtn" type="button">נקה</button>
+        </div>
+        <div class="status" id="status">ממתין לטעינת PDF</div>
+      </div>
+
+      <div class="box">
+        <h2>בחירת צד</h2>
+        <div class="row">
+          <button class="dark toggle active" id="homeBtn" type="button">ביתית</button>
+          <button class="dark toggle" id="awayBtn" type="button">אורחת</button>
+        </div>
+      </div>
+
+      <div class="box">
+        <h2>כותרות</h2>
+        <label>שורת עליונה</label>
+        <input type="text" id="topText" value="WE ARE HBS">
+
+        <label>פרטי משחק</label>
+        <input type="text" id="matchText" value="ליגת העל לנוער | מחזור | תאריך | שעה">
+
+        <label>מיקום / מגרש</label>
+        <input type="text" id="locationText" placeholder="אצטדיון טרנר">
+
+        <label>שם הקבוצה</label>
+        <input type="text" id="teamText">
+
+        <label>שם היריבה</label>
+        <input type="text" id="oppText">
+
+        <label>שם המאמן</label>
+        <input type="text" id="coachText">
+
+        <label>שורת תחתית</label>
+        <input type="text" id="footerText">
+      </div>
+
+      <div class="box">
+        <h2>תמונות ורקע</h2>
+        <label>תמונת שחקן</label>
+        <input type="file" id="playerImage" accept="image/*">
+
+        <div class="range-line">
+          <span>גודל תמונת שחקן</span>
+          <span id="playerScaleValue">100%</span>
+        </div>
+        <input type="range" id="playerScale" min="60" max="180" step="1" value="100">
+
+        <div class="range-line">
+          <span>מיקום תמונת שחקן למעלה / למטה</span>
+          <span id="playerYOffsetValue">0px</span>
+        </div>
+        <input type="range" id="playerYOffset" min="-300" max="300" step="1" value="0">
+
+        <div class="range-line">
+          <span>מיקום תמונת שחקן ימינה / שמאלה</span>
+          <span id="playerXOffsetValue">0px</span>
+        </div>
+        <input type="range" id="playerXOffset" min="-300" max="300" step="1" value="0">
+
+        <label>לוגו קבוצה ביתית</label>
+        <input type="file" id="teamLogo" accept="image/*">
+
+        <label>לוגו יריבה</label>
+        <input type="file" id="oppLogo" accept="image/*">
+
+        <label>רקע מותאם</label>
+        <input type="file" id="bgImageInput" accept="image/*">
+
+        <div class="range-line">
+          <span>שקיפות רקע מצד שמאל</span>
+          <span id="leftFadeValue">0%</span>
+        </div>
+        <input type="range" id="leftFade" min="0" max="70" step="1" value="0">
+      </div>
+
+      <div class="box">
+        <h2>עריכה ידנית</h2>
+        <label>שחקני הרכב — כל שורה: מספר|שם|סימונים</label>
+        <textarea id="startersInput" placeholder="55|מתן ארזי|C
+1|רועי כהן|GK
+10|דניאל לוי|C GK"></textarea>
+
+        <label>מחליפים — כל שורה: שם</label>
+        <textarea id="subsInput"></textarea>
+
+        <div class="row">
+          <button class="primary" id="applyManualBtn" type="button">החל</button>
+        </div>
+      </div>
+
+      <div class="box">
+        <h2>ייצוא</h2>
+        <div class="row">
+          <button class="danger" id="exportBtn" type="button">ייצוא PNG 1024x1536</button>
+        </div>
+      </div>
+    </aside>
+
+    <section class="preview-wrap">
+      <div class="poster-scale">
+        <div class="poster" id="poster">
+          <div class="bg-fallback"></div>
+          <img id="bgImagePreview" class="bg-image" alt="background">
+          <div class="bg-left-half" id="bgLeftHalf">
+            <img id="bgLeftHalfImage" alt="background left half">
+          </div>
+          <div class="left-fade-overlay" id="leftFadeOverlay"></div>
+          <div class="texture"></div>
+          <div class="darken"></div>
+
+          <img id="bgLogo" class="bg-logo" alt="bg logo">
+
+          <div class="player-area" id="playerArea">
+            <img id="playerPreview" alt="player image">
+          </div>
+
+          <div class="top-center">
+            <div class="top-logo-frame">
+              <img id="topClubLogo" class="top-logo" alt="club logo">
+            </div>
+            <div class="mini" id="topPreview">WE ARE HBS</div>
+          </div>
+
+          <div class="logos">
+            <div class="logo-slot"><img id="teamLogoPreview" alt="team logo"></div>
+            <div class="versus-x">X</div>
+            <div class="logo-slot"><img id="oppLogoPreview" alt="opp logo"></div>
+          </div>
+
+          <div class="content">
+            <div class="match-header">
+              <div class="match-line" id="matchPreview">ליגת העל לנוער | מחזור | תאריך | שעה</div>
+
+              <div class="location-line" id="locationWrap" style="display:none;">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M12 21s7-5.686 7-11a7 7 0 1 0-14 0c0 5.314 7 11 7 11Z" stroke="white" stroke-width="2"/>
+                  <circle cx="12" cy="10" r="2.8" fill="white"/>
+                </svg>
+                <span id="locationPreview"></span>
+              </div>
+
+              <div class="team-title" id="teamPreview">הקבוצה</div>
+              <div class="opponent-title" id="oppPreview">נגד היריבה</div>
+            </div>
+
+            <div class="stamp">STARTING XI</div>
+
+            <div class="card starting-card">
+              <div class="card-head">
+                <h3>שחקני הרכב</h3>
+              </div>
+              <div id="startersList"></div>
+            </div>
+
+            <div class="coach-above-subs">מאמן: <span id="coachPreview">—</span></div>
+
+            <div class="card subs-card">
+              <div class="subs-inline" id="subsList"></div>
+              <div class="bottom-club-logo-wrap">
+                <div class="bottom-logo-frame">
+                  <img id="bottomClubLogo" class="bottom-club-logo" alt="bottom club logo">
+                </div>
+              </div>
+            </div>
+
+            <div class="footer" id="footerPreview"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+    const state = {
+      selectedSide: "home",
+      parsed: {
+        matchDetails: "",
+        homeTeam: "",
+        awayTeam: "",
+        homeCoach: "",
+        awayCoach: "",
+        homeStarters: [],
+        awayStarters: [],
+        homeSubs: [],
+        awaySubs: []
+      }
+    };
+
+    const objectUrls = [];
+    const $ = (id) => document.getElementById(id);
+
+    function setStatus(msg, error = false){
+      $("status").textContent = msg;
+      $("status").style.color = error ? "#ffd5d5" : "rgba(255,255,255,.88)";
+    }
+
+    function safeText(s){
+      return String(s || "")
+        .replace(/[\u200e\u200f]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function escapeHtml(s){
+      return String(s || "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function normalizeRoleToken(token){
+      const t = safeText(token).toUpperCase().replace(/[^A-Z]/g,"");
+      if (t === "C") return "C";
+      if (t === "GK") return "GK";
+      return t;
+    }
+
+    function looksLikeNumber(token){
+      return /^\d{1,3}$/.test(safeText(token));
+    }
+
+    function cleanupVisualTokens(str){
+      return safeText(str)
+        .replace(/[–—-]/g, " ")
+        .replace(/\bGK\b/gi, " ")
+        .replace(/\bC\b/gi, " ")
+        .replace(/[|]+/g, " ")
+        .replace(/[()]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function cleanNameParts(parts){
+      return parts
+        .map(safeText)
+        .filter(Boolean)
+        .map(x => x.replace(/[–—-]/g, " "))
+        .filter(t => !looksLikeNumber(t))
+        .filter(t => normalizeRoleToken(t) !== "C" && normalizeRoleToken(t) !== "GK")
+        .join(" ")
+        .replace(/[|]+/g, " ")
+        .replace(/[()]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function hasRealLetters(text){
+      return /[A-Za-z\u0590-\u05FF]/.test(text || "");
+    }
+
+    function detectFlags(raw){
+      const txt = ` ${String(raw || "").toUpperCase()} `;
+      return {
+        captain: /\bC\b/.test(txt),
+        goalkeeper: /\bGK\b/.test(txt)
+      };
+    }
+
+    function startersToText(players){
+      return players.map(p => {
+        const flags = [];
+        if (p.captain) flags.push("C");
+        if (p.goalkeeper) flags.push("GK");
+        return `${p.number}|${p.name}|${flags.join(" ")}`.trim();
+      }).join("\n");
+    }
+
+    function subsToText(players){
+      return players.map(p => p.name).join("\n");
+    }
+
+    function parseTextareaPlayers(text){
+      return text.split("\n")
+        .map(line => line.trim())
+        .filter(Boolean)
+        .map(line => {
+          const parts = line.split("|");
+          const number = safeText(parts[0] || "");
+          const rawName = safeText(parts[1] || "");
+          const rawFlags = parts.slice(2).join(" ");
+          const flags = detectFlags(`${rawName} ${rawFlags}`);
+          const cleanedName = cleanupVisualTokens(rawName);
+
+          return {
+            number,
+            name: cleanedName,
+            captain: flags.captain,
+            goalkeeper: flags.goalkeeper
+          };
+        })
+        .filter(p => p.number && p.name);
+    }
+
+    function parseTextareaSubs(text){
+      return text.split("\n")
+        .map(line => line.trim())
+        .filter(Boolean)
+        .map(name => ({ name: cleanupVisualTokens(name) }))
+        .filter(p => p.name)
+        .filter(p => {
+          const normalized = p.name.replace(/\s+/g, " ").trim();
+          return normalized !== "מס' שם" &&
+                 normalized !== 'מס׳ שם' &&
+                 normalized !== 'מס שם' &&
+                 normalized !== 'שם מס' &&
+                 normalized !== 'שם';
+        });
+    }
+
+    function badgesHTML(player){
+      const badges = [];
+      if (player.captain) badges.push('<span class="role-badge">C</span>');
+      if (player.goalkeeper) badges.push('<span class="role-badge">GK</span>');
+      return badges.join("");
+    }
+
+    function renderPlayers(){
+      const starters = parseTextareaPlayers($("startersInput").value);
+      const subs = parseTextareaSubs($("subsInput").value);
+
+      $("startersList").innerHTML = "";
+
+      starters.forEach(p => {
+        const row = document.createElement("div");
+        row.className = "starter-row";
+        row.innerHTML = `
+          <div class="badges">${badgesHTML(p)}</div>
+          <div class="starter-main">
+            <div class="name">${escapeHtml(p.name)}</div>
+          </div>
+          <div class="num">${escapeHtml(p.number)}</div>
+        `;
+        $("startersList").appendChild(row);
+      });
+
+      $("subsList").textContent = subs.map(p => p.name).join(", ");
+    }
+
+    function updateLocationPreview(){
+      const val = $("locationText").value.trim();
+      if(val){
+        $("locationPreview").textContent = val;
+        $("locationWrap").style.display = "flex";
+      } else {
+        $("locationPreview").textContent = "";
+        $("locationWrap").style.display = "none";
+      }
+    }
+
+    function updatePreviewTexts(){
+      $("topPreview").textContent = $("topText").value || "";
+      $("matchPreview").textContent = $("matchText").value || "";
+      $("teamPreview").textContent = $("teamText").value || "";
+      $("oppPreview").textContent = $("oppText").value || "";
+      $("coachPreview").textContent = $("coachText").value || "—";
+      $("footerPreview").textContent = $("footerText").value || "";
+      updateLocationPreview();
+      renderPlayers();
+    }
+
+    function currentSideData(){
+      return state.selectedSide === "home"
+        ? {
+            team: state.parsed.homeTeam,
+            opp: state.parsed.awayTeam,
+            coach: state.parsed.homeCoach,
+            starters: state.parsed.homeStarters,
+            subs: state.parsed.homeSubs
+          }
+        : {
+            team: state.parsed.awayTeam,
+            opp: state.parsed.homeTeam,
+            coach: state.parsed.awayCoach,
+            starters: state.parsed.awayStarters,
+            subs: state.parsed.awaySubs
+          };
+    }
+
+    function fillSideInputs(){
+      const d = currentSideData();
+      $("teamText").value = d.team || "";
+      $("oppText").value = d.opp || "";
+      $("coachText").value = d.coach || "";
+      $("matchText").value = state.parsed.matchDetails || $("matchText").value;
+      $("startersInput").value = startersToText(d.starters || []);
+      $("subsInput").value = subsToText(d.subs || []);
+      updatePreviewTexts();
+    }
+
+    function setSide(side){
+      state.selectedSide = side;
+      $("homeBtn").classList.toggle("active", side === "home");
+      $("awayBtn").classList.toggle("active", side === "away");
+      fillSideInputs();
+    }
+
+    function addObjectUrl(url){
+      objectUrls.push(url);
+      return url;
+    }
+
+    function revokeObjectUrls(){
+      objectUrls.forEach(url => {
+        try { URL.revokeObjectURL(url); } catch(e){}
+      });
+      objectUrls.length = 0;
+    }
+
+    function applyImageUrlToTargets(objectUrl, targetIds){
+      targetIds.forEach(id => {
+        const el = $(id);
+        if (!el) return;
+
+        el.style.display = "none";
+        el.removeAttribute("src");
+
+        el.onload = function(){
+          el.style.display = "block";
+        };
+
+        el.onerror = function(){
+          setStatus("שגיאה בטעינת תמונה", true);
+        };
+
+        el.src = objectUrl;
+      });
+    }
+
+    function setImageFromInput(inputEl, targetIds){
+      const file = inputEl.files && inputEl.files[0];
+      if(!file) return;
+
+      if(!file.type.startsWith("image/")){
+        setStatus("הקובץ שנבחר אינו תמונה", true);
+        return;
+      }
+
+      const objectUrl = addObjectUrl(URL.createObjectURL(file));
+      applyImageUrlToTargets(objectUrl, targetIds);
+      setStatus("התמונה נטענה");
+    }
+
+    function setBackgroundFromInput(){
+      const file = $("bgImageInput").files && $("bgImageInput").files[0];
+      if(!file) return;
+
+      if(!file.type.startsWith("image/")){
+        setStatus("קובץ הרקע אינו תמונה", true);
+        return;
+      }
+
+      const objectUrl = addObjectUrl(URL.createObjectURL(file));
+      const bg = $("bgImagePreview");
+      const bgLeft = $("bgLeftHalfImage");
+      const bgLeftWrap = $("bgLeftHalf");
+
+      bg.style.display = "none";
+      bg.removeAttribute("src");
+      bgLeft.removeAttribute("src");
+      bgLeftWrap.style.display = "none";
+
+      let loadedCount = 0;
+      const done = function(){
+        loadedCount += 1;
+        if(loadedCount >= 2){
+          bg.style.display = "block";
+          bgLeftWrap.style.display = "block";
+          applyLeftFade();
+          setStatus("הרקע נטען");
+        }
+      };
+
+      bg.onload = done;
+      bgLeft.onload = done;
+
+      bg.onerror = function(){
+        setStatus("שגיאה בטעינת הרקע", true);
+      };
+      bgLeft.onerror = function(){
+        setStatus("שגיאה בטעינת הרקע", true);
+      };
+
+      bg.src = objectUrl;
+      bgLeft.src = objectUrl;
+    }
+
+    function applyPlayerImageTransform(){
+      const img = $("playerPreview");
+      const scale = Number($("playerScale").value || 100);
+      const yOffset = Number($("playerYOffset").value || 0);
+      const xOffset = Number($("playerXOffset").value || 0);
+
+      $("playerScaleValue").textContent = `${scale}%`;
+      $("playerYOffsetValue").textContent = `${yOffset}px`;
+      $("playerXOffsetValue").textContent = `${xOffset}px`;
+
+      img.style.height = `${scale}%`;
+      img.style.bottom = `${yOffset}px`;
+      img.style.left = `${xOffset}px`;
+      img.style.width = "auto";
+    }
+
+    function applyLeftFade(){
+      const v = Number($("leftFade").value || 0);
+      $("leftFadeValue").textContent = `${v}%`;
+      document.documentElement.style.setProperty("--left-fade-opacity", (v / 100).toFixed(2));
+
+      const hasBg = !!($("bgImagePreview").getAttribute("src"));
+      $("leftFadeOverlay").style.display = hasBg && v > 0 ? "block" : "none";
+      $("bgLeftHalf").style.display = hasBg ? "block" : "none";
+    }
+
+    async function extractPdfStructured(file){
+      const buf = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+      const rows = [];
+
+      for(let p = 1; p <= pdf.numPages; p++){
+        const page = await pdf.getPage(p);
+        const viewport = page.getViewport({ scale: 1 });
+        const content = await page.getTextContent();
+
+        const items = (content.items || [])
+          .map(item => {
+            const str = safeText(item.str || "");
+            return {
+              page: p,
+              x: item.transform[4],
+              y: item.transform[5],
+              str,
+              width: item.width || 0,
+              pageWidth: viewport.width
+            };
+          })
+          .filter(i => i.str);
+
+        const pageRows = groupItemsToRows(items, 2.8);
+        rows.push(...pageRows);
+      }
+
+      const fullText = rows.map(r => r.text).join("\n");
+      return { rows, fullText };
+    }
+
+    function groupItemsToRows(items, tolerance = 2.8){
+      const sorted = [...items].sort((a,b) => {
+        if (a.page !== b.page) return a.page - b.page;
+        return b.y - a.y;
+      });
+
+      const rows = [];
+
+      for(const item of sorted){
+        let row = rows.find(r => r.page === item.page && Math.abs(r.y - item.y) <= tolerance);
+        if(!row){
+          row = {
+            page: item.page,
+            y: item.y,
+            items: [],
+            pageWidth: item.pageWidth
+          };
+          rows.push(row);
+        }
+        row.items.push(item);
+      }
+
+      rows.forEach(row => {
+        row.items.sort((a,b) => a.x - b.x);
+        row.text = row.items.map(i => i.str).join(" ").replace(/\s+/g," ").trim();
+      });
+
+      rows.sort((a,b) => {
+        if (a.page !== b.page) return a.page - b.page;
+        return b.y - a.y;
+      });
+
+      return rows;
+    }
+
+    function findRowByRegex(rows, regex){
+      return rows.find(r => regex.test(r.text));
+    }
+
+    function collectSectionRows(rows, page, topY, bottomY){
+      return rows.filter(r => r.page === page && r.y < topY && r.y > bottomY);
+    }
+
+    function uniquePlayers(players, withNumber = true){
+      const seen = new Set();
+      const out = [];
+
+      for(const p of players){
+        if(!p) continue;
+        const key = withNumber ? `${p.number}|${p.name}|${p.captain}|${p.goalkeeper}` : p.name;
+        if(seen.has(key)) continue;
+        seen.add(key);
+        out.push(p);
+      }
+
+      return out;
+    }
+
+    function parseMatchDetails(text){
+      const leagueMatch =
+        text.match(/ליגת העל לנוער[^\n|]*/i) ||
+        text.match(/ליגה[^\n]*נוער[^\n|]*/i);
+
+      const roundMatch =
+        text.match(/(?:מס[’'"]?\s*מחזור|מחזור)\s*[:\-]?\s*(\d{1,2})/i);
+
+      const dateMatch =
+        text.match(/(\d{1,2}[./]\d{1,2}[./]\d{2,4})/);
+
+      const timeMatch =
+        text.match(/(\d{1,2}:\d{2})/);
+
+      const league = leagueMatch ? safeText(leagueMatch[0]) : "ליגת העל לנוער";
+      const round = roundMatch ? `מחזור ${roundMatch[1]}` : "";
+      const date = dateMatch ? dateMatch[1].replaceAll(".", "/") : "";
+      const time = timeMatch ? timeMatch[1] : "";
+
+      return [league, round, date, time].filter(Boolean).join(" | ");
+    }
+
+    function extractSideTextFromRow(row){
+      const middle = row.pageWidth / 2;
+
+      const rightText = row.items
+        .filter(i => i.x > middle)
+        .sort((a,b) => b.x - a.x)
+        .map(i => i.str)
+        .join(" ")
+        .trim();
+
+      const leftText = row.items
+        .filter(i => i.x <= middle)
+        .sort((a,b) => b.x - a.x)
+        .map(i => i.str)
+        .join(" ")
+        .trim();
+
+      return {
+        right: cleanNameParts(rightText.split(/\s+/)),
+        left: cleanNameParts(leftText.split(/\s+/))
+      };
+    }
+
+    function parseTeamsFromRows(rows, fullText){
+      let homeTeam = "";
+      let awayTeam = "";
+
+      const homeLabelRow = findRowByRegex(rows, /קבוצה ביתית/);
+      const awayLabelRow = findRowByRegex(rows, /קבוצה אורחת/);
+
+      if(homeLabelRow && awayLabelRow){
+        const page = homeLabelRow.page;
+        const upperY = Math.max(homeLabelRow.y, awayLabelRow.y) - 1;
+        const lowerY = Math.min(homeLabelRow.y, awayLabelRow.y) - 40;
+        const candidates = rows.filter(r => r.page === page && r.y < upperY && r.y > lowerY);
+
+        for(const row of candidates){
+          const sides = extractSideTextFromRow(row);
+          if(sides.right && sides.left){
+            homeTeam = sides.right;
+            awayTeam = sides.left;
+            break;
+          }
+        }
+      }
+
+      if(!homeTeam || !awayTeam){
+        const lines = fullText.split("\n").map(safeText).filter(Boolean);
+        const gameLine = lines.find(line => line.includes(" - "));
+        if(gameLine){
+          const parts = gameLine.split(" - ").map(safeText).filter(Boolean);
+          if(parts.length === 2){
+            homeTeam = homeTeam || parts[0];
+            awayTeam = awayTeam || parts[1];
+          }
+        }
+      }
+
+      return { homeTeam, awayTeam };
+    }
+
+    function parseCoachNameFromText(text){
+      const cleaned = safeText(text)
+        .replace(/מאמן(?:ת)?\s*הקבוצה/g, " ")
+        .replace(/מאמן(?:ת)?/g, " ")
+        .replace(/הקבוצה/g, " ");
+
+      const parts = cleaned.split(/\s+/).filter(Boolean);
+      const name = cleanNameParts(parts);
+      return hasRealLetters(name) ? name : "";
+    }
+
+    function parseCoachNamesFromRows(rows){
+      let homeCoach = "";
+      let awayCoach = "";
+
+      for(const row of rows){
+        if(!/מאמן/.test(row.text)) continue;
+        const sides = extractSideTextFromRow(row);
+        const rightCoach = parseCoachNameFromText(sides.right);
+        const leftCoach  = parseCoachNameFromText(sides.left);
+        if(rightCoach && !homeCoach) homeCoach = rightCoach;
+        if(leftCoach && !awayCoach) awayCoach = leftCoach;
+      }
+
+      return { homeCoach, awayCoach };
+    }
+
+    function parsePlayerTokens(tokens, expectNumber = true){
+      if(!tokens || !tokens.length) return null;
+
+      const cleanTokens = tokens.map(safeText).filter(Boolean);
+      if(!cleanTokens.length) return null;
+
+      const rawJoined = cleanTokens.join(" ");
+      const flags = detectFlags(rawJoined);
+
+      let number = "";
+      const numberIdx = cleanTokens.findIndex(looksLikeNumber);
+
+      if(numberIdx !== -1){
+        number = cleanTokens[numberIdx];
+      }
+
+      const nameTokens = cleanTokens.filter((t, idx) => {
+        if(idx === numberIdx) return false;
+        const n = normalizeRoleToken(t);
+        if(n === "C" || n === "GK") return false;
+        if(t === "-" || t === "–" || t === "—") return false;
+        return true;
+      });
+
+      const name = cleanupVisualTokens(cleanNameParts(nameTokens));
+
+      if(!name || !hasRealLetters(name)) return null;
+
+      if(expectNumber){
+        if(!number) return null;
+        return { number, name, captain: flags.captain, goalkeeper: flags.goalkeeper };
+      }
+
+      return { name };
+    }
+
+    function parsePlayerFromColumnItems(items, expectNumber = true){
+      if(!items || !items.length) return null;
+      const sorted = [...items].sort((a,b) => b.x - a.x);
+      const tokens = sorted.flatMap(i => safeText(i.str).split(/\s+/)).filter(Boolean);
+      return parsePlayerTokens(tokens, expectNumber);
+    }
+
+    function parseColumnsSection(rows, pageWidth, expectNumber = true){
+      const home = [];
+      const away = [];
+      const middle = pageWidth / 2;
+
+      for(const row of rows){
+        const rightItems = row.items.filter(i => i.x > middle + 4);
+        const leftItems  = row.items.filter(i => i.x <= middle - 4);
+
+        const homePlayer = parsePlayerFromColumnItems(rightItems, expectNumber);
+        const awayPlayer = parsePlayerFromColumnItems(leftItems, expectNumber);
+
+        if(homePlayer) home.push(homePlayer);
+        if(awayPlayer) away.push(awayPlayer);
+      }
+
+      return {
+        home: uniquePlayers(home, expectNumber),
+        away: uniquePlayers(away, expectNumber)
+      };
+    }
+
+    function sliceLikelyRoster(players, expectedCount){
+      if(players.length <= expectedCount) return players;
+      return players.filter(p => p && p.number && p.name).slice(0, expectedCount);
+    }
+
+    function parsePdfRoster(structured){
+      const { rows, fullText } = structured;
+
+      const startersRow = findRowByRegex(rows, /שחקני הרכב/);
+      const subsRow = findRowByRegex(rows, /מחליפים/);
+      const staffRow = findRowByRegex(rows, /צוות מקצועי/);
+      const refsRow = findRowByRegex(rows, /שופטים/);
+
+      const teams = parseTeamsFromRows(rows, fullText);
+      const matchDetails = parseMatchDetails(fullText);
+
+      let homeStarters = [];
+      let awayStarters = [];
+      let homeSubs = [];
+      let awaySubs = [];
+      let homeCoach = "";
+      let awayCoach = "";
+
+      if(startersRow && subsRow){
+        const startersRows = collectSectionRows(rows, startersRow.page, startersRow.y - 1, subsRow.y + 1);
+        const startersParsed = parseColumnsSection(startersRows, startersRow.pageWidth, true);
+        homeStarters = sliceLikelyRoster(startersParsed.home, 11);
+        awayStarters = sliceLikelyRoster(startersParsed.away, 11);
+      }
+
+      if(subsRow){
+        const subsBottomY = staffRow ? staffRow.y + 1 : (refsRow ? refsRow.y + 1 : -999999);
+        const subsRows = collectSectionRows(rows, subsRow.page, subsRow.y - 1, subsBottomY);
+        const subsParsed = parseColumnsSection(subsRows, subsRow.pageWidth, false);
+
+        homeSubs = uniquePlayers(subsParsed.home, false).filter(p => {
+          const n = safeText(p.name);
+          return n !== "מס' שם" &&
+                 n !== "מס׳ שם" &&
+                 n !== "מס שם" &&
+                 n !== "שם מס" &&
+                 n !== "שם";
+        });
+
+        awaySubs = uniquePlayers(subsParsed.away, false).filter(p => {
+          const n = safeText(p.name);
+          return n !== "מס' שם" &&
+                 n !== "מס׳ שם" &&
+                 n !== "מס שם" &&
+                 n !== "שם מס" &&
+                 n !== "שם";
+        });
+      }
+
+      if(staffRow){
+        const staffBottomY = refsRow ? refsRow.y + 1 : -999999;
+        const staffRows = collectSectionRows(rows, staffRow.page, staffRow.y - 1, staffBottomY);
+        const coaches = parseCoachNamesFromRows(staffRows);
+        homeCoach = coaches.homeCoach;
+        awayCoach = coaches.awayCoach;
+      }
+
+      return {
+        matchDetails,
+        homeTeam: teams.homeTeam,
+        awayTeam: teams.awayTeam,
+        homeCoach,
+        awayCoach,
+        homeStarters,
+        awayStarters,
+        homeSubs,
+        awaySubs
+      };
+    }
+
+    async function loadPdf(){
+      const file = $("pdfFile").files && $("pdfFile").files[0];
+      if(!file){
+        setStatus("לא נבחר PDF", true);
+        return;
+      }
+
+      try{
+        setStatus("טוענת PDF ומחלצת נתונים...");
+        const structured = await extractPdfStructured(file);
+        const parsed = parsePdfRoster(structured);
+
+        state.parsed = parsed;
+
+        if(
+          !parsed.homeStarters.length &&
+          !parsed.awayStarters.length &&
+          !parsed.homeSubs.length &&
+          !parsed.awaySubs.length
+        ){
+          setStatus("לא הצלחתי לחלץ שחקנים מה־PDF. אפשר לערוך ידנית.", true);
+          return;
+        }
+
+        $("matchText").value = parsed.matchDetails || $("matchText").value;
+
+        setStatus(
+          `הטעינה הצליחה
+ביתית: ${parsed.homeTeam || "-"}
+אורחת: ${parsed.awayTeam || "-"}
+הרכב ביתית: ${parsed.homeStarters.length}
+הרכב אורחת: ${parsed.awayStarters.length}
+מחליפים ביתית: ${parsed.homeSubs.length}
+מחליפים אורחת: ${parsed.awaySubs.length}`
+        );
+
+        setSide("home");
+      } catch(err){
+        console.error(err);
+        setStatus("שגיאה בקריאת ה־PDF", true);
+      }
+    }
+
+    async function waitForImagesInside(element){
+      const imgs = Array.from(element.querySelectorAll("img")).filter(img => img.src);
+      await Promise.all(
+        imgs.map(img => {
+          if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+          return new Promise(resolve => {
+            const done = () => resolve();
+            img.addEventListener("load", done, { once:true });
+            img.addEventListener("error", done, { once:true });
+          });
+        })
+      );
+    }
+
+    async function exportPNG(){
+      let stage = null;
+
+      try{
+        setStatus("מייצאת PNG איכותי...");
+
+        const poster = $("poster");
+
+        if (document.fonts && document.fonts.ready) {
+          await document.fonts.ready;
+        }
+
+        stage = document.createElement("div");
+        stage.style.position = "fixed";
+        stage.style.left = "-20000px";
+        stage.style.top = "0";
+        stage.style.width = "1024px";
+        stage.style.height = "1536px";
+        stage.style.overflow = "hidden";
+        stage.style.opacity = "1";
+        stage.style.pointerEvents = "none";
+        stage.style.zIndex = "-1";
+        stage.style.background = "transparent";
+
+        const clone = poster.cloneNode(true);
+        clone.id = "poster-export-clone";
+        clone.style.transform = "none";
+        clone.style.margin = "0";
+        clone.style.width = "1024px";
+        clone.style.height = "1536px";
+        clone.style.maxWidth = "1024px";
+        clone.style.maxHeight = "1536px";
+        clone.style.display = "block";
+        clone.style.position = "relative";
+        clone.style.left = "0";
+        clone.style.top = "0";
+
+        stage.appendChild(clone);
+        document.body.appendChild(stage);
+
+        if (document.fonts && document.fonts.ready) {
+          await document.fonts.ready;
+        }
+
+        await waitForImagesInside(clone);
+
+        const canvas = await html2canvas(clone, {
+          backgroundColor: null,
+          useCORS: true,
+          scale: 2,
+          width: 1024,
+          height: 1536,
+          windowWidth: 1024,
+          windowHeight: 1536,
+          scrollX: 0,
+          scrollY: 0
+        });
+
+        const exportCanvas = document.createElement("canvas");
+        exportCanvas.width = 1024;
+        exportCanvas.height = 1536;
+
+        const ctx = exportCanvas.getContext("2d");
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+        ctx.drawImage(canvas, 0, 0, exportCanvas.width, exportCanvas.height);
+
+        const link = document.createElement("a");
+        link.download = "starting-xi-1024x1536.png";
+        link.href = exportCanvas.toDataURL("image/png");
+        link.click();
+
+        setStatus("הייצוא הושלם");
+      } catch(err){
+        console.error(err);
+        setStatus("שגיאה בייצוא", true);
+      } finally {
+        if(stage && stage.parentNode){
+          stage.parentNode.removeChild(stage);
+        }
+      }
+    }
+
+    function clearAll(){
+      revokeObjectUrls();
+
+      state.parsed = {
+        matchDetails: "",
+        homeTeam: "",
+        awayTeam: "",
+        homeCoach: "",
+        awayCoach: "",
+        homeStarters: [],
+        awayStarters: [],
+        homeSubs: [],
+        awaySubs: []
+      };
+
+      $("pdfFile").value = "";
+      $("playerImage").value = "";
+      $("teamLogo").value = "";
+      $("oppLogo").value = "";
+      $("bgImageInput").value = "";
+
+      $("topText").value = "WE ARE HBS";
+      $("matchText").value = "ליגת העל לנוער | מחזור | תאריך | שעה";
+      $("locationText").value = "";
+      $("teamText").value = "";
+      $("oppText").value = "";
+      $("coachText").value = "";
+      $("footerText").value = "";
+      $("startersInput").value = "";
+      $("subsInput").value = "";
+
+      $("playerScale").value = 100;
+      $("playerYOffset").value = 0;
+      $("playerXOffset").value = 0;
+      $("leftFade").value = 0;
+
+      $("playerScaleValue").textContent = "100%";
+      $("playerYOffsetValue").textContent = "0px";
+      $("playerXOffsetValue").textContent = "0px";
+      $("leftFadeValue").textContent = "0%";
+
+      ["playerPreview","teamLogoPreview","oppLogoPreview","bgLogo","bgImagePreview","bgLeftHalfImage","topClubLogo","bottomClubLogo"].forEach(id => {
+        $(id).src = "";
+        $(id).style.display = "none";
+      });
+
+      $("bgLeftHalf").style.display = "none";
+      $("leftFadeOverlay").style.display = "none";
+
+      applyPlayerImageTransform();
+      applyLeftFade();
+      updateLocationPreview();
+      setSide("home");
+      updatePreviewTexts();
+      setStatus("נוקה");
+    }
+
+    $("loadPdfBtn").addEventListener("click", loadPdf);
+    $("clearBtn").addEventListener("click", clearAll);
+    $("homeBtn").addEventListener("click", () => setSide("home"));
+    $("awayBtn").addEventListener("click", () => setSide("away"));
+    $("applyManualBtn").addEventListener("click", updatePreviewTexts);
+    $("exportBtn").addEventListener("click", exportPNG);
+
+    [
+      "topText","matchText","locationText","teamText","oppText","coachText","footerText","startersInput","subsInput"
+    ].forEach(id => {
+      $(id).addEventListener("input", updatePreviewTexts);
+    });
+
+    $("playerImage").addEventListener("change", function(){
+      setImageFromInput(this, ["playerPreview"]);
+      applyPlayerImageTransform();
+    });
+
+    $("teamLogo").addEventListener("change", function(){
+      setImageFromInput(this, ["teamLogoPreview","bgLogo","topClubLogo","bottomClubLogo"]);
+    });
+
+    $("oppLogo").addEventListener("change", function(){
+      setImageFromInput(this, ["oppLogoPreview"]);
+    });
+
+    $("bgImageInput").addEventListener("change", setBackgroundFromInput);
+
+    $("playerScale").addEventListener("input", applyPlayerImageTransform);
+    $("playerYOffset").addEventListener("input", applyPlayerImageTransform);
+    $("playerXOffset").addEventListener("input", applyPlayerImageTransform);
+    $("leftFade").addEventListener("input", applyLeftFade);
+
+    updatePreviewTexts();
+    applyPlayerImageTransform();
+    applyLeftFade();
+  </script>
+</body>
+</html>

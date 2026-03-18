@@ -1,0 +1,312 @@
+/* ════════════════════════════════════════
+   HBS Studio 2026 — Shared Theme Override
+   ════════════════════════════════════════ */
+
+:root {
+  --hbs-bg: #080b12;
+  --hbs-accent: #AF1419;
+  --hbs-glow: rgba(175,20,25,.35);
+  --hbs-text: #e8eaf0;
+  --hbs-muted: #7a8090;
+}
+
+/* ── Body ── */
+body { background: var(--hbs-bg) !important; }
+
+/* ── Sidebar panels ── */
+.controls, .panel {
+  background: rgba(255,255,255,.03) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+}
+
+/* ── Main title ── */
+.controls h2, .panel h1, .panel h2 {
+  font-size: 17px !important;
+  background: linear-gradient(135deg, #AF1419, #e8373e);
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+/* ── Section headers ── */
+.controls h3, .group h3 {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: .12em !important;
+  text-transform: uppercase !important;
+  color: #AF1419 !important;
+  border-bottom: 1px solid rgba(255,255,255,.07) !important;
+  border-right: 3px solid #AF1419 !important;
+  padding-bottom: 8px !important;
+  padding-right: 8px !important;
+  margin: 22px 0 10px !important;
+  -webkit-text-fill-color: #AF1419 !important;
+}
+
+/* ── Field labels ── */
+.field label {
+  font-size: 11px !important;
+  color: #7a8090 !important;
+  letter-spacing: .03em !important;
+}
+.controls > label, .group label { color: #7a8090 !important; font-size: 11px !important; }
+
+/* ── Text / number / date / select ── */
+input[type="text"], input[type="date"], input[type="number"], select {
+  background: rgba(255,255,255,.05) !important;
+  color: #e8eaf0 !important;
+  border: 1px solid rgba(255,255,255,.09) !important;
+  border-radius: 8px !important;
+  transition: border-color .2s, box-shadow .2s !important;
+}
+input[type="text"]:focus, input[type="date"]:focus,
+input[type="number"]:focus, select:focus {
+  outline: none !important;
+  border-color: rgba(175,20,25,.55) !important;
+  box-shadow: 0 0 0 3px rgba(175,20,25,.12) !important;
+}
+
+/* ── Color input ── */
+input[type="color"] {
+  background: rgba(255,255,255,.05) !important;
+  border: 1px solid rgba(255,255,255,.09) !important;
+  border-radius: 8px !important;
+}
+
+/* ── Range slider ── */
+input[type="range"] {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  height: 3px !important;
+  background: rgba(255,255,255,.12) !important;
+  border-radius: 2px !important;
+  outline: none !important;
+  cursor: pointer !important;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none !important;
+  width: 14px !important;
+  height: 14px !important;
+  border-radius: 50% !important;
+  background: #AF1419 !important;
+  box-shadow: 0 0 8px rgba(175,20,25,.45) !important;
+  cursor: pointer !important;
+  transition: transform .15s !important;
+}
+input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.3) !important; }
+
+/* ── Value badge ── */
+.val {
+  background: rgba(175,20,25,.12) !important;
+  border: 1px solid rgba(175,20,25,.25) !important;
+  border-radius: 8px !important;
+  color: #e8373e !important;
+  font-weight: 700 !important;
+  font-size: 11px !important;
+}
+
+/* ── Buttons ── */
+button {
+  border-radius: 9px !important;
+  font-family: inherit !important;
+  letter-spacing: .03em !important;
+  cursor: pointer !important;
+  transition: opacity .15s, transform .1s !important;
+}
+button:active { transform: scale(.97) !important; }
+
+button:not(.btn-secondary):not(.dropdown-toggle):not(.hbs-copy-btn) {
+  background: linear-gradient(135deg, #AF1419, #c9181f) !important;
+  border: none !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 18px rgba(175,20,25,.38) !important;
+}
+button.btn-secondary, button.hbs-copy-btn {
+  background: rgba(255,255,255,.06) !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  color: #8a8f9a !important;
+  font-weight: 400 !important;
+  box-shadow: none !important;
+}
+
+/* ── Preview area — always dark, unaffected by theme ── */
+.preview-wrap {
+  background: #0d1018 !important;
+  border-radius: 16px !important;
+}
+
+/* ── Preview box ── */
+.preview-box {
+  background: rgba(255,255,255,.03) !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+}
+.preview-title {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: .12em !important;
+  text-transform: uppercase !important;
+  color: #7a8090 !important;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,.10); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.20); }
+
+/* ── Toast ── */
+#hbs-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(14px);
+  background: rgba(16,20,30,.93);
+  border: 1px solid rgba(175,20,25,.35);
+  color: #e8eaf0;
+  font-family: Rubik, Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 22px;
+  border-radius: 40px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .3s, transform .3s;
+  z-index: 99999;
+  white-space: nowrap;
+  box-shadow: 0 4px 24px rgba(0,0,0,.5), 0 0 0 1px rgba(175,20,25,.12);
+  backdrop-filter: blur(12px);
+}
+#hbs-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── Dropdown toggles ── */
+.dropdown-toggle {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  background: rgba(255,255,255,.05) !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  border-radius: 10px !important;
+  padding: 10px 14px !important;
+  color: #e8eaf0 !important;
+  font-size: 13px !important;
+  box-shadow: none !important;
+  margin-top: 6px !important;
+  -webkit-text-fill-color: #e8eaf0 !important;
+}
+.dropdown-toggle:hover { background: rgba(255,255,255,.09) !important; }
+.dropdown-toggle .arrow { font-size: 10px; opacity: .6; transition: transform .25s; display: inline-block; }
+.dropdown-toggle.open .arrow { transform: rotate(180deg); }
+.dropdown-body {
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 10px;
+}
+.dropdown-body.open { display: flex; }
+.dropdown-body .field { margin-bottom: 0; }
+.dropdown-body label { display: flex !important; align-items: center !important; gap: 10px !important; padding: 6px 4px !important; cursor: pointer !important; border-radius: 6px !important; }
+.dropdown-body label:hover { background: rgba(255,255,255,.05) !important; }
+.dropdown-body input[type="checkbox"] { width: 16px !important; height: 16px !important; accent-color: #AF1419 !important; cursor: pointer !important; }
+
+/* ── Keyboard shortcut badge on export buttons ── */
+button[data-hbs-export]::after {
+  content: attr(data-shortcut);
+  margin-right: 8px;
+  font-size: 10px;
+  opacity: .6;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+/* ════════════════════════════════════════
+   Light mode overrides  (html.hbs-light)
+   ════════════════════════════════════════ */
+
+html.hbs-light body { background: #f0f2f5 !important; color: #1a1a1a !important; }
+
+html.hbs-light .controls,
+html.hbs-light .panel {
+  background: rgba(255,255,255,0.80) !important;
+  border: 1px solid rgba(0,0,0,0.10) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+}
+
+html.hbs-light .controls h3,
+html.hbs-light .group h3 {
+  border-bottom: 1px solid rgba(0,0,0,0.10) !important;
+  border-right-color: #AF1419 !important;
+}
+
+html.hbs-light .field label,
+html.hbs-light .controls > label,
+html.hbs-light .group label { color: #7a8090 !important; }
+
+html.hbs-light input[type="text"],
+html.hbs-light input[type="date"],
+html.hbs-light input[type="number"],
+html.hbs-light select {
+  background: rgba(0,0,0,0.05) !important;
+  color: #1a1a1a !important;
+  border-color: rgba(0,0,0,0.15) !important;
+}
+html.hbs-light input[type="color"] {
+  background: rgba(0,0,0,0.05) !important;
+  border-color: rgba(0,0,0,0.15) !important;
+}
+html.hbs-light input[type="range"] { background: rgba(0,0,0,0.14) !important; }
+
+html.hbs-light button.btn-secondary,
+html.hbs-light button.hbs-copy-btn {
+  background: rgba(0,0,0,0.06) !important;
+  border-color: rgba(0,0,0,0.12) !important;
+  color: #555 !important;
+}
+
+/* preview-wrap, preview-box and preview-title intentionally excluded from light mode —
+   the image canvas area keeps its dark appearance regardless of theme */
+html.hbs-light .preview-wrap {
+  background: #0d1018 !important;
+}
+
+html.hbs-light .small-note { color: #888 !important; }
+
+html.hbs-light .checks label {
+  background: rgba(0,0,0,0.05) !important;
+  border-color: rgba(0,0,0,0.12) !important;
+  color: #333 !important;
+}
+
+html.hbs-light .dropdown-toggle {
+  background: rgba(0,0,0,0.05) !important;
+  border-color: rgba(0,0,0,0.12) !important;
+  color: #1a1a1a !important;
+  -webkit-text-fill-color: #1a1a1a !important;
+}
+html.hbs-light .dropdown-toggle:hover { background: rgba(0,0,0,0.09) !important; }
+
+html.hbs-light .dropdown-body {
+  background: rgba(0,0,0,0.03) !important;
+  border-color: rgba(0,0,0,0.10) !important;
+}
+html.hbs-light .dropdown-body label { color: #333 !important; }
+html.hbs-light .dropdown-body label:hover { background: rgba(0,0,0,0.05) !important; }
+
+html.hbs-light #hbs-toast {
+  background: rgba(240,242,245,0.95) !important;
+  color: #1a1a1a !important;
+  border-color: rgba(175,20,25,0.25) !important;
+}

@@ -1,0 +1,1160 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>STATEMENT PRO</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      background:#111;
+      color:#fff;
+      font-family:Rubik,Arial,sans-serif;
+      display:flex;
+      gap:20px;
+      padding:20px;
+      align-items:flex-start;
+      direction:ltr;
+    }
+
+    .controls{
+      width:440px;
+      background:#1c1c1c;
+      padding:18px;
+      border-radius:16px;
+      max-height:calc(100vh - 40px);
+      overflow:auto;
+      direction:rtl;
+    }
+
+    .controls h2{
+      margin:0 0 14px;
+      font-size:24px;
+    }
+
+    .controls h3{
+      margin:18px 0 8px;
+      font-size:14px;
+      border-bottom:1px solid rgba(255,255,255,.12);
+      padding-bottom:5px;
+    }
+
+    .field{margin-bottom:10px}
+
+    .field label{
+      display:block;
+      font-size:12px;
+      color:#ddd;
+      margin-bottom:5px;
+    }
+
+    input[type="text"],
+    input[type="file"],
+    input[type="range"],
+    input[type="color"]{
+      width:100%;
+    }
+
+    input[type="text"],
+    input[type="color"]{
+      background:#11161d;
+      color:#fff;
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:38px;
+      padding:10px 12px;
+      font-family:inherit;
+    }
+
+    .range-wrap{
+      display:grid;
+      grid-template-columns:1fr 72px;
+      gap:8px;
+      align-items:center;
+    }
+
+    .val{
+      background:#11161d;
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:10px;
+      padding:7px 4px;
+      text-align:center;
+      font-size:12px;
+    }
+
+    .checks{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:8px;
+    }
+
+    .checks label{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-size:13px;
+      background:#11161d;
+      border:1px solid rgba(255,255,255,.1);
+      border-radius:10px;
+      padding:10px 12px;
+      cursor:pointer;
+    }
+
+    button{
+      width:100%;
+      margin-top:10px;
+      border:0;
+      border-radius:10px;
+      padding:12px;
+      background:#AF1419;
+      color:#fff;
+      font-family:inherit;
+      font-size:15px;
+      cursor:pointer;
+    }
+
+    .btn-secondary{background:#2b313b}
+
+    .preview-wrap{
+      flex:1;
+      display:flex;
+      justify-content:center;
+    }
+
+    .preview-box{
+      background:#1c1c1c;
+      padding:16px;
+      border-radius:16px;
+    }
+
+    .preview-title{
+      text-align:center;
+      color:#cfcfcf;
+      font-size:13px;
+      margin-bottom:10px;
+      direction:rtl;
+    }
+
+    .stage-view{
+      width:700px;
+      max-width:calc(100vw - 550px);
+      aspect-ratio:1/1;
+      position:relative;
+      overflow:hidden;
+      border-radius:10px;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,.04), rgba(255,255,255,0));
+    }
+
+    .stage-root{
+      width:1080px;
+      height:1080px;
+      position:absolute;
+      left:0;
+      top:0;
+      transform-origin:top left;
+      overflow:hidden;
+      background:transparent;
+    }
+
+    .bg-base{
+      position:absolute;
+      inset:0;
+      background:transparent;
+      z-index:0;
+    }
+
+    .bg-fill{
+      position:absolute;
+      inset:0;
+      background:linear-gradient(to bottom, #ffffff 0 50%, #AF1419 50% 100%);
+      z-index:1;
+      display:none;
+    }
+
+    #mainImage{
+      position:absolute;
+      left:540px;
+      top:440px;
+      transform:translate(-50%,-50%);
+      transform-origin:center center;
+      max-width:none;
+      max-height:none;
+      object-fit:contain;
+      display:none;
+      z-index:5;
+      pointer-events:none;
+      user-select:none;
+    }
+
+    #textBox{
+      position:absolute;
+      left:540px;
+      top:165px;
+      transform:translate(-50%,-50%) rotate(0deg);
+      transform-origin:center center;
+      background:#AF1419;
+      color:#fff;
+      padding:0 22px;
+      font-size:35px;
+      font-weight:700;
+      line-height:1.1;
+      text-align:center;
+      direction:ltr;
+      z-index:12;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:move;
+      user-select:none;
+      white-space:nowrap;
+      font-family:Rubik,Arial,sans-serif;
+    }
+
+    #bottomBar{
+      position:absolute;
+      left:10px;
+      bottom:10px;
+      width:1060px;
+      height:110px;
+      background:#AF1419;
+      z-index:11;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:20px;
+      padding:0 24px;
+      overflow:hidden;
+    }
+
+    .bottom-logo{
+      object-fit:contain;
+      display:block;
+      flex:0 0 auto;
+    }
+
+    .ball{
+      position:absolute;
+      width:72px;
+      height:72px;
+      flex:0 0 72px;
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:move;
+      user-select:none;
+      z-index:14;
+      overflow:hidden;
+    }
+
+    .ball.red{
+      background:
+        radial-gradient(circle at 28% 24%, rgba(255,255,255,.92) 0 9%, rgba(255,255,255,.35) 10%, rgba(255,255,255,0) 24%),
+        radial-gradient(circle at 35% 32%, #ff6670 0%, #e3323b 42%, #c61b23 68%, #AF1419 100%);
+      box-shadow:
+        inset -4px -6px 10px rgba(0,0,0,.14),
+        inset 4px 5px 7px rgba(255,255,255,.12);
+    }
+
+    .ball.white{
+      background:
+        radial-gradient(circle at 28% 24%, rgba(255,255,255,1) 0 9%, rgba(255,255,255,.75) 10%, rgba(255,255,255,0) 24%),
+        radial-gradient(circle at 35% 32%, #ffffff 0%, #f5f5f5 45%, #e7e7e7 72%, #d6d6d6 100%);
+      box-shadow:
+        inset -4px -6px 10px rgba(0,0,0,.08),
+        inset 4px 5px 7px rgba(255,255,255,.18);
+    }
+
+    .ball svg{
+      width:38px;
+      height:38px;
+      display:block;
+      opacity:.98;
+      filter:drop-shadow(0 1px 1px rgba(0,0,0,.12));
+    }
+
+    .ball.red svg *{
+      stroke:#fff;
+      fill:none;
+      stroke-width:2.6;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+    }
+
+    .ball.white svg *{
+      stroke:#AF1419;
+      fill:none;
+      stroke-width:2.6;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+    }
+
+    .frame{
+      position:absolute;
+      inset:0;
+      z-index:30;
+      pointer-events:none;
+    }
+
+    .frame-top,
+    .frame-bottom,
+    .frame-left,
+    .frame-right{
+      position:absolute;
+      pointer-events:none;
+    }
+
+    .frame-top{
+      left:0;
+      top:0;
+      width:100%;
+      height:10px;
+      background:#ffffff;
+    }
+
+    .frame-bottom{
+      left:0;
+      bottom:0;
+      width:100%;
+      height:10px;
+      background:#AF1419;
+    }
+
+    .frame-left{
+      left:0;
+      top:0;
+      width:10px;
+      height:100%;
+      background:linear-gradient(
+        to bottom,
+        #ffffff 0%,
+        #ffffff 46%,
+        rgba(255,255,255,.55) 49%,
+        rgba(175,20,25,.55) 51%,
+        #AF1419 54%,
+        #AF1419 100%
+      );
+    }
+
+    .frame-right{
+      right:0;
+      top:0;
+      width:10px;
+      height:100%;
+      background:linear-gradient(
+        to bottom,
+        #ffffff 0%,
+        #ffffff 46%,
+        rgba(255,255,255,.55) 49%,
+        rgba(175,20,25,.55) 51%,
+        #AF1419 54%,
+        #AF1419 100%
+      );
+    }
+
+    .small-note{
+      margin-top:10px;
+      font-size:12px;
+      color:#bdbdbd;
+      direction:rtl;
+      text-align:center;
+    }
+
+    @media (max-width:1100px){
+      body{flex-direction:column}
+      .controls{width:100%;max-height:none}
+      .stage-view{max-width:100%}
+    }
+  </style>
+</head>
+<body>
+
+  <div class="controls">
+    <h2>מחולל STATEMENT PRO</h2>
+
+    <h3>תמונה מרכזית</h3>
+    <div class="field">
+      <label>טעינת תמונה</label>
+      <input type="file" id="mainImageUpload" accept="image/*">
+    </div>
+    <div class="checks">
+      <label><input type="checkbox" id="useOriginalSize"> התאמה אישית</label>
+    </div>
+    <div id="customImageControls" style="display:none">
+    <div class="field">
+      <label>מיקום אופקי</label>
+      <div class="range-wrap">
+        <input type="range" id="mainImageX" min="0" max="1080" value="540">
+        <div class="val" id="mainImageXVal">540</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>מיקום אנכי</label>
+      <div class="range-wrap">
+        <input type="range" id="mainImageY" min="0" max="1350" value="440">
+        <div class="val" id="mainImageYVal">440</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>זום תמונה</label>
+      <div class="range-wrap">
+        <input type="range" id="mainImageScale" min="10" max="250" value="100">
+        <div class="val" id="mainImageScaleVal">100%</div>
+      </div>
+    </div>
+    </div>
+
+    <h3>לוגואים בתחתית</h3>
+    <div class="field">
+      <label>טעינת לוגואים</label>
+      <input type="file" id="bottomLogosUpload" accept="image/*" multiple>
+    </div>
+    <div class="field">
+      <label>גובה אחיד לכל הלוגואים</label>
+      <div class="range-wrap">
+        <input type="range" id="bottomLogoHeight" min="20" max="100" value="90">
+        <div class="val" id="bottomLogoHeightVal">90px</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>מרווח בין לוגואים</label>
+      <div class="range-wrap">
+        <input type="range" id="bottomLogoGap" min="0" max="150" value="100">
+        <div class="val" id="bottomLogoGapVal">100px</div>
+      </div>
+    </div>
+
+    <h3>מלבן טקסט</h3>
+    <div class="field">
+      <label>מלל</label>
+      <input type="text" id="textBoxText" value="Developing the future">
+    </div>
+    <div class="field">
+      <label>גודל פונט</label>
+      <div class="range-wrap">
+        <input type="range" id="textBoxFontSize" min="14" max="120" value="35">
+        <div class="val" id="textBoxFontSizeVal">35px</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>רוחב פנימי</label>
+      <div class="range-wrap">
+        <input type="range" id="textBoxWidth" min="80" max="900" value="420">
+        <div class="val" id="textBoxWidthVal">420px</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>גובה פנימי</label>
+      <div class="range-wrap">
+        <input type="range" id="textBoxHeight" min="40" max="250" value="75">
+        <div class="val" id="textBoxHeightVal">75px</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>מיקום אופקי</label>
+      <div class="range-wrap">
+        <input type="range" id="textBoxX" min="0" max="1080" value="531">
+        <div class="val" id="textBoxXVal">531</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>מיקום אנכי</label>
+      <div class="range-wrap">
+        <input type="range" id="textBoxY" min="0" max="1350" value="55">
+        <div class="val" id="textBoxYVal">55</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>סיבוב</label>
+      <div class="range-wrap">
+        <input type="range" id="textBoxRotate" min="-45" max="45" value="0">
+        <div class="val" id="textBoxRotateVal">0°</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>רדיוס פינות</label>
+      <div class="range-wrap">
+        <input type="range" id="textBoxRadius" min="0" max="80" value="38">
+        <div class="val" id="textBoxRadiusVal">38px</div>
+      </div>
+    </div>
+
+    <h3>הצללה שחורה</h3>
+    <div class="field">
+      <label>עוצמת הצללה</label>
+      <div class="range-wrap">
+        <input type="range" id="shadowStrength" min="0" max="100" value="35">
+        <div class="val" id="shadowStrengthVal">35%</div>
+      </div>
+    </div>
+
+    <h3>כדורים ואייקונים</h3>
+    <div class="checks">
+      <label><input type="checkbox" id="showFacebook" checked> Facebook</label>
+      <label><input type="checkbox" id="showInstagram" checked> Instagram</label>
+      <label><input type="checkbox" id="showTikTok" checked> TikTok</label>
+      <label><input type="checkbox" id="showLike" checked> Like</label>
+      <label><input type="checkbox" id="showHeart" checked> Heart</label>
+    </div>
+
+    <div class="field">
+      <label>רווח בין 3 הכדורים האדומים</label>
+      <div class="range-wrap">
+        <input type="range" id="redBallGap" min="0" max="120" value="28">
+        <div class="val" id="redBallGapVal">28px</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>רווח בין 2 הכדורים הלבנים</label>
+      <div class="range-wrap">
+        <input type="range" id="whiteBallGap" min="0" max="120" value="28">
+        <div class="val" id="whiteBallGapVal">28px</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>רווח בין הכדורים האדומים לכדורים הלבנים</label>
+      <div class="range-wrap">
+        <input type="range" id="groupBallGap" min="0" max="700" value="600">
+        <div class="val" id="groupBallGapVal">600px</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>מיקום אנכי של הכדורים</label>
+      <div class="range-wrap">
+        <input type="range" id="ballsYOffset" min="780" max="1040" value="935">
+        <div class="val" id="ballsYOffsetVal">935px</div>
+      </div>
+    </div>
+
+    <button type="button" class="btn-secondary" id="resetBallSpacing">איפוס רווחי כדורים</button>
+    <button type="button" class="btn-secondary" id="resetAll">איפוס מלא</button>
+    <button type="button" id="export1080">ייצוא PNG 1080×1080</button>
+    <button type="button" id="export1350">ייצוא PNG 1080×1350</button>
+  </div>
+
+  <div class="preview-wrap">
+    <div class="preview-box">
+      <div class="preview-title">תצוגה מקדימה</div>
+      <div class="stage-view" id="stageView">
+        <div class="stage-root" id="stageRoot"></div>
+      </div>
+      <div class="small-note">
+        כשהעמוד נטען מוצגת רק המסגרת. רק כשמסמנים התאמה אישית נפתחים פקדי התמונה ומוצג גם רקע לבן בחצי העליון ואדום בחצי התחתון.
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+  <script>
+    const state = {
+      mainImageSrc: "",
+      mainImageNaturalWidth: 0,
+      mainImageNaturalHeight: 0,
+      mainImageX: 540,
+      mainImageY: 440,
+      mainImageScale: 1,
+      useOriginalSize: false,
+
+      bottomLogos: [],
+      bottomLogoHeight: 90,
+      bottomLogoGap: 100,
+
+      textBoxText: "Developing the future",
+      textBoxFontSize: 35,
+      textBoxWidth: 420,
+      textBoxHeight: 75,
+      textBoxX: 531,
+      textBoxY: 55,
+      textBoxRotate: 0,
+      textBoxRadius: 38,
+
+      shadowStrength: 0.35,
+
+      redBallGap: 28,
+      whiteBallGap: 28,
+      groupBallGap: 600,
+      ballsYOffset: 935,
+
+      balls: {
+        facebook: { visible:true, x:150, y:935, color:"red", icon:"facebook" },
+        instagram:{ visible:true, x:250, y:935, color:"red", icon:"instagram" },
+        tiktok:   { visible:true, x:350, y:935, color:"red", icon:"tiktok" },
+        like:     { visible:true, x:810, y:935, color:"white", icon:"like" },
+        heart:    { visible:true, x:910, y:935, color:"white", icon:"heart" }
+      }
+    };
+
+    const els = {
+      stageView: document.getElementById("stageView"),
+      stageRoot: document.getElementById("stageRoot"),
+
+      mainImageUpload: document.getElementById("mainImageUpload"),
+      useOriginalSize: document.getElementById("useOriginalSize"),
+      mainImageX: document.getElementById("mainImageX"),
+      mainImageY: document.getElementById("mainImageY"),
+      mainImageScale: document.getElementById("mainImageScale"),
+      mainImageXVal: document.getElementById("mainImageXVal"),
+      mainImageYVal: document.getElementById("mainImageYVal"),
+      mainImageScaleVal: document.getElementById("mainImageScaleVal"),
+
+      bottomLogosUpload: document.getElementById("bottomLogosUpload"),
+      bottomLogoHeight: document.getElementById("bottomLogoHeight"),
+      bottomLogoGap: document.getElementById("bottomLogoGap"),
+      bottomLogoHeightVal: document.getElementById("bottomLogoHeightVal"),
+      bottomLogoGapVal: document.getElementById("bottomLogoGapVal"),
+
+      textBoxText: document.getElementById("textBoxText"),
+      textBoxFontSize: document.getElementById("textBoxFontSize"),
+      textBoxWidth: document.getElementById("textBoxWidth"),
+      textBoxHeight: document.getElementById("textBoxHeight"),
+      textBoxX: document.getElementById("textBoxX"),
+      textBoxY: document.getElementById("textBoxY"),
+      textBoxRotate: document.getElementById("textBoxRotate"),
+      textBoxRadius: document.getElementById("textBoxRadius"),
+      textBoxFontSizeVal: document.getElementById("textBoxFontSizeVal"),
+      textBoxWidthVal: document.getElementById("textBoxWidthVal"),
+      textBoxHeightVal: document.getElementById("textBoxHeightVal"),
+      textBoxXVal: document.getElementById("textBoxXVal"),
+      textBoxYVal: document.getElementById("textBoxYVal"),
+      textBoxRotateVal: document.getElementById("textBoxRotateVal"),
+      textBoxRadiusVal: document.getElementById("textBoxRadiusVal"),
+
+      shadowStrength: document.getElementById("shadowStrength"),
+      shadowStrengthVal: document.getElementById("shadowStrengthVal"),
+
+      showFacebook: document.getElementById("showFacebook"),
+      showInstagram: document.getElementById("showInstagram"),
+      showTikTok: document.getElementById("showTikTok"),
+      showLike: document.getElementById("showLike"),
+      showHeart: document.getElementById("showHeart"),
+
+      redBallGap: document.getElementById("redBallGap"),
+      whiteBallGap: document.getElementById("whiteBallGap"),
+      groupBallGap: document.getElementById("groupBallGap"),
+      ballsYOffset: document.getElementById("ballsYOffset"),
+      redBallGapVal: document.getElementById("redBallGapVal"),
+      whiteBallGapVal: document.getElementById("whiteBallGapVal"),
+      groupBallGapVal: document.getElementById("groupBallGapVal"),
+      ballsYOffsetVal: document.getElementById("ballsYOffsetVal"),
+
+      resetBallSpacing: document.getElementById("resetBallSpacing"),
+      resetAll: document.getElementById("resetAll"),
+      export1080: document.getElementById("export1080"),
+      export1350: document.getElementById("export1350")
+    };
+
+    function readFileAsDataURL(file){
+      return new Promise((resolve,reject)=>{
+        const reader = new FileReader();
+        reader.onload = ()=>resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function loadImage(src){
+      return new Promise((resolve,reject)=>{
+        const img = new Image();
+        img.onload = ()=>resolve(img);
+        img.onerror = reject;
+        img.src = src;
+      });
+    }
+
+    async function handleMainImageUpload(file){
+      if(!file) return;
+      const src = await readFileAsDataURL(file);
+      const img = await loadImage(src);
+      state.mainImageSrc = src;
+      state.mainImageNaturalWidth = img.naturalWidth || img.width;
+      state.mainImageNaturalHeight = img.naturalHeight || img.height;
+      if(!state.useOriginalSize){
+        state.mainImageX = 540;
+        state.mainImageY = 440;
+        state.mainImageScale = 1;
+        els.mainImageX.value = 540;
+        els.mainImageY.value = 440;
+        els.mainImageScale.value = 100;
+      }
+      render();
+    }
+
+    async function handleBottomLogosUpload(files){
+      const arr = [];
+      for(const file of files){
+        arr.push(await readFileAsDataURL(file));
+      }
+      state.bottomLogos = arr;
+      render();
+    }
+
+    function shadowCss(mult=1){
+      const a = Math.max(0, Math.min(1, state.shadowStrength * mult));
+      return `0 10px 18px rgba(0,0,0,${a}), 0 4px 10px rgba(0,0,0,${a*0.5})`;
+    }
+
+    function getIconSVG(name){
+      if(name === "facebook"){
+        return `
+          <svg viewBox="0 0 48 48" aria-hidden="true">
+            <path d="M28 13h5"/>
+            <path d="M24 36V22c0-3.5 2-6 6-6h3"/>
+            <path d="M19 26h10"/>
+          </svg>
+        `;
+      }
+
+      if(name === "instagram"){
+        return `
+          <svg viewBox="0 0 48 48" aria-hidden="true">
+            <rect x="11" y="11" width="26" height="26" rx="8"></rect>
+            <circle cx="24" cy="24" r="6.5"></circle>
+            <circle cx="31.7" cy="16.5" r="1.6"></circle>
+          </svg>
+        `;
+      }
+
+      if(name === "tiktok"){
+        return `
+          <svg viewBox="0 0 48 48" aria-hidden="true">
+            <path d="M25 13v15.5a5.8 5.8 0 1 1-5.8-5.8"></path>
+            <path d="M25 13c1.4 3.2 4.1 5.3 7.6 5.8"></path>
+          </svg>
+        `;
+      }
+
+      if(name === "like"){
+        return `
+          <svg viewBox="0 0 48 48" aria-hidden="true">
+            <path d="M18 22l4-8c1.2-2.2 4.5-1.3 4.5 1.2V22h7c2.2 0 3.7 2.1 2.9 4.1L33.8 34c-.5 1.4-1.9 2.3-3.4 2.3H18z"></path>
+            <path d="M12 22h6v14h-6z"></path>
+          </svg>
+        `;
+      }
+
+      return `
+        <svg viewBox="0 0 48 48" aria-hidden="true">
+          <path d="M24 37c-8-5.2-13-9.7-13-16 0-4 3-7 7-7 2.6 0 5 1.3 6 3.3 1-2 3.4-3.3 6-3.3 4 0 7 3 7 7 0 6.3-5 10.8-13 16z"></path>
+        </svg>
+      `;
+    }
+
+    function getImageSize(){
+      if(!state.mainImageSrc || !state.mainImageNaturalWidth || !state.mainImageNaturalHeight){
+        return { width: 1080, height: 1080 };
+      }
+
+      const ratio = state.mainImageNaturalHeight / state.mainImageNaturalWidth;
+      let width;
+      let height;
+
+      if(state.useOriginalSize){
+        width = state.mainImageNaturalWidth * state.mainImageScale;
+        height = state.mainImageNaturalHeight * state.mainImageScale;
+      }else{
+        const fitScale = Math.min(1080 / state.mainImageNaturalWidth, 1080 / state.mainImageNaturalHeight);
+        width = state.mainImageNaturalWidth * fitScale;
+        height = state.mainImageNaturalHeight * fitScale;
+      }
+
+      return { width, height };
+    }
+
+    function applyBallSpacing(){
+      const ballSize = 72;
+      const redOrder = ["facebook","instagram","tiktok"].filter(k => state.balls[k].visible);
+      const whiteOrder = ["like","heart"].filter(k => state.balls[k].visible);
+
+      if(redOrder.length || whiteOrder.length){
+        const totalRedWidth = redOrder.length * ballSize + Math.max(0, redOrder.length - 1) * state.redBallGap;
+        const totalWhiteWidth = whiteOrder.length * ballSize + Math.max(0, whiteOrder.length - 1) * state.whiteBallGap;
+        const totalWidth = totalRedWidth + totalWhiteWidth + (redOrder.length && whiteOrder.length ? state.groupBallGap : 0);
+        let x = (1080 - totalWidth) / 2 + ballSize / 2;
+
+        redOrder.forEach((key, idx) => {
+          state.balls[key].x = x + idx * (ballSize + state.redBallGap);
+          state.balls[key].y = state.ballsYOffset;
+        });
+
+        if(whiteOrder.length){
+          x += totalRedWidth + (redOrder.length ? state.groupBallGap : 0);
+          whiteOrder.forEach((key, idx) => {
+            state.balls[key].x = x + idx * (ballSize + state.whiteBallGap);
+            state.balls[key].y = state.ballsYOffset;
+          });
+        }
+      }
+    }
+
+    function createStageDOM(targetHeight = 1080){
+      const root = document.createElement("div");
+      root.className = "stage-root";
+      root.style.width = "1080px";
+      root.style.height = `${targetHeight}px`;
+      root.style.transform = "none";
+      root.style.position = "relative";
+      root.style.left = "0";
+      root.style.top = "0";
+      root.style.background = "transparent";
+      root.style.overflow = "hidden";
+
+      const bgBase = document.createElement("div");
+      bgBase.className = "bg-base";
+      bgBase.style.height = `${targetHeight}px`;
+      root.appendChild(bgBase);
+
+      const bgFill = document.createElement("div");
+      bgFill.className = "bg-fill";
+      bgFill.style.display = state.useOriginalSize ? "block" : "none";
+      root.appendChild(bgFill);
+
+      const mainImage = document.createElement("img");
+      mainImage.id = "mainImage";
+
+      if(state.mainImageSrc){
+        mainImage.src = state.mainImageSrc;
+        mainImage.style.display = "block";
+      }else{
+        mainImage.style.display = "none";
+      }
+
+      const imgSize = getImageSize();
+      mainImage.style.left = `${state.mainImageX}px`;
+      mainImage.style.top = `${state.mainImageY}px`;
+      mainImage.style.width = `${imgSize.width}px`;
+      mainImage.style.height = `${imgSize.height}px`;
+      mainImage.style.transform = `translate(-50%,-50%)`;
+      mainImage.style.filter = `drop-shadow(0 5px 10px rgba(0,0,0,${Math.max(0, state.shadowStrength * 0.18)}))`;
+      root.appendChild(mainImage);
+
+      const textBox = document.createElement("div");
+      textBox.id = "textBox";
+      textBox.textContent = state.textBoxText;
+      textBox.style.left = `${state.textBoxX}px`;
+      textBox.style.top = `${state.textBoxY}px`;
+      textBox.style.width = `${state.textBoxWidth}px`;
+      textBox.style.height = `${state.textBoxHeight}px`;
+      textBox.style.fontSize = `${state.textBoxFontSize}px`;
+      textBox.style.transform = `translate(-50%,-50%) rotate(${state.textBoxRotate}deg)`;
+      textBox.style.boxShadow = shadowCss(0.7);
+      textBox.style.borderRadius = `${state.textBoxRadius}px`;
+      root.appendChild(textBox);
+
+      const bottomBar = document.createElement("div");
+      bottomBar.id = "bottomBar";
+      bottomBar.style.boxShadow = "inset 0 1px 0 rgba(255,255,255,.10)";
+      bottomBar.style.gap = `${state.bottomLogoGap}px`;
+
+      state.bottomLogos.forEach(src=>{
+        const img = document.createElement("img");
+        img.src = src;
+        img.className = "bottom-logo";
+        img.style.height = `${state.bottomLogoHeight}px`;
+        img.style.maxHeight = `${state.bottomLogoHeight}px`;
+        img.style.filter = `drop-shadow(0 3px 6px rgba(0,0,0,.18))`;
+        bottomBar.appendChild(img);
+      });
+
+      root.appendChild(bottomBar);
+
+      Object.entries(state.balls).forEach(([key,ball])=>{
+        if(!ball.visible) return;
+        const el = document.createElement("div");
+        el.className = `ball ${ball.color}`;
+        el.dataset.ball = key;
+        el.style.left = `${ball.x - 36}px`;
+        el.style.top = `${ball.y - 36}px`;
+        el.style.boxShadow = "0 4px 8px rgba(0,0,0,.08)";
+        el.innerHTML = getIconSVG(ball.icon);
+        root.appendChild(el);
+      });
+
+      const frame = document.createElement("div");
+      frame.className = "frame";
+
+      const frameTop = document.createElement("div");
+      frameTop.className = "frame-top";
+
+      const frameBottom = document.createElement("div");
+      frameBottom.className = "frame-bottom";
+
+      const frameLeft = document.createElement("div");
+      frameLeft.className = "frame-left";
+
+      const frameRight = document.createElement("div");
+      frameRight.className = "frame-right";
+
+      frame.appendChild(frameTop);
+      frame.appendChild(frameBottom);
+      frame.appendChild(frameLeft);
+      frame.appendChild(frameRight);
+      root.appendChild(frame);
+
+      return root;
+    }
+
+
+    function updateCustomImageControls(){
+      const box = document.getElementById("customImageControls");
+      if(box) box.style.display = state.useOriginalSize ? "block" : "none";
+    }
+
+    function render(){
+      applyBallSpacing();
+      updateCustomImageControls();
+
+      const previewScale = els.stageView.clientWidth / 1080;
+      els.stageRoot.innerHTML = "";
+
+      const previewDOM = createStageDOM(1080);
+      previewDOM.style.transform = `scale(${previewScale})`;
+
+      els.stageRoot.appendChild(previewDOM);
+      bindDragHandlers();
+
+      els.mainImageXVal.textContent = Math.round(state.mainImageX);
+      els.mainImageYVal.textContent = Math.round(state.mainImageY);
+      els.mainImageScaleVal.textContent = `${Math.round(state.mainImageScale * 100)}%`;
+
+      els.bottomLogoHeightVal.textContent = `${Math.round(state.bottomLogoHeight)}px`;
+      els.bottomLogoGapVal.textContent = `${Math.round(state.bottomLogoGap)}px`;
+
+      els.textBoxFontSizeVal.textContent = `${Math.round(state.textBoxFontSize)}px`;
+      els.textBoxWidthVal.textContent = `${Math.round(state.textBoxWidth)}px`;
+      els.textBoxHeightVal.textContent = `${Math.round(state.textBoxHeight)}px`;
+      els.textBoxXVal.textContent = Math.round(state.textBoxX);
+      els.textBoxYVal.textContent = Math.round(state.textBoxY);
+      els.textBoxRotateVal.textContent = `${Math.round(state.textBoxRotate)}°`;
+      els.textBoxRadiusVal.textContent = `${Math.round(state.textBoxRadius)}px`;
+
+      els.shadowStrengthVal.textContent = `${Math.round(state.shadowStrength * 100)}%`;
+      els.redBallGapVal.textContent = `${Math.round(state.redBallGap)}px`;
+      els.whiteBallGapVal.textContent = `${Math.round(state.whiteBallGap)}px`;
+      els.groupBallGapVal.textContent = `${Math.round(state.groupBallGap)}px`;
+      els.ballsYOffsetVal.textContent = `${Math.round(state.ballsYOffset)}px`;
+    }
+
+    let dragTarget = null;
+
+    function bindDragHandlers(){
+      const previewRoot = els.stageRoot.querySelector(".stage-root");
+      if(!previewRoot) return;
+
+      const textBox = previewRoot.querySelector("#textBox");
+      if(textBox){
+        textBox.addEventListener("mousedown",(e)=>{
+          dragTarget = { type:"textbox" };
+          e.preventDefault();
+        });
+      }
+
+      previewRoot.querySelectorAll(".ball").forEach(ball=>{
+        ball.addEventListener("mousedown",(e)=>{
+          dragTarget = { type:"ball", key: ball.dataset.ball };
+          e.preventDefault();
+        });
+      });
+    }
+
+    document.addEventListener("mousemove",(e)=>{
+      if(!dragTarget) return;
+
+      const rect = els.stageView.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 1080;
+      const y = ((e.clientY - rect.top) / rect.height) * 1080;
+
+      if(dragTarget.type === "textbox"){
+        state.textBoxX = Math.max(0, Math.min(1080, x));
+        state.textBoxY = Math.max(0, Math.min(1080, y));
+        els.textBoxX.value = Math.round(state.textBoxX);
+        els.textBoxY.value = Math.round(state.textBoxY);
+      }
+
+      if(dragTarget.type === "ball"){
+        state.balls[dragTarget.key].x = Math.max(36, Math.min(1044, x));
+        state.balls[dragTarget.key].y = Math.max(36, Math.min(1314, y));
+      }
+
+      render();
+    });
+
+    document.addEventListener("mouseup",()=>{
+      dragTarget = null;
+    });
+
+    els.mainImageUpload.addEventListener("change",e=>handleMainImageUpload(e.target.files?.[0]));
+    els.bottomLogosUpload.addEventListener("change",e=>handleBottomLogosUpload([...e.target.files]));
+
+    els.useOriginalSize.addEventListener("change",e=>{ state.useOriginalSize = e.target.checked; render(); });
+
+    els.mainImageX.addEventListener("input",e=>{ state.mainImageX = +e.target.value; render(); });
+    els.mainImageY.addEventListener("input",e=>{ state.mainImageY = +e.target.value; render(); });
+    els.mainImageScale.addEventListener("input",e=>{ state.mainImageScale = +e.target.value / 100; render(); });
+
+    els.bottomLogoHeight.addEventListener("input",e=>{ state.bottomLogoHeight = +e.target.value; render(); });
+    els.bottomLogoGap.addEventListener("input",e=>{ state.bottomLogoGap = +e.target.value; render(); });
+
+    els.textBoxText.addEventListener("input",e=>{ state.textBoxText = e.target.value; render(); });
+    els.textBoxFontSize.addEventListener("input",e=>{ state.textBoxFontSize = +e.target.value; render(); });
+    els.textBoxWidth.addEventListener("input",e=>{ state.textBoxWidth = +e.target.value; render(); });
+    els.textBoxHeight.addEventListener("input",e=>{ state.textBoxHeight = +e.target.value; render(); });
+    els.textBoxX.addEventListener("input",e=>{ state.textBoxX = +e.target.value; render(); });
+    els.textBoxY.addEventListener("input",e=>{ state.textBoxY = +e.target.value; render(); });
+    els.textBoxRotate.addEventListener("input",e=>{ state.textBoxRotate = +e.target.value; render(); });
+    els.textBoxRadius.addEventListener("input",e=>{ state.textBoxRadius = +e.target.value; render(); });
+
+    els.shadowStrength.addEventListener("input",e=>{ state.shadowStrength = +e.target.value / 100; render(); });
+
+    els.showFacebook.addEventListener("change",e=>{ state.balls.facebook.visible = e.target.checked; render(); });
+    els.showInstagram.addEventListener("change",e=>{ state.balls.instagram.visible = e.target.checked; render(); });
+    els.showTikTok.addEventListener("change",e=>{ state.balls.tiktok.visible = e.target.checked; render(); });
+    els.showLike.addEventListener("change",e=>{ state.balls.like.visible = e.target.checked; render(); });
+    els.showHeart.addEventListener("change",e=>{ state.balls.heart.visible = e.target.checked; render(); });
+
+    els.redBallGap.addEventListener("input",e=>{ state.redBallGap = +e.target.value; render(); });
+    els.whiteBallGap.addEventListener("input",e=>{ state.whiteBallGap = +e.target.value; render(); });
+    els.groupBallGap.addEventListener("input",e=>{ state.groupBallGap = +e.target.value; render(); });
+    els.ballsYOffset.addEventListener("input",e=>{ state.ballsYOffset = +e.target.value; render(); });
+
+    els.resetBallSpacing.addEventListener("click",()=>{
+      state.redBallGap = 28;
+      state.whiteBallGap = 28;
+      state.groupBallGap = 600;
+      state.ballsYOffset = 935;
+      els.redBallGap.value = 28;
+      els.whiteBallGap.value = 28;
+      els.groupBallGap.value = 600;
+      els.ballsYOffset.value = 935;
+      render();
+    });
+
+    els.resetAll.addEventListener("click",()=>{
+      state.mainImageSrc = "";
+      state.mainImageNaturalWidth = 0;
+      state.mainImageNaturalHeight = 0;
+      state.mainImageX = 540;
+      state.mainImageY = 440;
+      state.mainImageScale = 1;
+      state.useOriginalSize = false;
+
+      state.bottomLogos = [];
+      state.bottomLogoHeight = 90;
+      state.bottomLogoGap = 100;
+
+      state.textBoxText = "Developing the future";
+      state.textBoxFontSize = 35;
+      state.textBoxWidth = 420;
+      state.textBoxHeight = 75;
+      state.textBoxX = 531;
+      state.textBoxY = 55;
+      state.textBoxRotate = 0;
+      state.textBoxRadius = 38;
+
+      state.shadowStrength = 0.35;
+      state.redBallGap = 28;
+      state.whiteBallGap = 28;
+      state.groupBallGap = 600;
+      state.ballsYOffset = 935;
+
+      state.balls.facebook = { visible:true, x:0, y:935, color:"red", icon:"facebook" };
+      state.balls.instagram = { visible:true, x:0, y:935, color:"red", icon:"instagram" };
+      state.balls.tiktok = { visible:true, x:0, y:935, color:"red", icon:"tiktok" };
+      state.balls.like = { visible:true, x:0, y:935, color:"white", icon:"like" };
+      state.balls.heart = { visible:true, x:0, y:935, color:"white", icon:"heart" };
+
+      els.mainImageUpload.value = "";
+      els.bottomLogosUpload.value = "";
+
+      els.useOriginalSize.checked = false;
+      els.mainImageX.value = 540;
+      els.mainImageY.value = 440;
+      els.mainImageScale.value = 100;
+
+      els.bottomLogoHeight.value = 90;
+      els.bottomLogoGap.value = 100;
+
+      els.textBoxText.value = "Developing the future";
+      els.textBoxFontSize.value = 35;
+      els.textBoxWidth.value = 420;
+      els.textBoxHeight.value = 75;
+      els.textBoxX.value = 531;
+      els.textBoxY.value = 55;
+      els.textBoxRotate.value = 0;
+      els.textBoxRadius.value = 38;
+
+      els.shadowStrength.value = 35;
+      els.redBallGap.value = 28;
+      els.whiteBallGap.value = 28;
+      els.groupBallGap.value = 600;
+      els.ballsYOffset.value = 935;
+
+      els.showFacebook.checked = true;
+      els.showInstagram.checked = true;
+      els.showTikTok.checked = true;
+      els.showLike.checked = true;
+      els.showHeart.checked = true;
+
+      render();
+    });
+
+    async function exportCanvas(targetHeight){
+      const wrapper = document.createElement("div");
+      wrapper.style.position = "fixed";
+      wrapper.style.left = "-20000px";
+      wrapper.style.top = "0";
+      wrapper.style.width = "1080px";
+      wrapper.style.height = `${targetHeight}px`;
+      wrapper.style.background = "transparent";
+      wrapper.style.zIndex = "-1";
+
+      const exportDOM = createStageDOM(targetHeight);
+
+      if(targetHeight > 1080){
+        const extra = targetHeight - 1080;
+        Object.entries(state.balls).forEach(([key,ball])=>{
+          const el = exportDOM.querySelector(`[data-ball="${key}"]`);
+          if(el){
+            const adjustedY = Math.min(targetHeight - 46, ball.y + extra);
+            el.style.top = `${adjustedY - 36}px`;
+          }
+        });
+      }
+
+      wrapper.appendChild(exportDOM);
+      document.body.appendChild(wrapper);
+
+      await document.fonts.ready;
+
+      const canvas = await html2canvas(exportDOM,{
+        backgroundColor:null,
+        width:1080,
+        height:targetHeight,
+        scale:1,
+        useCORS:true
+      });
+
+      const link = document.createElement("a");
+      link.download = targetHeight === 1080 ? "statement-pro-1080x1080.png" : "statement-pro-1080x1350.png";
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+
+      wrapper.remove();
+    }
+
+    els.export1080.addEventListener("click",()=>exportCanvas(1080));
+    els.export1350.addEventListener("click",()=>exportCanvas(1350));
+
+    window.addEventListener("resize",render);
+    render();
+  </script>
+</body>
+</html>

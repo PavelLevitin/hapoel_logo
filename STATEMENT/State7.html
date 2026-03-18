@@ -1,0 +1,1012 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>ACADEMY STATEMENT PRO V5</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Rubik:wght@400;500;700;900&family=Oxanium:wght@400;500;600;700;800&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:#111;
+  color:#fff;
+  font-family:Rubik,Arial,sans-serif;
+  display:flex;
+  gap:20px;
+  padding:20px;
+  align-items:flex-start;
+  direction:ltr;
+}
+.controls{
+  width:460px;
+  background:#1c1c1c;
+  padding:18px;
+  border-radius:16px;
+  max-height:calc(100vh - 40px);
+  overflow:auto;
+  direction:rtl;
+}
+.controls h2{margin:0 0 12px;font-size:22px}
+.controls h3{
+  margin:18px 0 8px;
+  font-size:14px;
+  border-bottom:1px solid rgba(255,255,255,.12);
+  padding-bottom:5px
+}
+.field{margin-bottom:10px}
+.field label{
+  display:block;
+  font-size:12px;
+  color:#d8d8d8;
+  margin-bottom:5px
+}
+input[type="text"],input[type="color"],input[type="file"],input[type="range"]{width:100%}
+input[type="text"],input[type="color"]{
+  background:#11161d;
+  color:#fff;
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:10px;
+  padding:10px 12px;
+  font-family:inherit;
+}
+input[type="color"]{height:44px;padding:4px}
+.range-wrap{
+  display:grid;
+  grid-template-columns:1fr 72px;
+  gap:8px;
+  align-items:center;
+}
+.val{
+  background:#11161d;
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:10px;
+  padding:7px 4px;
+  text-align:center;
+  font-size:12px;
+}
+button{
+  width:100%;
+  margin-top:10px;
+  border:0;
+  border-radius:10px;
+  padding:12px;
+  background:#AF1419;
+  color:#fff;
+  font-family:inherit;
+  font-size:15px;
+  cursor:pointer;
+}
+.btn-secondary{background:#2b313b}
+.preview-wrap{flex:1;display:flex;justify-content:center}
+.preview-box{background:#1c1c1c;padding:16px;border-radius:16px}
+.preview-title{text-align:center;color:#cfcfcf;font-size:13px;margin-bottom:10px;direction:rtl}
+.stage{
+  width:700px;
+  max-width:calc(100vw - 570px);
+  aspect-ratio:1/1;
+  position:relative;
+  background:#BB0E16;
+  overflow:hidden;
+}
+#bgTexture,
+#overlayImage,
+#clubLogo{
+  position:absolute;
+  display:none;
+}
+#bgTexture{
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  z-index:0;
+}
+#patternLayer{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  opacity:.12;
+}
+#shade{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(180deg, rgba(0,0,0,.06) 0%, rgba(0,0,0,.18) 100%);
+  z-index:2;
+  pointer-events:none;
+  opacity:.72;
+}
+#overlayImage{
+  left:540px;
+  top:410px;
+  width:220px;
+  height:220px;
+  transform:translate(-50%,-50%);
+  object-fit:contain;
+  z-index:4;
+  opacity:1;
+  filter:drop-shadow(0 6px 16px rgba(0,0,0,.12));
+}
+#logoWaves{
+  position:absolute;
+  left:50%;
+  top:0;
+  transform:translateX(-50%);
+  width:420px;
+  height:260px;
+  z-index:7;
+  pointer-events:none;
+  overflow:visible;
+}
+#clubLogo{
+  left:50%;
+  top:8px;
+  transform:translateX(-50%);
+  width:138px;
+  height:138px;
+  object-fit:contain;
+  z-index:8;
+  filter:drop-shadow(0 6px 18px rgba(0,0,0,.18));
+}
+#developingText{
+  position:absolute;
+  left:50%;
+  top:158px;
+  transform:translateX(-50%);
+  font-family:Oxanium, Rubik, Arial, sans-serif;
+  font-size:30px;
+  line-height:1;
+  white-space:nowrap;
+  z-index:8;
+  text-shadow:0 2px 10px rgba(0,0,0,.18);
+}
+#centerGroup{
+  position:absolute;
+  left:50%;
+  top:620px;
+  transform:translateX(-50%);
+  width:min(92%, 980px);
+  text-align:center;
+  z-index:9;
+  pointer-events:none;
+}
+#hebrewText{
+  position:relative;
+  font-family:Fredoka, Rubik, Arial, sans-serif;
+  font-size:75px;
+  line-height:1.05;
+  direction:rtl;
+  unicode-bidi:plaintext;
+  white-space:nowrap;
+  text-shadow:0 3px 12px rgba(0,0,0,.18);
+}
+#dividerLine{
+  width:420px;
+  height:3px;
+  background:#fff;
+  margin:16px auto 16px;
+  border-radius:999px;
+  box-shadow:0 2px 8px rgba(0,0,0,.12);
+}
+#academyText{
+  font-family:Oswald, Oxanium, Rubik, Arial, sans-serif;
+  font-weight:600;
+  font-size:74px;
+  line-height:.95;
+  letter-spacing:.04em;
+  white-space:nowrap;
+  text-shadow:0 3px 12px rgba(0,0,0,.2);
+}
+#seasonText{
+  position:absolute;
+  left:50%;
+  top:980px;
+  transform:translateX(-50%);
+  font-family:Oxanium, Rubik, Arial, sans-serif;
+  font-weight:600;
+  font-size:42px;
+  line-height:1;
+  white-space:nowrap;
+  z-index:9;
+  text-shadow:0 3px 12px rgba(0,0,0,.18);
+  letter-spacing:.04em;
+}
+.small-note{
+  margin-top:10px;
+  font-size:12px;
+  color:#bdbdbd;
+  direction:rtl;
+  text-align:center
+}
+@media (max-width:1100px){
+  body{flex-direction:column}
+  .controls{width:100%;max-height:none}
+  .stage{max-width:100%}
+}
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <h2>מחולל ACADEMY STATEMENT</h2>
+
+  <h3>רקע</h3>
+  <div class="field">
+    <label>טעינת רקע / טקסטורה</label>
+    <input type="file" id="bgTextureUpload" accept="image/*">
+  </div>
+  <div class="field">
+    <label>צבע רקע</label>
+    <input type="color" id="bgColor" value="#BB0E16">
+  </div>
+  <div class="field">
+    <label>עוצמת שכבת הצללה</label>
+    <div class="range-wrap">
+      <input type="range" id="shadeOpacity" min="0" max="100" value="72">
+      <div class="val" id="shadeOpacityVal">72%</div>
+    </div>
+  </div>
+
+  <h3>שכבת OFFICIAL STATEMENT</h3>
+  <div class="field">
+    <label>שקיפות שכבה</label>
+    <div class="range-wrap">
+      <input type="range" id="patternOpacity" min="0" max="100" value="12">
+      <div class="val" id="patternOpacityVal">12%</div>
+    </div>
+  </div>
+  <div class="field">
+    <label>גודל טקסט השכבה</label>
+    <div class="range-wrap">
+      <input type="range" id="patternSize" min="20" max="180" value="104">
+      <div class="val" id="patternSizeVal">104px</div>
+    </div>
+  </div>
+  <div class="field">
+    <label>מרווח אנכי בין שורות</label>
+    <div class="range-wrap">
+      <input type="range" id="patternGapY" min="30" max="260" value="130">
+      <div class="val" id="patternGapYVal">130px</div>
+    </div>
+  </div>
+  <div class="field">
+    <label>מרווח אופקי בין מופעים</label>
+    <div class="range-wrap">
+      <input type="range" id="patternGapX" min="120" max="700" value="470">
+      <div class="val" id="patternGapXVal">470px</div>
+    </div>
+  </div>
+
+  <h3>לוגו מועדון</h3>
+  <div class="field">
+    <label>טעינת לוגו</label>
+    <input type="file" id="clubLogoUpload" accept="image/*">
+  </div>
+  <div class="field">
+    <label>מיקום אנכי לוגו</label>
+    <div class="range-wrap">
+      <input type="range" id="logoY" min="0" max="220" value="8">
+      <div class="val" id="logoYVal">8</div>
+    </div>
+  </div>
+  <div class="field">
+    <label>גודל לוגו</label>
+    <div class="range-wrap">
+      <input type="range" id="logoSize" min="40" max="260" value="138">
+      <div class="val" id="logoSizeVal">138px</div>
+    </div>
+  </div>
+
+  <h3>קשתות הלוגו</h3>
+  <div class="field">
+    <label>עובי קשתות</label>
+    <div class="range-wrap">
+      <input type="range" id="waveStroke" min="1" max="10" value="3">
+      <div class="val" id="waveStrokeVal">3px</div>
+    </div>
+  </div>
+  <div class="field">
+    <label>מיקום אנכי קשתות</label>
+    <div class="range-wrap">
+      <input type="range" id="waveY" min="-40" max="160" value="101">
+      <div class="val" id="waveYVal">101</div>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>הזזה אופקית של הקשתות</label>
+    <div class="range-wrap">
+      <input type="range" id="waveXOffset" min="-120" max="120" value="0">
+      <div class="val" id="waveXOffsetVal">0</div>
+    </div>
+  </div>
+  <div class="field">
+    <label>גודל קשת פנימית</label>
+    <div class="range-wrap">
+      <input type="range" id="waveInnerRadius" min="20" max="140" value="59">
+      <div class="val" id="waveInnerRadiusVal">59px</div>
+    </div>
+  </div>
+  <div class="field">
+    <label>גודל קשת חיצונית</label>
+    <div class="range-wrap">
+      <input type="range" id="waveOuterRadius" min="30" max="180" value="73">
+      <div class="val" id="waveOuterRadiusVal">73px</div>
+    </div>
+  </div>
+
+  <h3>Developing the future</h3>
+  <div class="field">
+    <label>טקסט</label>
+    <input type="text" id="developingInput" value="Developing the future">
+  </div>
+  <div class="field">
+    <label>גודל טקסט</label>
+    <div class="range-wrap">
+      <input type="range" id="developingSize" min="10" max="80" value="30">
+      <div class="val" id="developingSizeVal">30px</div>
+    </div>
+  </div>
+  <div class="field">
+    <label>רווח מתחת ללוגו</label>
+    <div class="range-wrap">
+      <input type="range" id="developingGap" min="0" max="80" value="6">
+      <div class="val" id="developingGapVal">6px</div>
+    </div>
+  </div>
+
+  <h3>תמונה שקופה מתחת לטקסטים</h3>
+  <div class="field">
+    <label>טעינת תמונה</label>
+    <input type="file" id="overlayUpload" accept="image/*">
+  </div>
+  <div class="field">
+    <label>מיקום אופקי</label>
+    <div class="range-wrap">
+      <input type="range" id="overlayX" min="0" max="1080" value="540">
+      <div class="val" id="overlayXVal">540</div>
+    </div>
+  </div>
+  <div class="field">
+    <label>מיקום אנכי</label>
+    <div class="range-wrap">
+      <input type="range" id="overlayY" min="0" max="1080" value="410">
+      <div class="val" id="overlayYVal">410</div>
+    </div>
+  </div>
+  <div class="field">
+    <label>גודל תמונה</label>
+    <div class="range-wrap">
+      <input type="range" id="overlaySize" min="40" max="860" value="220">
+      <div class="val" id="overlaySizeVal">220px</div>
+    </div>
+  </div>
+  <div class="field">
+    <label>שקיפות תמונה</label>
+    <div class="range-wrap">
+      <input type="range" id="overlayOpacity" min="0" max="100" value="100">
+      <div class="val" id="overlayOpacityVal">100%</div>
+    </div>
+  </div>
+
+  <h3>הטקסטים במרכז</h3>
+  <div class="field">
+    <label>טקסט עברי</label>
+    <input type="text" id="hebrewInput" value="הודעת מחלקת הנוער">
+  </div>
+  <div class="field">
+    <label>מיקום אנכי טקסט עברי</label>
+    <div class="range-wrap">
+      <input type="range" id="hebrewOffsetY" min="-120" max="120" value="0">
+      <div class="val" id="hebrewOffsetYVal">0</div>
+    </div>
+  </div>
+  <div class="field">
+    <label>גודל טקסט עברי</label>
+    <div class="range-wrap">
+      <input type="range" id="hebrewSize" min="18" max="140" value="75">
+      <div class="val" id="hebrewSizeVal">75px</div>
+    </div>
+  </div>
+  <div class="field">
+    <label>טקסט אנגלי</label>
+    <input type="text" id="academyInput" value="ACADEMY STATEMENT">
+  </div>
+  <div class="field">
+    <label>גודל ACADEMY STATEMENT</label>
+    <div class="range-wrap">
+      <input type="range" id="academySize" min="24" max="160" value="74">
+      <div class="val" id="academySizeVal">74px</div>
+    </div>
+  </div>
+  <div class="field">
+    <label>מיקום אנכי קבוצת הטקסטים</label>
+    <div class="range-wrap">
+      <input type="range" id="centerY" min="180" max="940" value="620">
+      <div class="val" id="centerYVal">620</div>
+    </div>
+  </div>
+  <div class="field">
+    <label>רווח בין עברית לפס</label>
+    <div class="range-wrap">
+      <input type="range" id="hebrewGap" min="0" max="60" value="16">
+      <div class="val" id="hebrewGapVal">16px</div>
+    </div>
+  </div>
+  <div class="field">
+    <label>רוחב הפס הלבן</label>
+    <div class="range-wrap">
+      <input type="range" id="dividerWidth" min="120" max="760" value="420">
+      <div class="val" id="dividerWidthVal">420px</div>
+    </div>
+  </div>
+  <div class="field">
+    <label>רווח בין הפס לאנגלית</label>
+    <div class="range-wrap">
+      <input type="range" id="academyGap" min="0" max="60" value="16">
+      <div class="val" id="academyGapVal">16px</div>
+    </div>
+  </div>
+
+  <h3>מספר עונה בתחתית</h3>
+  <div class="field">
+    <label>טקסט עונה</label>
+    <input type="text" id="seasonInput" value="2025/26">
+  </div>
+  <div class="field">
+    <label>מיקום אנכי</label>
+    <div class="range-wrap">
+      <input type="range" id="seasonY" min="860" max="1060" value="980">
+      <div class="val" id="seasonYVal">980</div>
+    </div>
+  </div>
+  <div class="field">
+    <label>גודל טקסט עונה</label>
+    <div class="range-wrap">
+      <input type="range" id="seasonSize" min="18" max="100" value="42">
+      <div class="val" id="seasonSizeVal">42px</div>
+    </div>
+  </div>
+
+  <button type="button" class="btn-secondary" id="resetAll">איפוס כללי</button>
+  <button type="button" id="exportBtn">ייצוא PNG 1080x1080</button>
+</div>
+
+<div class="preview-wrap">
+  <div class="preview-box">
+    <div class="preview-title">תצוגה מקדימה</div>
+    <div class="stage" id="stage">
+      <img id="bgTexture" alt="">
+      <canvas id="patternLayer"></canvas>
+      <div id="shade"></div>
+      <img id="overlayImage" alt="">
+
+      <svg id="logoWaves" viewBox="0 0 420 260" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path id="waveR1" d="" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+        <path id="waveR2" d="" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+        <path id="waveL1" d="" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+        <path id="waveL2" d="" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+
+      <img id="clubLogo" alt="">
+      <div id="developingText">Developing the future</div>
+
+      <div id="centerGroup">
+        <div id="hebrewText">הודעת מחלקת הנוער</div>
+        <div id="dividerLine"></div>
+        <div id="academyText">ACADEMY STATEMENT</div>
+      </div>
+
+      <div id="seasonText">2025/26</div>
+    </div>
+    <div class="small-note">הקשתות נשלטות עכשיו בנפרד מהלוגו: מיקום אנכי, הזזה אופקית, גודל פנימי וגודל חיצוני. תוקן גם יישור הייצוא כך שהקשתות ישמרו בדיוק על אותו מיקום כמו בתצוגה.</div>
+  </div>
+</div>
+
+<script>
+const defaultState = {
+  bgTextureSrc:"",
+  bgColor:"#BB0E16",
+  shadeOpacity:0.72,
+
+  patternOpacity:0.12,
+  patternSize:104,
+  patternGapY:130,
+  patternGapX:470,
+
+  clubLogoSrc:"",
+  logoY:8,
+  logoSize:138,
+
+  waveStroke:3,
+  waveY:101,
+  waveXOffset:0,
+  waveInnerRadius:59,
+  waveOuterRadius:73,
+
+  developingText:"Developing the future",
+  developingSize:30,
+  developingGap:6,
+
+  overlaySrc:"",
+  overlayX:540,
+  overlayY:410,
+  overlaySize:220,
+  overlayOpacity:1,
+
+  hebrewText:"הודעת מחלקת הנוער",
+  hebrewOffsetY:0,
+  hebrewSize:75,
+
+  academyText:"ACADEMY STATEMENT",
+  academySize:74,
+  centerY:620,
+  hebrewGap:16,
+  dividerWidth:420,
+  academyGap:16,
+
+  seasonText:"2025/26",
+  seasonY:980,
+  seasonSize:42
+};
+
+const state = {...defaultState};
+
+const ids = [
+  "stage","bgTexture","patternLayer","shade","clubLogo","developingText","overlayImage","logoWaves",
+  "centerGroup","hebrewText","dividerLine","academyText","seasonText",
+  "waveR1","waveR2","waveL1","waveL2",
+
+  "bgTextureUpload","bgColor","shadeOpacity","shadeOpacityVal",
+  "patternOpacity","patternOpacityVal","patternSize","patternSizeVal","patternGapY","patternGapYVal","patternGapX","patternGapXVal",
+
+  "clubLogoUpload","logoY","logoYVal","logoSize","logoSizeVal",
+
+  "waveStroke","waveStrokeVal","waveY","waveYVal","waveXOffset","waveXOffsetVal","waveInnerRadius","waveInnerRadiusVal","waveOuterRadius","waveOuterRadiusVal",
+
+  "developingInput","developingSize","developingSizeVal","developingGap","developingGapVal",
+
+  "overlayUpload","overlayX","overlayXVal","overlayY","overlayYVal","overlaySize","overlaySizeVal","overlayOpacity","overlayOpacityVal",
+
+  "hebrewInput","hebrewOffsetY","hebrewOffsetYVal","hebrewSize","hebrewSizeVal","academyInput","academySize","academySizeVal","centerY","centerYVal",
+  "hebrewGap","hebrewGapVal","dividerWidth","dividerWidthVal","academyGap","academyGapVal",
+
+  "seasonInput","seasonY","seasonYVal","seasonSize","seasonSizeVal",
+
+  "resetAll","exportBtn"
+];
+
+const els = Object.fromEntries(ids.map(id => [id, document.getElementById(id)]));
+
+function readFileAsDataURL(file){
+  return new Promise((resolve,reject)=>{
+    const reader = new FileReader();
+    reader.onload = ()=>resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+function loadImage(src){
+  return new Promise((resolve,reject)=>{
+    const img = new Image();
+    img.onload = ()=>resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+function fitContain(imgW,imgH,boxW,boxH){
+  const r = Math.min(boxW/imgW, boxH/imgH);
+  return {w:imgW*r, h:imgH*r};
+}
+function polarToCartesian(cx, cy, r, angleDeg){
+  const rad = (angleDeg - 90) * Math.PI / 180;
+  return {
+    x: cx + r * Math.cos(rad),
+    y: cy + r * Math.sin(rad)
+  };
+}
+function describeArc(cx, cy, r, startAngle, endAngle){
+  const start = polarToCartesian(cx, cy, r, endAngle);
+  const end = polarToCartesian(cx, cy, r, startAngle);
+  const largeArcFlag = Math.abs(endAngle - startAngle) <= 180 ? "0" : "1";
+  return `M ${start.x} ${start.y} A ${r} ${r} 0 ${largeArcFlag} 0 ${end.x} ${end.y}`;
+}
+
+function drawPatternCanvas(){
+  const canvas = els.patternLayer;
+  const stageRect = els.stage.getBoundingClientRect();
+  const w = Math.max(1, Math.round(stageRect.width));
+  const h = Math.max(1, Math.round(stageRect.height));
+  canvas.width = w;
+  canvas.height = h;
+  canvas.style.opacity = state.patternOpacity;
+
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0,0,w,h);
+
+  const scale = w / 1080;
+  const fontSize = state.patternSize * scale;
+  const gapY = state.patternGapY * scale;
+  const gapX = state.patternGapX * scale;
+
+  ctx.save();
+  ctx.fillStyle = "#ffffff";
+  ctx.font = `700 ${fontSize}px Oxanium, Arial, sans-serif`;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "middle";
+  ctx.translate(w/2, h/2);
+  ctx.rotate(-22 * Math.PI / 180);
+
+  const phrase = "OFFICIAL STATEMENT";
+  const textW = ctx.measureText(phrase).width;
+
+  for(let y = -h*1.8; y <= h*1.8; y += gapY){
+    const rowOffset = (Math.round(y / gapY) % 2 === 0) ? 0 : gapX / 2;
+    for(let x = -w*2.1; x <= w*2.1; x += textW + gapX){
+      ctx.fillText(phrase, x + rowOffset, y);
+    }
+  }
+  ctx.restore();
+}
+
+function updateTopPositions(scale){
+  els.clubLogo.style.top = `${state.logoY * scale}px`;
+  els.clubLogo.style.width = `${state.logoSize * scale}px`;
+  els.clubLogo.style.height = `${state.logoSize * scale}px`;
+
+  const developingTop = (state.logoY + state.logoSize + state.developingGap) * scale;
+  els.developingText.style.top = `${developingTop}px`;
+  els.developingText.style.fontSize = `${state.developingSize * scale}px`;
+
+  const svgW = 420 * scale;
+  const svgH = 260 * scale;
+  els.logoWaves.style.width = `${svgW}px`;
+  els.logoWaves.style.height = `${svgH}px`;
+  els.logoWaves.style.top = `0px`;
+
+  const cx = 210 + state.waveXOffset;
+  const cy = state.waveY;
+  const inner = state.waveInnerRadius;
+  const outer = Math.max(state.waveOuterRadius, state.waveInnerRadius + 14);
+
+  els.waveR1.setAttribute("d", describeArc(cx, cy, inner, 45, 135));
+  els.waveR2.setAttribute("d", describeArc(cx, cy, outer, 45, 135));
+  els.waveL1.setAttribute("d", describeArc(cx, cy, inner, 225, 315));
+  els.waveL2.setAttribute("d", describeArc(cx, cy, outer, 225, 315));
+
+  [els.waveR1, els.waveR2, els.waveL1, els.waveL2].forEach(p=>{
+    p.setAttribute("stroke-width", state.waveStroke);
+  });
+}
+
+function render(){
+  const rect = els.stage.getBoundingClientRect();
+  const scale = rect.width / 1080;
+
+  els.stage.style.background = state.bgColor;
+  els.shade.style.opacity = state.shadeOpacity;
+
+  if(state.bgTextureSrc){
+    els.bgTexture.src = state.bgTextureSrc;
+    els.bgTexture.style.display = "block";
+  }else{
+    els.bgTexture.style.display = "none";
+  }
+
+  if(state.clubLogoSrc){
+    els.clubLogo.src = state.clubLogoSrc;
+    els.clubLogo.style.display = "block";
+  }else{
+    els.clubLogo.style.display = "none";
+  }
+
+  if(state.overlaySrc){
+    els.overlayImage.src = state.overlaySrc;
+    els.overlayImage.style.display = "block";
+  }else{
+    els.overlayImage.style.display = "none";
+  }
+
+  drawPatternCanvas();
+  updateTopPositions(scale);
+
+  els.developingText.textContent = state.developingText;
+
+  els.overlayImage.style.left = `${state.overlayX * scale}px`;
+  els.overlayImage.style.top = `${state.overlayY * scale}px`;
+  els.overlayImage.style.width = `${state.overlaySize * scale}px`;
+  els.overlayImage.style.height = `${state.overlaySize * scale}px`;
+  els.overlayImage.style.opacity = state.overlayOpacity;
+
+  els.centerGroup.style.top = `${state.centerY * scale}px`;
+
+  els.hebrewText.textContent = state.hebrewText;
+  els.hebrewText.style.fontSize = `${state.hebrewSize * scale}px`;
+  els.hebrewText.style.top = `${state.hebrewOffsetY * scale}px`;
+
+  els.dividerLine.style.width = `${state.dividerWidth * scale}px`;
+  els.dividerLine.style.marginTop = `${state.hebrewGap * scale}px`;
+  els.dividerLine.style.marginBottom = `${state.academyGap * scale}px`;
+
+  els.academyText.textContent = state.academyText;
+  els.academyText.style.fontSize = `${state.academySize * scale}px`;
+
+  els.seasonText.textContent = state.seasonText;
+  els.seasonText.style.top = `${state.seasonY * scale}px`;
+  els.seasonText.style.fontSize = `${state.seasonSize * scale}px`;
+
+  els.shadeOpacityVal.textContent = `${Math.round(state.shadeOpacity*100)}%`;
+
+  els.patternOpacityVal.textContent = `${Math.round(state.patternOpacity*100)}%`;
+  els.patternSizeVal.textContent = `${Math.round(state.patternSize)}px`;
+  els.patternGapYVal.textContent = `${Math.round(state.patternGapY)}px`;
+  els.patternGapXVal.textContent = `${Math.round(state.patternGapX)}px`;
+
+  els.logoYVal.textContent = Math.round(state.logoY);
+  els.logoSizeVal.textContent = `${Math.round(state.logoSize)}px`;
+
+  els.waveStrokeVal.textContent = `${Math.round(state.waveStroke)}px`;
+  els.waveYVal.textContent = Math.round(state.waveY);
+  els.waveXOffsetVal.textContent = Math.round(state.waveXOffset);
+  els.waveInnerRadiusVal.textContent = `${Math.round(state.waveInnerRadius)}px`;
+  els.waveOuterRadiusVal.textContent = `${Math.round(Math.max(state.waveOuterRadius, state.waveInnerRadius + 14))}px`;
+
+  els.developingSizeVal.textContent = `${Math.round(state.developingSize)}px`;
+  els.developingGapVal.textContent = `${Math.round(state.developingGap)}px`;
+
+  els.overlayXVal.textContent = Math.round(state.overlayX);
+  els.overlayYVal.textContent = Math.round(state.overlayY);
+  els.overlaySizeVal.textContent = `${Math.round(state.overlaySize)}px`;
+  els.overlayOpacityVal.textContent = `${Math.round(state.overlayOpacity*100)}%`;
+
+  els.hebrewOffsetYVal.textContent = Math.round(state.hebrewOffsetY);
+  els.hebrewSizeVal.textContent = `${Math.round(state.hebrewSize)}px`;
+  els.academySizeVal.textContent = `${Math.round(state.academySize)}px`;
+  els.centerYVal.textContent = Math.round(state.centerY);
+  els.hebrewGapVal.textContent = `${Math.round(state.hebrewGap)}px`;
+  els.dividerWidthVal.textContent = `${Math.round(state.dividerWidth)}px`;
+  els.academyGapVal.textContent = `${Math.round(state.academyGap)}px`;
+
+  els.seasonYVal.textContent = Math.round(state.seasonY);
+  els.seasonSizeVal.textContent = `${Math.round(state.seasonSize)}px`;
+}
+
+async function handleUpload(file,key){
+  if(!file) return;
+  state[key] = await readFileAsDataURL(file);
+  render();
+}
+
+els.bgTextureUpload.addEventListener("change",e=>handleUpload(e.target.files?.[0],"bgTextureSrc"));
+els.clubLogoUpload.addEventListener("change",e=>handleUpload(e.target.files?.[0],"clubLogoSrc"));
+els.overlayUpload.addEventListener("change",e=>handleUpload(e.target.files?.[0],"overlaySrc"));
+
+const rangeMap = {
+  shadeOpacity:["shadeOpacity",v=>+v/100],
+  patternOpacity:["patternOpacity",v=>+v/100],
+  patternSize:["patternSize",v=>+v],
+  patternGapY:["patternGapY",v=>+v],
+  patternGapX:["patternGapX",v=>+v],
+
+  logoY:["logoY",v=>+v],
+  logoSize:["logoSize",v=>+v],
+
+  waveStroke:["waveStroke",v=>+v],
+  waveY:["waveY",v=>+v],
+  waveXOffset:["waveXOffset",v=>+v],
+  waveInnerRadius:["waveInnerRadius",v=>+v],
+  waveOuterRadius:["waveOuterRadius",v=>+v],
+
+  developingSize:["developingSize",v=>+v],
+  developingGap:["developingGap",v=>+v],
+
+  overlayX:["overlayX",v=>+v],
+  overlayY:["overlayY",v=>+v],
+  overlaySize:["overlaySize",v=>+v],
+  overlayOpacity:["overlayOpacity",v=>+v/100],
+
+  hebrewOffsetY:["hebrewOffsetY",v=>+v],
+  hebrewSize:["hebrewSize",v=>+v],
+  academySize:["academySize",v=>+v],
+  centerY:["centerY",v=>+v],
+  hebrewGap:["hebrewGap",v=>+v],
+  dividerWidth:["dividerWidth",v=>+v],
+  academyGap:["academyGap",v=>+v],
+
+  seasonY:["seasonY",v=>+v],
+  seasonSize:["seasonSize",v=>+v]
+};
+
+Object.entries(rangeMap).forEach(([id,[key,parse]])=>{
+  els[id].addEventListener("input",e=>{
+    state[key] = parse(e.target.value);
+    render();
+  });
+});
+
+els.bgColor.addEventListener("input",e=>{ state.bgColor = e.target.value; render(); });
+els.developingInput.addEventListener("input",e=>{ state.developingText = e.target.value; render(); });
+els.hebrewInput.addEventListener("input",e=>{ state.hebrewText = e.target.value; render(); });
+els.academyInput.addEventListener("input",e=>{ state.academyText = e.target.value; render(); });
+els.seasonInput.addEventListener("input",e=>{ state.seasonText = e.target.value; render(); });
+
+els.resetAll.addEventListener("click",()=>{
+  Object.assign(state, JSON.parse(JSON.stringify(defaultState)));
+
+  els.bgTextureUpload.value = "";
+  els.clubLogoUpload.value = "";
+  els.overlayUpload.value = "";
+
+  els.bgColor.value = state.bgColor;
+  els.shadeOpacity.value = 72;
+
+  els.patternOpacity.value = 12;
+  els.patternSize.value = 104;
+  els.patternGapY.value = 130;
+  els.patternGapX.value = 470;
+
+  els.logoY.value = 8;
+  els.logoSize.value = 138;
+
+  els.waveStroke.value = 3;
+  els.waveY.value = 101;
+  els.waveXOffset.value = 0;
+  els.waveInnerRadius.value = 59;
+  els.waveOuterRadius.value = 73;
+
+  els.developingInput.value = state.developingText;
+  els.developingSize.value = 30;
+  els.developingGap.value = 6;
+
+  els.overlayX.value = 540;
+  els.overlayY.value = 410;
+  els.overlaySize.value = 220;
+  els.overlayOpacity.value = 100;
+
+  els.hebrewInput.value = state.hebrewText;
+  els.hebrewOffsetY.value = 0;
+  els.hebrewSize.value = 75;
+
+  els.academyInput.value = state.academyText;
+  els.academySize.value = 74;
+  els.centerY.value = 620;
+  els.hebrewGap.value = 16;
+  els.dividerWidth.value = 420;
+  els.academyGap.value = 16;
+
+  els.seasonInput.value = state.seasonText;
+  els.seasonY.value = 980;
+  els.seasonSize.value = 42;
+
+  render();
+});
+
+async function exportPNG(){
+  await document.fonts.ready;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = 1080;
+  canvas.height = 1080;
+  const ctx = canvas.getContext("2d");
+
+  ctx.fillStyle = state.bgColor;
+  ctx.fillRect(0,0,1080,1080);
+
+  if(state.bgTextureSrc){
+    try{
+      const bg = await loadImage(state.bgTextureSrc);
+      ctx.drawImage(bg,0,0,1080,1080);
+    }catch(e){}
+  }
+
+  ctx.save();
+  ctx.globalAlpha = state.patternOpacity;
+  ctx.fillStyle = "#ffffff";
+  ctx.font = `700 ${state.patternSize}px Oxanium, Arial, sans-serif`;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "middle";
+  ctx.translate(540,540);
+  ctx.rotate(-22 * Math.PI / 180);
+
+  const phrase = "OFFICIAL STATEMENT";
+  const phraseW = ctx.measureText(phrase).width;
+
+  for(let y = -1800; y <= 1800; y += state.patternGapY){
+    const rowOffset = (Math.round(y / state.patternGapY) % 2 === 0) ? 0 : state.patternGapX / 2;
+    for(let x = -2200; x <= 2200; x += phraseW + state.patternGapX){
+      ctx.fillText(phrase, x + rowOffset, y);
+    }
+  }
+  ctx.restore();
+
+  ctx.save();
+  ctx.fillStyle = `rgba(0,0,0,${state.shadeOpacity*0.18})`;
+  ctx.fillRect(0,0,1080,1080);
+  ctx.restore();
+
+  if(state.overlaySrc){
+    try{
+      const overlay = await loadImage(state.overlaySrc);
+      const fit = fitContain(overlay.width, overlay.height, state.overlaySize, state.overlaySize);
+      ctx.save();
+      ctx.globalAlpha = state.overlayOpacity;
+      ctx.drawImage(overlay, state.overlayX - fit.w/2, state.overlayY - fit.h/2, fit.w, fit.h);
+      ctx.restore();
+    }catch(e){}
+  }
+
+  ctx.save();
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = state.waveStroke;
+  ctx.lineCap = "round";
+
+  function drawArcCanvas(cx, cy, r, startDeg, endDeg){
+    const start = (startDeg - 90) * Math.PI / 180;
+    const end = (endDeg - 90) * Math.PI / 180;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, start, end, false);
+    ctx.stroke();
+  }
+
+  const inner = state.waveInnerRadius;
+  const outer = Math.max(state.waveOuterRadius, state.waveInnerRadius + 14);
+  const cx = 540 + state.waveXOffset;
+  const cy = state.waveY;
+
+  drawArcCanvas(cx, cy, inner, 45, 135);
+  drawArcCanvas(cx, cy, outer, 45, 135);
+  drawArcCanvas(cx, cy, inner, 225, 315);
+  drawArcCanvas(cx, cy, outer, 225, 315);
+
+  ctx.restore();
+
+  if(state.clubLogoSrc){
+    try{
+      const logo = await loadImage(state.clubLogoSrc);
+      const fit = fitContain(logo.width, logo.height, state.logoSize, state.logoSize);
+      ctx.drawImage(logo, 540 - fit.w/2, state.logoY, fit.w, fit.h);
+    }catch(e){}
+  }
+
+  const developingTop = state.logoY + state.logoSize + state.developingGap;
+  ctx.fillStyle = "#fff";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "top";
+  ctx.font = `${state.developingSize}px Oxanium, Rubik, Arial, sans-serif`;
+  ctx.fillText(state.developingText, 540, developingTop);
+
+  const hebrewY = state.centerY + state.hebrewOffsetY;
+  ctx.direction = "rtl";
+  ctx.font = `600 ${state.hebrewSize}px Fredoka, Rubik, Arial, sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "top";
+  ctx.fillText(state.hebrewText, 540, hebrewY);
+
+  const dividerY = hebrewY + state.hebrewSize + state.hebrewGap;
+  ctx.fillRect(540 - state.dividerWidth/2, dividerY, state.dividerWidth, 3);
+
+  const academyY = dividerY + 3 + state.academyGap;
+  ctx.direction = "ltr";
+  ctx.font = `600 ${state.academySize}px Oswald, Arial, sans-serif`;
+  ctx.fillText(state.academyText, 540, academyY);
+
+  ctx.font = `600 ${state.seasonSize}px Oxanium, Rubik, Arial, sans-serif`;
+  ctx.fillText(state.seasonText, 540, state.seasonY);
+
+  const link = document.createElement("a");
+  link.download = "academy-statement-pro-v5.png";
+  link.href = canvas.toDataURL("image/png");
+  link.click();
+}
+
+els.exportBtn.addEventListener("click", exportPNG);
+window.addEventListener("resize", render);
+render();
+</script>
+</body>
+</html>

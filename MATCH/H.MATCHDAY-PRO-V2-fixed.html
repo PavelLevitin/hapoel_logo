@@ -1,0 +1,1690 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>H.MATCHDAY PRO</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:#111;
+      color:#fff;
+      font-family:Rubik,Arial,sans-serif;
+      display:flex;
+      gap:20px;
+      padding:20px;
+      align-items:flex-start;
+      direction:ltr;
+    }
+    .controls{
+      width:420px;
+      background:#1b1b1b;
+      padding:18px;
+      border-radius:16px;
+      direction:rtl;
+      max-height:calc(100vh - 40px);
+      overflow:auto;
+    }
+    .controls h2{margin:0 0 12px;font-size:22px}
+    .controls h3{
+      margin:18px 0 8px;
+      font-size:15px;
+      border-bottom:1px solid rgba(255,255,255,.12);
+      padding-bottom:6px;
+    }
+    .field{margin-bottom:10px}
+    .field label{display:block;font-size:13px;margin-bottom:6px;color:#d7d7d7}
+    .field input[type="text"],
+    .field input[type="color"],
+    .field input[type="file"],
+    .field input[type="range"]{width:100%}
+    .field input[type="text"],
+    .field input[type="color"]{
+      background:#11161d;
+      color:#fff;
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:10px;
+      padding:10px 12px;
+      font-family:inherit;
+    }
+    .field input[type="color"]{
+      height:44px;
+      padding:4px;
+    }
+    .range-wrap{
+      display:grid;
+      grid-template-columns:1fr 74px;
+      gap:8px;
+      align-items:center;
+    }
+    .val{
+      background:#11161d;
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:10px;
+      padding:7px 4px;
+      text-align:center;
+      font-size:12px;
+    }
+    button{
+      width:100%;
+      margin-top:10px;
+      border:0;
+      border-radius:10px;
+      padding:12px;
+      background:#AF1419;
+      color:#fff;
+      font-family:inherit;
+      font-size:15px;
+      cursor:pointer;
+    }
+    .btn-secondary{background:#2b313b}
+
+    .preview-wrap{flex:1;display:flex;justify-content:center}
+    .preview-box{background:#1b1b1b;padding:16px;border-radius:16px}
+    .preview-title{text-align:center;color:#cfcfcf;font-size:13px;margin-bottom:10px;direction:rtl}
+    .stage{
+      width:700px;
+      max-width:calc(100vw - 530px);
+      aspect-ratio:1/1;
+      position:relative;
+      background:#BB0E16;
+      overflow:hidden;
+      touch-action:none;
+      user-select:none;
+    }
+
+    #texture, #playerOutline, #fade, #player, #mainLogo, #homeLogo, #awayLogo{
+      position:absolute;
+      object-fit:contain;
+      pointer-events:none;
+      max-width:none;
+    }
+
+    #texture{
+      inset:0;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:none;
+      z-index:0;
+    }
+
+    #matchdayWrap{
+      position:absolute;
+      left:120px;
+      top:545px;
+      transform:translate(-50%,-50%) rotate(90deg);
+      width:max-content;
+      pointer-events:none;
+      user-select:none;
+      z-index:1;
+    }
+
+    #matchdayText{
+      font-size:185px;
+      font-weight:800;
+      line-height:1;
+      letter-spacing:.01em;
+      font-family:"Iosevka Charon Mono","Courier New",monospace;
+      white-space:nowrap;
+      text-transform:uppercase;
+      text-align:center;
+      color:#fff;
+    }
+
+    #playerOutline,#fade,#player{
+      left:50%;
+      top:50%;
+      transform-origin:center center;
+    }
+    #playerOutline{z-index:2;display:none}
+    #fade{
+      opacity:.34;
+      filter:blur(22px);
+      z-index:3;
+      mix-blend-mode:screen;
+      display:none;
+    }
+    #player{
+      z-index:4;
+      display:none;
+      pointer-events:auto;
+      cursor:grab;
+    }
+    #player.dragging{cursor:grabbing}
+
+    #mainLogo{
+      left:50%;
+      top:22px;
+      width:118px;
+      height:118px;
+      transform:translateX(-50%);
+      object-fit:contain;
+      display:none;
+      z-index:8;
+    }
+
+    #weare{
+      position:absolute;
+      left:50%;
+      top:132px;
+      transform:translateX(-50%);
+      text-align:center;
+      font-family:"Courier New", monospace;
+      font-size:14px;
+      line-height:1;
+      z-index:9;
+      width:max-content;
+      white-space:nowrap;
+      pointer-events:none;
+      color:#fff;
+    }
+
+    #rightPanel{
+      position:absolute;
+      right:62px;
+      top:170px;
+      width:250px;
+      z-index:10;
+      pointer-events:none;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:12px;
+    }
+
+    .logosRow{
+      display:flex;
+      gap:14px;
+      align-items:center;
+      justify-content:center;
+      width:100%;
+      direction:ltr;
+    }
+
+    .logoBox{
+      width:92px;
+      height:92px;
+      border:1px solid rgba(255,255,255,.95);
+      border-radius:18px;
+      background:rgba(255,255,255,0);
+      position:relative;
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.25);
+    }
+
+    #homeLogo,#awayLogo{
+      width:72px;
+      height:72px;
+      left:50%;
+      top:50%;
+      transform:translate(-50%,-50%) scale(1);
+      display:none;
+    }
+
+    #homeLogoWrap,#awayLogoWrap{
+      position:relative;
+      width:92px;
+      height:92px;
+    }
+
+    #plateWrap{
+      position:relative;
+      width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      margin-top:4px;
+      height:86px;
+      overflow:visible;
+    }
+
+    #tiltPlate{
+      position:absolute;
+      left:50%;
+      top:50%;
+      transform:translate(-50%,-50%) rotate(0deg);
+      width:260px;
+      height:74px;
+      z-index:0;
+      pointer-events:none;
+      border-radius:18px;
+
+      background:
+        linear-gradient(
+          180deg,
+          rgba(255,255,255,1) 0%,
+          rgba(252,252,252,1) 52%,
+          rgba(240,240,240,1) 100%
+        );
+
+      box-shadow:
+        0 10px 18px rgba(0,0,0,.14),
+        inset 0 1px 0 rgba(255,255,255,.8),
+        inset 0 -1px 0 rgba(0,0,0,.05);
+    }
+
+    #tiltPlate::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:inherit;
+      background:
+        linear-gradient(
+          90deg,
+          rgba(255,255,255,.00) 0%,
+          rgba(255,255,255,.24) 20%,
+          rgba(255,255,255,.00) 42%,
+          rgba(0,0,0,.03) 100%
+        );
+      mix-blend-mode:screen;
+      pointer-events:none;
+    }
+
+    #tiltPlate::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:inherit;
+      background-image:
+        radial-gradient(rgba(0,0,0,.045) 0.6px, transparent 0.8px);
+      background-size:6px 6px;
+      opacity:.18;
+      pointer-events:none;
+    }
+
+    #teamsRow{
+      position:relative;
+      z-index:1;
+      width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:14px;
+      padding-right:0;
+      padding-left:0;
+      direction:rtl;
+      text-align:right;
+      white-space:nowrap;
+      color:#AF1419;
+      font-weight:900;
+      line-height:1;
+      text-shadow:none;
+    }
+
+    #homeTeamText,#awayTeamText,#vsText{
+      display:inline-block;
+      line-height:1;
+    }
+
+    #vsText{
+      font-weight:900;
+      transform:translateY(-1px);
+    }
+
+    #matchInfo{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      width:100%;
+      gap:9px;
+      margin-top:2px;
+      direction:rtl;
+    }
+
+    .infoLine{
+      width:100%;
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      gap:6px;
+    }
+
+    .infoContent{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      width:100%;
+      direction:rtl;
+      color:#fff;
+      font-weight:900;
+      text-shadow:none;
+    }
+
+    .iconSvg{
+      width:22px;
+      height:22px;
+      flex:0 0 auto;
+      display:block;
+      order:0;
+    }
+
+    .infoText{
+      text-align:right;
+      white-space:nowrap;
+      line-height:1;
+      direction:rtl;
+      unicode-bidi:plaintext;
+      order:1;
+      width:100%;
+      display:block;
+    }
+
+    .divider{
+      height:1px;
+      background:rgba(255,255,255,.95);
+      align-self:flex-end;
+      width:100px;
+    }
+
+    #freeText{
+      position:absolute;
+      left:1028px;
+      top:965px;
+      transform:translate(-50%,-50%) rotate(0deg);
+      transform-origin:center center;
+      z-index:12;
+      color:#fff;
+      font-weight:900;
+      font-size:42px;
+      line-height:1;
+      white-space:nowrap;
+      direction:rtl;
+      user-select:none;
+      cursor:grab;
+      pointer-events:auto;
+      text-shadow:0 2px 10px rgba(0,0,0,.18);
+    }
+    #freeText.dragging{cursor:grabbing}
+
+    .small-note{
+      margin-top:10px;
+      font-size:12px;
+      color:#bdbdbd;
+      direction:rtl;
+      text-align:center;
+    }
+
+    @media (max-width:1100px){
+      body{flex-direction:column}
+      .controls{width:100%;max-height:none}
+      .stage{max-width:100%}
+    }
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <h2>מחולל MATCHDAY PRO</h2>
+
+    <h3>רקע</h3>
+    <div class="field">
+      <label>טעינת טקסטורה</label>
+      <input type="file" id="textureUpload" accept="image/*">
+    </div>
+    <button type="button" class="btn-secondary" id="resetTexture">איפוס טקסטורה</button>
+
+    <h3>לוגו עליון</h3>
+    <div class="field">
+      <label>טעינת לוגו עליון</label>
+      <input type="file" id="mainLogoUpload" accept="image/*">
+    </div>
+    <div class="field">
+      <label>מיקום לוגו למעלה/למטה</label>
+      <div class="range-wrap">
+        <input type="range" id="mainLogoY" min="0" max="300" value="22">
+        <div class="val" id="mainLogoYVal">22</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>גודל לוגו</label>
+      <div class="range-wrap">
+        <input type="range" id="mainLogoSize" min="40" max="300" value="118">
+        <div class="val" id="mainLogoSizeVal">118px</div>
+      </div>
+    </div>
+    <button type="button" class="btn-secondary" id="resetMainLogo">איפוס לוגו עליון</button>
+
+    <h3>WE ARE HBS</h3>
+    <div class="field">
+      <label>מיקום למעלה/למטה</label>
+      <div class="range-wrap">
+        <input type="range" id="weareY" min="0" max="400" value="132">
+        <div class="val" id="weareYVal">132</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>גודל WE ARE HBS</label>
+      <div class="range-wrap">
+        <input type="range" id="weareSize" min="8" max="80" value="14">
+        <div class="val" id="weareSizeVal">14px</div>
+      </div>
+    </div>
+
+    <h3>שחקן</h3>
+    <div class="field">
+      <label>טעינת תמונת שחקן</label>
+      <input type="file" id="playerUpload" accept="image/*">
+    </div>
+    <div class="field">
+      <label>מיקום אופקי שחקן</label>
+      <div class="range-wrap">
+        <input type="range" id="playerX" min="-500" max="500" value="17">
+        <div class="val" id="playerXVal">17</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>מיקום אנכי שחקן</label>
+      <div class="range-wrap">
+        <input type="range" id="playerY" min="-500" max="500" value="87">
+        <div class="val" id="playerYVal">87</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>גודל שחקן</label>
+      <div class="range-wrap">
+        <input type="range" id="playerScale" min="10" max="250" value="111">
+        <div class="val" id="playerScaleVal">111%</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>שקיפות שחקן</label>
+      <div class="range-wrap">
+        <input type="range" id="playerOpacity" min="0" max="100" value="100">
+        <div class="val" id="playerOpacityVal">100%</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>עובי OUTLINE לבן</label>
+      <div class="range-wrap">
+        <input type="range" id="playerOutlineWidth" min="0" max="10" value="2">
+        <div class="val" id="playerOutlineWidthVal">2px</div>
+      </div>
+    </div>
+
+    <h3>פייד סביב השחקן</h3>
+    <div class="field">
+      <label>שקיפות פייד</label>
+      <div class="range-wrap">
+        <input type="range" id="fadeOpacity" min="0" max="100" value="34">
+        <div class="val" id="fadeOpacityVal">34%</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>טשטוש פייד</label>
+      <div class="range-wrap">
+        <input type="range" id="fadeBlur" min="0" max="120" value="22">
+        <div class="val" id="fadeBlurVal">22</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>גודל פייד</label>
+      <div class="range-wrap">
+        <input type="range" id="fadeScale" min="100" max="200" value="115">
+        <div class="val" id="fadeScaleVal">115%</div>
+      </div>
+    </div>
+
+    <h3>MATCHDAY</h3>
+    <div class="field">
+      <label>מיקום אופקי MATCHDAY</label>
+      <div class="range-wrap">
+        <input type="range" id="matchdayX" min="0" max="1080" value="120">
+        <div class="val" id="matchdayXVal">120</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>מיקום אנכי MATCHDAY</label>
+      <div class="range-wrap">
+        <input type="range" id="matchdayY" min="0" max="1080" value="545">
+        <div class="val" id="matchdayYVal">545</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>גודל MATCHDAY</label>
+      <div class="range-wrap">
+        <input type="range" id="matchdaySize" min="40" max="300" value="185">
+        <div class="val" id="matchdaySizeVal">185px</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>זווית MATCHDAY</label>
+      <div class="range-wrap">
+        <input type="range" id="matchdayRotate" min="-180" max="180" value="90">
+        <div class="val" id="matchdayRotateVal">90°</div>
+      </div>
+    </div>
+
+    <h3>לוגו קבוצה ביתית</h3>
+    <div class="field">
+      <label>טעינת לוגו ביתית</label>
+      <input type="file" id="homeLogoUpload" accept="image/*">
+    </div>
+    <div class="field">
+      <label>זום לוגו ביתית</label>
+      <div class="range-wrap">
+        <input type="range" id="homeLogoScale" min="40" max="180" value="100">
+        <div class="val" id="homeLogoScaleVal">100%</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>שם קבוצה ביתית</label>
+      <input type="text" id="homeTeamInput" value="HBS">
+    </div>
+
+    <h3>לוגו קבוצה אורחת</h3>
+    <div class="field">
+      <label>טעינת לוגו אורחת</label>
+      <input type="file" id="awayLogoUpload" accept="image/*">
+    </div>
+    <div class="field">
+      <label>זום לוגו אורחת</label>
+      <div class="range-wrap">
+        <input type="range" id="awayLogoScale" min="40" max="180" value="100">
+        <div class="val" id="awayLogoScaleVal">100%</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>שם קבוצה אורחת</label>
+      <input type="text" id="awayTeamInput" value="MTA">
+    </div>
+
+    <h3>מלבן שמות קבוצות</h3>
+    <div class="field">
+      <label>רוחב מלבן</label>
+      <div class="range-wrap">
+        <input type="range" id="brushWidth" min="120" max="420" value="260">
+        <div class="val" id="brushWidthVal">260px</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>גובה מלבן</label>
+      <div class="range-wrap">
+        <input type="range" id="brushHeight" min="30" max="140" value="74">
+        <div class="val" id="brushHeightVal">74px</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>גודל טקסט שמות קבוצות</label>
+      <div class="range-wrap">
+        <input type="range" id="teamsFontSize" min="12" max="46" value="23">
+        <div class="val" id="teamsFontSizeVal">23px</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>זווית מלבן שמות</label>
+      <div class="range-wrap">
+        <input type="range" id="plateRotate" min="-25" max="25" value="0">
+        <div class="val" id="plateRotateVal">0°</div>
+      </div>
+    </div>
+
+    <h3>פאנל צד ימין</h3>
+    <div class="field">
+      <label>מיקום אופקי פאנל</label>
+      <div class="range-wrap">
+        <input type="range" id="panelX" min="0" max="350" value="62">
+        <div class="val" id="panelXVal">62</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>מיקום אנכי פאנל</label>
+      <div class="range-wrap">
+        <input type="range" id="panelY" min="0" max="600" value="170">
+        <div class="val" id="panelYVal">170</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>רוחב פאנל</label>
+      <div class="range-wrap">
+        <input type="range" id="panelWidth" min="160" max="420" value="250">
+        <div class="val" id="panelWidthVal">250px</div>
+      </div>
+    </div>
+
+    <h3>פרטי משחק</h3>
+    <div class="field">
+      <label>שם מגרש / אצטדיון</label>
+      <input type="text" id="stadiumTextInput" value="וסרמיל 4">
+    </div>
+    <div class="field">
+      <label>תאריך משחק</label>
+      <input type="text" id="matchDateInput" value="15.03.2026">
+    </div>
+    <div class="field">
+      <label>שעת משחק</label>
+      <input type="text" id="matchTimeInput" value="20:30">
+    </div>
+    <div class="field">
+      <label>גודל טקסט אצטדיון</label>
+      <div class="range-wrap">
+        <input type="range" id="stadiumSize" min="16" max="70" value="28">
+        <div class="val" id="stadiumSizeVal">28px</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>גודל טקסט תאריך</label>
+      <div class="range-wrap">
+        <input type="range" id="matchDateSize" min="16" max="70" value="31">
+        <div class="val" id="matchDateSizeVal">31px</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>גודל טקסט שעה</label>
+      <div class="range-wrap">
+        <input type="range" id="matchTimeSize" min="16" max="70" value="27">
+        <div class="val" id="matchTimeSizeVal">27px</div>
+      </div>
+    </div>
+
+    <h3>מלל חופשי</h3>
+    <div class="field">
+      <label>טקסט חופשי</label>
+      <input type="text" id="freeTextInput" value="הכיתוב שלך כאן">
+    </div>
+    <div class="field">
+      <label>מיקום אופקי</label>
+      <div class="range-wrap">
+        <input type="range" id="freeTextX" min="0" max="1080" value="1028">
+        <div class="val" id="freeTextXVal">1028</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>מיקום אנכי</label>
+      <div class="range-wrap">
+        <input type="range" id="freeTextY" min="0" max="1080" value="965">
+        <div class="val" id="freeTextYVal">965</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>גודל טקסט</label>
+      <div class="range-wrap">
+        <input type="range" id="freeTextSize" min="12" max="120" value="42">
+        <div class="val" id="freeTextSizeVal">42px</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>זווית טקסט</label>
+      <div class="range-wrap">
+        <input type="range" id="freeTextRotate" min="-180" max="180" value="0">
+        <div class="val" id="freeTextRotateVal">0°</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>צבע טקסט</label>
+      <input type="color" id="freeTextColor" value="#ffffff">
+    </div>
+
+    <button type="button" id="resetPlayer" class="btn-secondary">איפוס שחקן</button>
+    <button type="button" id="exportBtn">ייצוא PNG 1080x1080</button>
+  </div>
+
+  <div class="preview-wrap">
+    <div class="preview-box">
+      <div class="preview-title">תצוגה מקדימה</div>
+      <div class="stage" id="stage">
+        <img id="texture" alt="">
+
+        <div id="matchdayWrap">
+          <div id="matchdayText">MATCHDAY</div>
+        </div>
+
+        <img id="playerOutline" alt="">
+        <img id="fade" alt="">
+        <img id="player" alt="">
+
+        <img id="mainLogo" alt="">
+        <div id="weare">WE ARE HBS</div>
+
+        <div id="rightPanel">
+          <div class="logosRow">
+            <div id="homeLogoWrap" class="logoBox">
+              <img id="homeLogo" alt="">
+            </div>
+            <div id="awayLogoWrap" class="logoBox">
+              <img id="awayLogo" alt="">
+            </div>
+          </div>
+
+          <div id="plateWrap">
+            <div id="tiltPlate"></div>
+
+            <div id="teamsRow">
+              <span id="awayTeamText">MTA</span>
+              <span id="vsText">X</span>
+              <span id="homeTeamText">HBS</span>
+            </div>
+          </div>
+
+          <div id="matchInfo">
+            <div class="infoLine">
+              <div class="infoContent">
+                <svg class="iconSvg" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fill="#fff" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/>
+                </svg>
+                <span class="infoText" id="stadiumText">וסרמיל 4</span>
+              </div>
+              <div class="divider" id="divider1"></div>
+            </div>
+
+            <div class="infoLine">
+              <div class="infoContent">
+                <svg class="iconSvg" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fill="#fff" d="M7 2h2v2h6V2h2v2h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h3V2zm13 8H4v10h16V10z"/>
+                </svg>
+                <span class="infoText" id="matchDateText">15.03.2026</span>
+              </div>
+              <div class="divider" id="divider2"></div>
+            </div>
+
+            <div class="infoLine">
+              <div class="infoContent">
+                <svg class="iconSvg" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fill="#fff" d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 10.41 3.29 3.3-1.41 1.41L11 13V7h2z"/>
+                </svg>
+                <span class="infoText" id="matchTimeText">20:30</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="freeText">הכיתוב שלך כאן</div>
+      </div>
+      <div class="small-note">אפשר לגרור את השחקן ואת המלל החופשי עם העכבר.</div>
+    </div>
+  </div>
+
+  <script>
+    const STAGE_SIZE = 1080;
+
+    const state = {
+      textureSrc: "",
+      mainLogoSrc: "",
+      mainLogoY: 22,
+      mainLogoSize: 118,
+
+      weareY: 132,
+      weareSize: 14,
+
+      playerSrc: "",
+      playerNaturalW: 0,
+      playerNaturalH: 0,
+      playerX: 17,
+      playerY: 87,
+      playerScale: 1.11,
+      playerOpacity: 1,
+      playerOutlineWidth: 2,
+
+      fadeOpacity: 0.34,
+      fadeBlur: 22,
+      fadeScale: 1.15,
+
+      matchdayX: 120,
+      matchdayY: 545,
+      matchdaySize: 185,
+      matchdayRotate: 90,
+
+      homeLogoSrc: "",
+      awayLogoSrc: "",
+      homeLogoScale: 1,
+      awayLogoScale: 1,
+
+      homeTeam: "HBS",
+      awayTeam: "MTA",
+      brushWidth: 260,
+      brushHeight: 74,
+      teamsFontSize: 23,
+      plateRotate: 0,
+
+      panelX: 62,
+      panelY: 170,
+      panelWidth: 250,
+
+      stadiumText: "וסרמיל 4",
+      matchDateText: "15.03.2026",
+      matchTimeText: "20:30",
+      stadiumSize: 28,
+      matchDateSize: 31,
+      matchTimeSize: 27,
+
+      freeText: "הכיתוב שלך כאן",
+      freeTextX: 1028,
+      freeTextY: 965,
+      freeTextSize: 42,
+      freeTextRotate: 0,
+      freeTextColor: "#ffffff"
+    };
+
+    const ids = [
+      "stage","texture","playerOutline","fade","player","mainLogo","weare","matchdayWrap","matchdayText",
+      "rightPanel","homeLogo","awayLogo","stadiumText","matchDateText","matchTimeText",
+      "homeTeamText","awayTeamText","vsText","tiltPlate","teamsRow","divider1","divider2","freeText",
+
+      "textureUpload","mainLogoUpload","playerUpload","homeLogoUpload","awayLogoUpload",
+      "mainLogoY","mainLogoSize","weareY","weareSize","playerX","playerY","playerScale","playerOpacity","playerOutlineWidth",
+      "fadeOpacity","fadeBlur","fadeScale","matchdayX","matchdayY","matchdaySize","matchdayRotate",
+      "homeLogoScale","awayLogoScale","homeTeamInput","awayTeamInput",
+      "brushWidth","brushHeight","teamsFontSize","plateRotate",
+      "panelX","panelY","panelWidth",
+      "stadiumTextInput","matchDateInput","matchTimeInput","stadiumSize","matchDateSize","matchTimeSize",
+      "freeTextInput","freeTextX","freeTextY","freeTextSize","freeTextRotate","freeTextColor",
+
+      "mainLogoYVal","mainLogoSizeVal","weareYVal","weareSizeVal","playerXVal","playerYVal","playerScaleVal","playerOpacityVal","playerOutlineWidthVal",
+      "fadeOpacityVal","fadeBlurVal","fadeScaleVal","matchdayXVal","matchdayYVal","matchdaySizeVal","matchdayRotateVal",
+      "homeLogoScaleVal","awayLogoScaleVal","brushWidthVal","brushHeightVal","teamsFontSizeVal","plateRotateVal",
+      "panelXVal","panelYVal","panelWidthVal","stadiumSizeVal","matchDateSizeVal","matchTimeSizeVal",
+      "freeTextXVal","freeTextYVal","freeTextSizeVal","freeTextRotateVal",
+
+      "resetTexture","resetMainLogo","resetPlayer","exportBtn"
+    ];
+
+    const els = Object.fromEntries(ids.map(id => [id, document.getElementById(id)]));
+
+    function readFileAsDataURL(file){
+      return new Promise((resolve,reject)=>{
+        const reader = new FileReader();
+        reader.onload = ()=>resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function loadImage(src){
+      return new Promise((resolve,reject)=>{
+        const img = new Image();
+        img.onload = ()=>resolve(img);
+        img.onerror = reject;
+        img.src = src;
+      });
+    }
+
+    function fitContain(imgW,imgH,boxW,boxH){
+      const r = Math.min(boxW / imgW, boxH / imgH);
+      const w = imgW * r;
+      const h = imgH * r;
+      return { w, h, x:(boxW-w)/2, y:(boxH-h)/2 };
+    }
+
+    function getOutlineFilter(px){
+      if(px <= 0) return "none";
+      const shadows = [];
+      for(let x=-px; x<=px; x++){
+        for(let y=-px; y<=px; y++){
+          if(x===0 && y===0) continue;
+          if(Math.hypot(x,y) <= px + 0.25){
+            shadows.push(`drop-shadow(${x}px ${y}px 0 #fff)`);
+          }
+        }
+      }
+      return shadows.join(" ");
+    }
+
+    function syncDividers(scale){
+      const width1 = els.stadiumText.getBoundingClientRect().width;
+      const width2 = els.matchDateText.getBoundingClientRect().width;
+      const width3 = els.matchTimeText.getBoundingClientRect().width;
+      const maxWidth = Math.max(width1, width2, width3);
+      const iconW = 22 * scale;
+      const gap = 10 * scale;
+      const dividerW = Math.max(40, maxWidth + iconW + gap + 6 * scale);
+      els.divider1.style.width = `${dividerW}px`;
+      els.divider2.style.width = `${dividerW}px`;
+    }
+
+    function render(){
+      const rect = els.stage.getBoundingClientRect();
+      const scale = rect.width / STAGE_SIZE;
+
+      if(state.textureSrc){
+        els.texture.src = state.textureSrc;
+        els.texture.style.display = "block";
+      }else{
+        els.texture.style.display = "none";
+      }
+
+      if(state.mainLogoSrc){
+        els.mainLogo.src = state.mainLogoSrc;
+        els.mainLogo.style.display = "block";
+      }else{
+        els.mainLogo.style.display = "none";
+      }
+
+      if(state.homeLogoSrc){
+        els.homeLogo.src = state.homeLogoSrc;
+        els.homeLogo.style.display = "block";
+      }else{
+        els.homeLogo.style.display = "none";
+      }
+
+      if(state.awayLogoSrc){
+        els.awayLogo.src = state.awayLogoSrc;
+        els.awayLogo.style.display = "block";
+      }else{
+        els.awayLogo.style.display = "none";
+      }
+
+      if(state.playerSrc){
+        els.player.src = state.playerSrc;
+        els.fade.src = state.playerSrc;
+        els.playerOutline.src = state.playerSrc;
+        els.player.style.display = "block";
+        els.fade.style.display = "block";
+        els.playerOutline.style.display = state.playerOutlineWidth > 0 ? "block" : "none";
+      }else{
+        els.player.style.display = "none";
+        els.fade.style.display = "none";
+        els.playerOutline.style.display = "none";
+      }
+
+      els.mainLogo.style.top = `${state.mainLogoY * scale}px`;
+      els.mainLogo.style.width = `${state.mainLogoSize * scale}px`;
+      els.mainLogo.style.height = `${state.mainLogoSize * scale}px`;
+
+      els.weare.style.top = `${state.weareY * scale}px`;
+      els.weare.style.fontSize = `${state.weareSize * scale}px`;
+
+      const px = state.playerX * scale;
+      const py = state.playerY * scale;
+
+      const BASE_PLAYER_SIZE = 940;
+      const naturalW = state.playerNaturalW || BASE_PLAYER_SIZE;
+      const naturalH = state.playerNaturalH || BASE_PLAYER_SIZE;
+      const baseRatio = Math.min(BASE_PLAYER_SIZE / naturalW, BASE_PLAYER_SIZE / naturalH);
+      const baseW = naturalW * baseRatio * scale;
+      const baseH = naturalH * baseRatio * scale;
+      const playerTransform = `translate(calc(-50% + ${px}px), calc(-50% + ${py}px)) scale(${state.playerScale})`;
+
+      [els.playerOutline, els.fade, els.player].forEach(el=>{
+        el.style.left = "50%";
+        el.style.top = "50%";
+        el.style.width = `${baseW}px`;
+        el.style.height = `${baseH}px`;
+      });
+
+      els.playerOutline.style.transform = playerTransform;
+      els.playerOutline.style.filter = getOutlineFilter(Math.round(state.playerOutlineWidth * scale));
+      els.playerOutline.style.opacity = 1;
+
+      els.player.style.transform = playerTransform;
+      els.player.style.opacity = state.playerOpacity;
+
+      els.fade.style.transform = `translate(calc(-50% + ${px}px), calc(-50% + ${py}px)) scale(${state.playerScale * state.fadeScale})`;
+      els.fade.style.opacity = state.fadeOpacity;
+      els.fade.style.filter = `blur(${state.fadeBlur * scale}px)`;
+
+      els.matchdayWrap.style.left = `${state.matchdayX * scale}px`;
+      els.matchdayWrap.style.top = `${state.matchdayY * scale}px`;
+      els.matchdayWrap.style.transform = `translate(-50%,-50%) rotate(${state.matchdayRotate}deg)`;
+      els.matchdayText.style.fontSize = `${state.matchdaySize * scale}px`;
+
+      els.rightPanel.style.right = `${state.panelX * scale}px`;
+      els.rightPanel.style.top = `${state.panelY * scale}px`;
+      els.rightPanel.style.width = `${state.panelWidth * scale}px`;
+
+      const logoBoxSize = 92 * scale;
+      const innerLogoSize = 72 * scale;
+      document.querySelectorAll(".logoBox").forEach(box=>{
+        box.style.width = `${logoBoxSize}px`;
+        box.style.height = `${logoBoxSize}px`;
+        box.style.borderWidth = `${Math.max(1, 1 * scale)}px`;
+        box.style.borderRadius = `${18 * scale}px`;
+      });
+      document.querySelectorAll("#homeLogoWrap,#awayLogoWrap").forEach(wrap=>{
+        wrap.style.width = `${logoBoxSize}px`;
+        wrap.style.height = `${logoBoxSize}px`;
+      });
+
+      els.homeLogo.style.width = `${innerLogoSize}px`;
+      els.homeLogo.style.height = `${innerLogoSize}px`;
+      els.homeLogo.style.transform = `translate(-50%,-50%) scale(${state.homeLogoScale})`;
+
+      els.awayLogo.style.width = `${innerLogoSize}px`;
+      els.awayLogo.style.height = `${innerLogoSize}px`;
+      els.awayLogo.style.transform = `translate(-50%,-50%) scale(${state.awayLogoScale})`;
+
+      els.homeTeamText.textContent = state.homeTeam;
+      els.awayTeamText.textContent = state.awayTeam;
+      els.vsText.textContent = "X";
+
+      els.tiltPlate.style.width = `${state.brushWidth * scale}px`;
+      els.tiltPlate.style.height = `${state.brushHeight * scale}px`;
+      els.tiltPlate.style.transform = `translate(-50%,-50%) rotate(${state.plateRotate}deg)`;
+      els.teamsRow.style.fontSize = `${state.teamsFontSize * scale}px`;
+
+      els.stadiumText.textContent = state.stadiumText;
+      els.matchDateText.textContent = state.matchDateText;
+      els.matchTimeText.textContent = state.matchTimeText;
+
+      els.stadiumText.style.fontSize = `${state.stadiumSize * scale}px`;
+      els.matchDateText.style.fontSize = `${state.matchDateSize * scale}px`;
+      els.matchTimeText.style.fontSize = `${state.matchTimeSize * scale}px`;
+
+      const iconSize = 22 * scale;
+      document.querySelectorAll(".iconSvg").forEach(icon=>{
+        icon.style.width = `${iconSize}px`;
+        icon.style.height = `${iconSize}px`;
+      });
+
+      els.freeText.textContent = state.freeText;
+      els.freeText.style.left = `${state.freeTextX * scale}px`;
+      els.freeText.style.top = `${state.freeTextY * scale}px`;
+      els.freeText.style.fontSize = `${state.freeTextSize * scale}px`;
+      els.freeText.style.color = state.freeTextColor;
+      els.freeText.style.transform = `translate(-50%,-50%) rotate(${state.freeTextRotate}deg)`;
+
+      els.mainLogoYVal.textContent = Math.round(state.mainLogoY);
+      els.mainLogoSizeVal.textContent = Math.round(state.mainLogoSize) + "px";
+      els.weareYVal.textContent = Math.round(state.weareY);
+      els.weareSizeVal.textContent = Math.round(state.weareSize) + "px";
+
+      els.playerXVal.textContent = Math.round(state.playerX);
+      els.playerYVal.textContent = Math.round(state.playerY);
+      els.playerScaleVal.textContent = Math.round(state.playerScale * 100) + "%";
+      els.playerOpacityVal.textContent = Math.round(state.playerOpacity * 100) + "%";
+      els.playerOutlineWidthVal.textContent = Math.round(state.playerOutlineWidth) + "px";
+
+      els.fadeOpacityVal.textContent = Math.round(state.fadeOpacity * 100) + "%";
+      els.fadeBlurVal.textContent = Math.round(state.fadeBlur);
+      els.fadeScaleVal.textContent = Math.round(state.fadeScale * 100) + "%";
+
+      els.matchdayXVal.textContent = Math.round(state.matchdayX);
+      els.matchdayYVal.textContent = Math.round(state.matchdayY);
+      els.matchdaySizeVal.textContent = Math.round(state.matchdaySize) + "px";
+      els.matchdayRotateVal.textContent = Math.round(state.matchdayRotate) + "°";
+
+      els.homeLogoScaleVal.textContent = Math.round(state.homeLogoScale * 100) + "%";
+      els.awayLogoScaleVal.textContent = Math.round(state.awayLogoScale * 100) + "%";
+
+      els.brushWidthVal.textContent = Math.round(state.brushWidth) + "px";
+      els.brushHeightVal.textContent = Math.round(state.brushHeight) + "px";
+      els.teamsFontSizeVal.textContent = Math.round(state.teamsFontSize) + "px";
+      els.plateRotateVal.textContent = Math.round(state.plateRotate) + "°";
+
+      els.panelXVal.textContent = Math.round(state.panelX);
+      els.panelYVal.textContent = Math.round(state.panelY);
+      els.panelWidthVal.textContent = Math.round(state.panelWidth) + "px";
+
+      els.stadiumSizeVal.textContent = Math.round(state.stadiumSize) + "px";
+      els.matchDateSizeVal.textContent = Math.round(state.matchDateSize) + "px";
+      els.matchTimeSizeVal.textContent = Math.round(state.matchTimeSize) + "px";
+
+      els.freeTextXVal.textContent = Math.round(state.freeTextX);
+      els.freeTextYVal.textContent = Math.round(state.freeTextY);
+      els.freeTextSizeVal.textContent = Math.round(state.freeTextSize) + "px";
+      els.freeTextRotateVal.textContent = Math.round(state.freeTextRotate) + "°";
+
+      requestAnimationFrame(()=>syncDividers(scale));
+    }
+
+    async function handleImageUpload(file, target){
+      if(!file) return;
+      state[target] = await readFileAsDataURL(file);
+      render();
+    }
+
+    els.textureUpload.addEventListener("change", e=>handleImageUpload(e.target.files?.[0], "textureSrc"));
+    els.mainLogoUpload.addEventListener("change", e=>handleImageUpload(e.target.files?.[0], "mainLogoSrc"));
+    els.homeLogoUpload.addEventListener("change", e=>handleImageUpload(e.target.files?.[0], "homeLogoSrc"));
+    els.awayLogoUpload.addEventListener("change", e=>handleImageUpload(e.target.files?.[0], "awayLogoSrc"));
+
+    els.playerUpload.addEventListener("change", async e=>{
+      const file = e.target.files?.[0];
+      if(!file) return;
+      state.playerSrc = await readFileAsDataURL(file);
+      try{
+        const img = await loadImage(state.playerSrc);
+        state.playerNaturalW = img.width;
+        state.playerNaturalH = img.height;
+      }catch(err){
+        state.playerNaturalW = 0;
+        state.playerNaturalH = 0;
+      }
+      render();
+    });
+
+    const rangeMap = {
+      mainLogoY:["mainLogoY",v=>+v],
+      mainLogoSize:["mainLogoSize",v=>+v],
+      weareY:["weareY",v=>+v],
+      weareSize:["weareSize",v=>+v],
+
+      playerX:["playerX",v=>+v],
+      playerY:["playerY",v=>+v],
+      playerScale:["playerScale",v=>+v/100],
+      playerOpacity:["playerOpacity",v=>+v/100],
+      playerOutlineWidth:["playerOutlineWidth",v=>+v],
+
+      fadeOpacity:["fadeOpacity",v=>+v/100],
+      fadeBlur:["fadeBlur",v=>+v],
+      fadeScale:["fadeScale",v=>+v/100],
+
+      matchdayX:["matchdayX",v=>+v],
+      matchdayY:["matchdayY",v=>+v],
+      matchdaySize:["matchdaySize",v=>+v],
+      matchdayRotate:["matchdayRotate",v=>+v],
+
+      homeLogoScale:["homeLogoScale",v=>+v/100],
+      awayLogoScale:["awayLogoScale",v=>+v/100],
+
+      brushWidth:["brushWidth",v=>+v],
+      brushHeight:["brushHeight",v=>+v],
+      teamsFontSize:["teamsFontSize",v=>+v],
+      plateRotate:["plateRotate",v=>+v],
+
+      panelX:["panelX",v=>+v],
+      panelY:["panelY",v=>+v],
+      panelWidth:["panelWidth",v=>+v],
+
+      stadiumSize:["stadiumSize",v=>+v],
+      matchDateSize:["matchDateSize",v=>+v],
+      matchTimeSize:["matchTimeSize",v=>+v],
+
+      freeTextX:["freeTextX",v=>+v],
+      freeTextY:["freeTextY",v=>+v],
+      freeTextSize:["freeTextSize",v=>+v],
+      freeTextRotate:["freeTextRotate",v=>+v]
+    };
+
+    Object.entries(rangeMap).forEach(([id,[key,parse]])=>{
+      els[id].addEventListener("input", e=>{
+        state[key] = parse(e.target.value);
+        render();
+      });
+    });
+
+    els.homeTeamInput.addEventListener("input", e=>{ state.homeTeam = e.target.value; render(); });
+    els.awayTeamInput.addEventListener("input", e=>{ state.awayTeam = e.target.value; render(); });
+
+    els.stadiumTextInput.addEventListener("input", e=>{ state.stadiumText = e.target.value; render(); });
+    els.matchDateInput.addEventListener("input", e=>{ state.matchDateText = e.target.value; render(); });
+    els.matchTimeInput.addEventListener("input", e=>{ state.matchTimeText = e.target.value; render(); });
+
+    els.freeTextInput.addEventListener("input", e=>{ state.freeText = e.target.value; render(); });
+    els.freeTextColor.addEventListener("input", e=>{ state.freeTextColor = e.target.value; render(); });
+
+    els.resetTexture.addEventListener("click", ()=>{
+      state.textureSrc = "";
+      els.textureUpload.value = "";
+      render();
+    });
+
+    els.resetMainLogo.addEventListener("click", ()=>{
+      state.mainLogoSrc = "";
+      state.mainLogoY = 22;
+      state.mainLogoSize = 118;
+      els.mainLogoUpload.value = "";
+      els.mainLogoY.value = 22;
+      els.mainLogoSize.value = 118;
+      render();
+    });
+
+    els.resetPlayer.addEventListener("click", ()=>{
+      state.playerSrc = "";
+      state.playerNaturalW = 0;
+      state.playerNaturalH = 0;
+      state.playerX = 17;
+      state.playerY = 87;
+      state.playerScale = 1.11;
+      state.playerOpacity = 1;
+      state.playerOutlineWidth = 2;
+      state.fadeOpacity = 0.34;
+      state.fadeBlur = 22;
+      state.fadeScale = 1.15;
+
+      els.playerUpload.value = "";
+      els.playerX.value = 17;
+      els.playerY.value = 87;
+      els.playerScale.value = 111;
+      els.playerOpacity.value = 100;
+      els.playerOutlineWidth.value = 2;
+      els.fadeOpacity.value = 34;
+      els.fadeBlur.value = 22;
+      els.fadeScale.value = 115;
+      render();
+    });
+
+    let draggingPlayer = false, draggingText = false;
+    let dragStartX = 0, dragStartY = 0, startX = 0, startY = 0;
+
+    els.stage.addEventListener("pointerdown", e=>{
+      if(e.target === els.freeText){
+        draggingText = true;
+        els.freeText.classList.add("dragging");
+        els.stage.setPointerCapture(e.pointerId);
+        dragStartX = e.clientX;
+        dragStartY = e.clientY;
+        startX = state.freeTextX;
+        startY = state.freeTextY;
+        return;
+      }
+
+      if(e.target === els.player && state.playerSrc){
+        draggingPlayer = true;
+        els.player.classList.add("dragging");
+        els.stage.setPointerCapture(e.pointerId);
+        dragStartX = e.clientX;
+        dragStartY = e.clientY;
+        startX = state.playerX;
+        startY = state.playerY;
+      }
+    });
+
+    els.stage.addEventListener("pointermove", e=>{
+      const rect = els.stage.getBoundingClientRect();
+      const ratio = STAGE_SIZE / rect.width;
+
+      if(draggingPlayer){
+        state.playerX = Math.round(startX + (e.clientX - dragStartX) * ratio);
+        state.playerY = Math.round(startY + (e.clientY - dragStartY) * ratio);
+        els.playerX.value = state.playerX;
+        els.playerY.value = state.playerY;
+        render();
+      }
+
+      if(draggingText){
+        state.freeTextX = Math.round(startX + (e.clientX - dragStartX) * ratio);
+        state.freeTextY = Math.round(startY + (e.clientY - dragStartY) * ratio);
+        els.freeTextX.value = state.freeTextX;
+        els.freeTextY.value = state.freeTextY;
+        render();
+      }
+    });
+
+    function stopDrag(){
+      draggingPlayer = false;
+      draggingText = false;
+      els.freeText.classList.remove("dragging");
+      els.player.classList.remove("dragging");
+    }
+
+    els.stage.addEventListener("pointerup", stopDrag);
+    els.stage.addEventListener("pointercancel", stopDrag);
+    els.stage.addEventListener("pointerleave", stopDrag);
+
+    function drawImageOutline(ctx, img, x, y, w, h, outlinePx){
+      if(outlinePx <= 0) return;
+      for(let ox = -outlinePx; ox <= outlinePx; ox++){
+        for(let oy = -outlinePx; oy <= outlinePx; oy++){
+          if(ox === 0 && oy === 0) continue;
+          if(Math.hypot(ox, oy) <= outlinePx + 0.25){
+            ctx.drawImage(img, x + ox, y + oy, w, h);
+          }
+        }
+      }
+    }
+
+    function measureTextWidth(ctx, text, font){
+      ctx.save();
+      ctx.font = font;
+      const w = ctx.measureText(text || "").width;
+      ctx.restore();
+      return w;
+    }
+
+    function drawRoundedRect(ctx, x, y, w, h, r){
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+    }
+
+    function drawInfoIcon(ctx, type, x, y, size){
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.fillStyle = "#fff";
+      ctx.strokeStyle = "#fff";
+      ctx.lineWidth = 1.8;
+
+      if(type === "location"){
+        ctx.beginPath();
+        ctx.moveTo(0, -size*0.42);
+        ctx.bezierCurveTo(size*0.28, -size*0.42, size*0.5, -size*0.2, size*0.5, size*0.06);
+        ctx.bezierCurveTo(size*0.5, size*0.32, 0, size*0.6, 0, size*0.6);
+        ctx.bezierCurveTo(0, size*0.6, -size*0.5, size*0.32, -size*0.5, size*0.06);
+        ctx.bezierCurveTo(-size*0.5, -size*0.2, -size*0.28, -size*0.42, 0, -size*0.42);
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(0, -size*0.08, size*0.13, 0, Math.PI*2);
+        ctx.fillStyle = "#BB0E16";
+        ctx.fill();
+      } else if(type === "calendar"){
+        const w = size*0.95, h = size*0.82, r = size*0.08;
+        ctx.beginPath();
+        ctx.moveTo(-w/2 + r, -h/2);
+        ctx.arcTo(w/2, -h/2, w/2, h/2, r);
+        ctx.arcTo(w/2, h/2, -w/2, h/2, r);
+        ctx.arcTo(-w/2, h/2, -w/2, -h/2, r);
+        ctx.arcTo(-w/2, -h/2, w/2, -h/2, r);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(-w/2, -h*0.12);
+        ctx.lineTo(w/2, -h*0.12);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(-w*0.22, -h/2 - size*0.04);
+        ctx.lineTo(-w*0.22, -h/2 + size*0.12);
+        ctx.moveTo(w*0.22, -h/2 - size*0.04);
+        ctx.lineTo(w*0.22, -h/2 + size*0.12);
+        ctx.stroke();
+      } else if(type === "clock"){
+        ctx.beginPath();
+        ctx.arc(0, 0, size*0.45, 0, Math.PI*2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, -size*0.22);
+        ctx.moveTo(0, 0);
+        ctx.lineTo(size*0.16, size*0.1);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function drawTiltPlate(ctx, cx, cy, w, h, angleDeg){
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(angleDeg * Math.PI / 180);
+
+      const x = -w / 2;
+      const y = -h / 2;
+      const r = Math.min(18, h / 2 - 2);
+
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+
+      const grad = ctx.createLinearGradient(0, y, 0, y + h);
+      grad.addColorStop(0, "#ffffff");
+      grad.addColorStop(0.52, "#fcfcfc");
+      grad.addColorStop(1, "#efefef");
+      ctx.fillStyle = grad;
+      ctx.shadowColor = "rgba(0,0,0,0.14)";
+      ctx.shadowBlur = 18;
+      ctx.shadowOffsetY = 6;
+      ctx.fill();
+
+      ctx.save();
+      ctx.clip();
+
+      const gloss = ctx.createLinearGradient(x, 0, x + w, 0);
+      gloss.addColorStop(0, "rgba(255,255,255,0)");
+      gloss.addColorStop(0.22, "rgba(255,255,255,0.22)");
+      gloss.addColorStop(0.42, "rgba(255,255,255,0)");
+      gloss.addColorStop(1, "rgba(0,0,0,0.03)");
+      ctx.shadowColor = "transparent";
+      ctx.fillStyle = gloss;
+      ctx.fillRect(x, y, w, h);
+
+      for(let iy = 0; iy < h; iy += 6){
+        for(let ix = 0; ix < w; ix += 6){
+          ctx.fillStyle = "rgba(0,0,0,0.03)";
+          ctx.fillRect(x + ix, y + iy, 1, 1);
+        }
+      }
+      ctx.restore();
+
+      ctx.shadowColor = "transparent";
+      ctx.strokeStyle = "rgba(255,255,255,0.75)";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    async function exportPNG(){
+      await document.fonts.ready;
+
+      const canvas = document.createElement("canvas");
+      canvas.width = 1080;
+      canvas.height = 1080;
+      const ctx = canvas.getContext("2d");
+
+      ctx.fillStyle = "#BB0E16";
+      ctx.fillRect(0,0,1080,1080);
+
+      if(state.textureSrc){
+        try{
+          const tex = await loadImage(state.textureSrc);
+          ctx.drawImage(tex,0,0,1080,1080);
+        }catch(e){}
+      }
+
+      ctx.save();
+      ctx.translate(state.matchdayX, state.matchdayY);
+      ctx.rotate(state.matchdayRotate * Math.PI / 180);
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.font = `800 ${state.matchdaySize}px "Iosevka Charon Mono","Courier New",monospace`;
+      ctx.fillStyle = "#fff";
+      ctx.fillText("MATCHDAY", 0, 0);
+      ctx.restore();
+
+      if(state.playerSrc){
+        try{
+          const player = await loadImage(state.playerSrc);
+          const cx = 540 + state.playerX;
+          const cy = 540 + state.playerY;
+          const BASE_PLAYER_SIZE = 940;
+          const ratio = Math.min(BASE_PLAYER_SIZE / player.width, BASE_PLAYER_SIZE / player.height);
+          const pw = player.width * ratio * state.playerScale;
+          const ph = player.height * ratio * state.playerScale;
+          const px = cx - pw/2;
+          const py = cy - ph/2;
+
+          if(state.playerOutlineWidth > 0){
+            const off = document.createElement("canvas");
+            off.width = 1080;
+            off.height = 1080;
+            const octx = off.getContext("2d");
+            octx.save();
+            octx.filter = "brightness(0) saturate(0) invert(1)";
+            drawImageOutline(octx, player, px, py, pw, ph, state.playerOutlineWidth);
+            octx.restore();
+            ctx.drawImage(off,0,0);
+          }
+
+          ctx.save();
+          ctx.globalAlpha = state.fadeOpacity;
+          ctx.filter = `blur(${state.fadeBlur}px)`;
+          const fw = player.width * ratio * state.playerScale * state.fadeScale;
+          const fh = player.height * ratio * state.playerScale * state.fadeScale;
+          ctx.drawImage(player, cx - fw/2, cy - fh/2, fw, fh);
+          ctx.restore();
+
+          ctx.save();
+          ctx.globalAlpha = state.playerOpacity;
+          ctx.drawImage(player, px, py, pw, ph);
+          ctx.restore();
+        }catch(e){}
+      }
+
+      if(state.mainLogoSrc){
+        try{
+          const logo = await loadImage(state.mainLogoSrc);
+          const fit = fitContain(logo.width, logo.height, state.mainLogoSize, state.mainLogoSize);
+          ctx.drawImage(
+            logo,
+            540 - state.mainLogoSize/2 + fit.x,
+            state.mainLogoY + fit.y,
+            fit.w,
+            fit.h
+          );
+        }catch(e){}
+      }
+
+      ctx.save();
+      ctx.fillStyle = "#fff";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+      ctx.font = `${state.weareSize}px "Courier New", monospace`;
+      ctx.fillText("WE ARE HBS", 540, state.weareY);
+      ctx.restore();
+
+      const panelRight = 1080 - state.panelX;
+      const panelTop = state.panelY;
+      const panelWidth = state.panelWidth;
+      const boxSize = 92;
+      const gap = 14;
+      const rowWidth = boxSize * 2 + gap;
+      const rowStartX = panelRight - panelWidth/2 - rowWidth/2;
+      const boxY = panelTop;
+
+      const homeBoxX = rowStartX;
+      const awayBoxX = rowStartX + boxSize + gap;
+
+      ctx.save();
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = "rgba(255,255,255,0.95)";
+      drawRoundedRect(ctx, homeBoxX, boxY, boxSize, boxSize, 18);
+      ctx.stroke();
+      drawRoundedRect(ctx, awayBoxX, boxY, boxSize, boxSize, 18);
+      ctx.stroke();
+      ctx.restore();
+
+      if(state.homeLogoSrc){
+        try{
+          const logo = await loadImage(state.homeLogoSrc);
+          const innerSize = 72;
+          const fit = fitContain(logo.width, logo.height, innerSize, innerSize);
+          const drawW = fit.w * state.homeLogoScale;
+          const drawH = fit.h * state.homeLogoScale;
+          const cx = homeBoxX + boxSize/2;
+          const cy = boxY + boxSize/2;
+          ctx.drawImage(logo, cx - drawW/2, cy - drawH/2, drawW, drawH);
+        }catch(e){}
+      }
+
+      if(state.awayLogoSrc){
+        try{
+          const logo = await loadImage(state.awayLogoSrc);
+          const innerSize = 72;
+          const fit = fitContain(logo.width, logo.height, innerSize, innerSize);
+          const drawW = fit.w * state.awayLogoScale;
+          const drawH = fit.h * state.awayLogoScale;
+          const cx = awayBoxX + boxSize/2;
+          const cy = boxY + boxSize/2;
+          ctx.drawImage(logo, cx - drawW/2, cy - drawH/2, drawW, drawH);
+        }catch(e){}
+      }
+
+      const brushTop = boxY + boxSize + 8;
+      const plateCenterX = panelRight - panelWidth / 2;
+      const plateCenterY = brushTop + state.brushHeight / 2;
+
+      drawTiltPlate(ctx, plateCenterX, plateCenterY, state.brushWidth, state.brushHeight, state.plateRotate);
+
+      ctx.save();
+      ctx.fillStyle = "#AF1419";
+      ctx.textBaseline = "middle";
+      ctx.textAlign = "center";
+      ctx.font = `900 ${state.teamsFontSize}px Rubik, Arial, sans-serif`;
+
+      const teamY = plateCenterY + 1;
+      const homeW = measureTextWidth(ctx, state.homeTeam, ctx.font);
+      const awayW = measureTextWidth(ctx, state.awayTeam, ctx.font);
+      const vsW = measureTextWidth(ctx, "X", ctx.font);
+      const teamGap = 14;
+      const totalW = homeW + teamGap + vsW + teamGap + awayW;
+      let cursorX = plateCenterX - totalW / 2;
+      ctx.textAlign = "left";
+      ctx.fillText(state.homeTeam, cursorX, teamY);
+      cursorX += homeW + teamGap;
+      ctx.fillText("X", cursorX, teamY);
+      cursorX += vsW + teamGap;
+      ctx.fillText(state.awayTeam, cursorX, teamY);
+
+      ctx.restore();
+
+      const infoTop = brushTop + state.brushHeight + 14;
+      const iconSize = 22;
+      const gapTextIcon = 10;
+
+      const font1 = `900 ${state.stadiumSize}px Rubik, Arial, sans-serif`;
+      const font2 = `900 ${state.matchDateSize}px Rubik, Arial, sans-serif`;
+      const font3 = `900 ${state.matchTimeSize}px Rubik, Arial, sans-serif`;
+
+      const textW1 = measureTextWidth(ctx, state.stadiumText, font1);
+      const textW2 = measureTextWidth(ctx, state.matchDateText, font2);
+      const textW3 = measureTextWidth(ctx, state.matchTimeText, font3);
+      const longestText = Math.max(textW1, textW2, textW3);
+      const dividerW = longestText + iconSize + gapTextIcon + 8;
+
+      function drawInfoRow(text, font, y, iconType, drawDivider){
+        const lineRightX = panelRight - 10;
+        const iconCenterX = lineRightX - iconSize/2;
+        const textRightX = iconCenterX - iconSize/2 - gapTextIcon;
+
+        drawInfoIcon(ctx, iconType, iconCenterX, y, iconSize);
+
+        ctx.save();
+        ctx.font = font;
+        ctx.fillStyle = "#fff";
+        ctx.textAlign = "right";
+        ctx.textBaseline = "middle";
+        ctx.fillText(text, textRightX, y);
+        ctx.restore();
+
+        if(drawDivider){
+          ctx.save();
+          ctx.strokeStyle = "rgba(255,255,255,0.95)";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(lineRightX - dividerW, y + 28);
+          ctx.lineTo(lineRightX, y + 28);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
+      drawInfoRow(state.stadiumText, font1, infoTop + 18, "location", true);
+      drawInfoRow(state.matchDateText, font2, infoTop + 72, "calendar", true);
+      drawInfoRow(state.matchTimeText, font3, infoTop + 122, "clock", false);
+
+      if(state.freeText.trim()){
+        ctx.save();
+        ctx.translate(state.freeTextX, state.freeTextY);
+        ctx.rotate(state.freeTextRotate * Math.PI / 180);
+        ctx.fillStyle = state.freeTextColor;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.font = `900 ${state.freeTextSize}px Rubik, Arial, sans-serif`;
+        ctx.shadowColor = "rgba(0,0,0,0.18)";
+        ctx.shadowBlur = 10;
+        ctx.fillText(state.freeText, 0, 0);
+        ctx.restore();
+      }
+
+      const link = document.createElement("a");
+      link.download = "h.matchday-pro-1080x1080.html-export.png";
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    }
+
+    els.exportBtn.addEventListener("click", exportPNG);
+    window.addEventListener("resize", render);
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,866 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>H.BIRTH</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700;900&display=swap" rel="stylesheet">
+
+  <style>
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:#111;
+      color:#fff;
+      font-family:Rubik,Arial,sans-serif;
+      display:flex;
+      gap:20px;
+      padding:20px;
+      align-items:flex-start;
+      direction:ltr;
+    }
+    .controls{
+      width:380px;
+      background:#1b1b1b;
+      padding:18px;
+      border-radius:16px;
+      direction:rtl;
+      max-height:calc(100vh - 40px);
+      overflow:auto;
+    }
+    .controls h2{margin:0 0 12px;font-size:22px}
+    .controls h3{
+      margin:18px 0 8px;
+      font-size:15px;
+      border-bottom:1px solid rgba(255,255,255,.12);
+      padding-bottom:6px;
+    }
+    .field{margin-bottom:10px}
+    .field label{display:block;font-size:13px;margin-bottom:6px;color:#d7d7d7}
+    .field input[type="text"],
+    .field input[type="date"],
+    .field input[type="file"],
+    .field input[type="range"]{width:100%}
+    .field input[type="text"],
+    .field input[type="date"]{
+      background:#11161d;
+      color:#fff;
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:10px;
+      padding:10px 12px;
+      font-family:inherit;
+    }
+    .range-wrap{display:grid;grid-template-columns:1fr 62px;gap:8px;align-items:center}
+    .val{
+      background:#11161d;
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:10px;
+      padding:7px 4px;
+      text-align:center;
+      font-size:12px;
+    }
+    button{
+      width:100%;margin-top:10px;border:0;border-radius:10px;padding:12px;
+      background:#AF1419;color:#fff;font-family:inherit;font-size:15px;cursor:pointer;
+    }
+    .btn-secondary{background:#2b313b}
+    .preview-wrap{flex:1;display:flex;justify-content:center}
+    .preview-box{background:#1b1b1b;padding:16px;border-radius:16px}
+    .preview-title{text-align:center;color:#cfcfcf;font-size:13px;margin-bottom:10px;direction:rtl}
+    .stage{
+      width:700px;max-width:calc(100vw - 490px);aspect-ratio:1/1;position:relative;
+      background:#AF1419;overflow:hidden;
+    }
+    #texture, #playerOutline, #fade, #player, #logo{
+      position:absolute;object-fit:contain;pointer-events:none;max-width:none;
+    }
+    #texture{inset:0;width:100%;height:100%;object-fit:cover;display:none;z-index:0}
+    #birthdayWrap{
+      position:absolute;left:50%;top:290px;transform:translate(-50%,-50%);
+      width:max-content;pointer-events:none;user-select:none;z-index:1;
+    }
+    #birthdayFill,#birthdayOutline,#birthdayOutline2{
+      position:absolute;left:50%;top:0;transform:translateX(-50%);
+      font-size:125px;font-weight:900;line-height:.88;letter-spacing:.02em;
+      font-family:Rubik,Arial,sans-serif;white-space:nowrap;text-transform:uppercase;text-align:center;
+    }
+    #birthdayFill{color:#fff;z-index:1}
+    #birthdayOutline,
+    #birthdayOutline2{
+      color:transparent;
+      -webkit-text-stroke:2px rgba(255,255,255,.34);
+      text-stroke:2px rgba(255,255,255,.34);
+      z-index:0;
+    }
+    #birthdayOutline{top:113px;}
+    #birthdayOutline2{top:226px;}
+    #playerOutline,#fade,#player{left:50%;top:50%;transform-origin:center center}
+    #playerOutline{z-index:2;display:none}
+    #fade{opacity:.45;filter:blur(20px);z-index:3;mix-blend-mode:screen;display:none}
+    #player{z-index:4;display:none}
+    #logo{
+      left:50%;top:0px;width:144px;height:144px;transform:translateX(-50%);
+      object-fit:contain;display:none;z-index:6;
+    }
+    #customBadge{
+      position:absolute;left:213px;top:800px;transform:translate(-50%,-50%) scale(1);
+      width:110px;height:110px;display:none;align-items:center;justify-content:center;
+      z-index:7;pointer-events:none;
+      filter:drop-shadow(0 8px 18px rgba(0,0,0,.25));
+      object-fit:contain;max-width:none;
+    }
+    #birthDateText{
+      position:absolute;left:884px;top:947px;transform:translate(-50%,-50%) scale(1);
+      z-index:7;pointer-events:none;white-space:nowrap;
+      color:#fff;font-weight:700;font-size:34px;text-align:center;
+      text-shadow:0 2px 12px rgba(0,0,0,.20);
+    }
+    #weare{
+      position:absolute;left:50%;top:122px;transform:translateX(-50%);
+      text-align:center;font-family:"Courier New", monospace;font-size:15px;line-height:1;color:#fff;
+      z-index:7;width:max-content;white-space:nowrap;pointer-events:none;
+    }
+    #number{
+      position:absolute;left:884px;top:773px;transform:translate(-50%,-50%) scale(1);
+      text-align:center;font-weight:900;font-size:120px;line-height:1;z-index:7;
+      white-space:nowrap;pointer-events:none;text-shadow:0 4px 16px rgba(0,0,0,.28);
+      color:#fff;
+    }
+    #monthBox{
+      position:absolute;left:889px;top:884px;transform:translate(-50%,-50%) scale(1);
+      z-index:7;pointer-events:none;white-space:nowrap;
+      padding:14px 26px;border:2px solid rgba(255,255,255,.95);border-radius:18px;
+      background:rgba(255,255,255,0);color:#fff;font-weight:800;font-size:42px;
+      letter-spacing:.08em;text-transform:uppercase;text-align:center;
+      text-shadow:0 2px 12px rgba(0,0,0,.20);
+    }
+    #name{
+      position:absolute;left:50%;top:1070px;transform:translate(-50%,-100%);
+      width:92%;text-align:center;font-size:80px;font-weight:900;line-height:.9;z-index:8;
+      white-space:nowrap;pointer-events:none;text-shadow:0 4px 16px rgba(0,0,0,.28);
+    }
+    .small-note{margin-top:10px;font-size:12px;color:#bdbdbd;direction:rtl;text-align:center}
+    @media (max-width:1100px){
+      body{flex-direction:column}
+      .controls{width:100%;max-height:none}
+      .stage{max-width:100%}
+    }
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <h2>מחולל HAPPY BIRTHDAY</h2>
+
+    <h3>רקע</h3>
+    <div class="field">
+      <label>טעינת טקסטורה</label>
+      <input type="file" id="textureUpload" accept="image/*">
+    </div>
+    <button type="button" class="btn-secondary" id="resetTexture">איפוס טקסטורה</button>
+
+    <h3>לוגו</h3>
+    <div class="field">
+      <label>טעינת לוגו</label>
+      <input type="file" id="logoUpload" accept="image/*">
+    </div>
+    <div class="field">
+      <label>מיקום לוגו למעלה/למטה</label>
+      <div class="range-wrap"><input type="range" id="logoY" min="0" max="300" value="0"><div class="val" id="logoYVal">0</div></div>
+    </div>
+    <div class="field">
+      <label>גודל לוגו</label>
+      <div class="range-wrap"><input type="range" id="logoSize" min="40" max="300" value="144"><div class="val" id="logoSizeVal">144px</div></div>
+    </div>
+    <button type="button" class="btn-secondary" id="resetLogo">איפוס לוגו</button>
+
+    <h3>WE ARE HBS</h3>
+    <div class="field">
+      <label>מיקום למעלה/למטה</label>
+      <div class="range-wrap"><input type="range" id="weareY" min="0" max="400" value="122"><div class="val" id="weareYVal">122</div></div>
+    </div>
+    <div class="field">
+      <label>גודל WE ARE HBS</label>
+      <div class="range-wrap"><input type="range" id="weareSize" min="8" max="80" value="15"><div class="val" id="weareSizeVal">15px</div></div>
+    </div>
+
+    <h3>שחקן</h3>
+    <div class="field">
+      <label>טעינת תמונת שחקן</label>
+      <input type="file" id="playerUpload" accept="image/*">
+    </div>
+    <div class="field">
+      <label>מיקום אופקי שחקן</label>
+      <div class="range-wrap"><input type="range" id="playerX" min="-500" max="500" value="0"><div class="val" id="playerXVal">0</div></div>
+    </div>
+    <div class="field">
+      <label>מיקום אנכי שחקן</label>
+      <div class="range-wrap"><input type="range" id="playerY" min="-500" max="500" value="0"><div class="val" id="playerYVal">0</div></div>
+    </div>
+    <div class="field">
+      <label>גודל שחקן</label>
+      <div class="range-wrap"><input type="range" id="playerScale" min="10" max="250" value="100"><div class="val" id="playerScaleVal">100%</div></div>
+    </div>
+    <div class="field">
+      <label>שקיפות שחקן</label>
+      <div class="range-wrap"><input type="range" id="playerOpacity" min="0" max="100" value="100"><div class="val" id="playerOpacityVal">100%</div></div>
+    </div>
+    <div class="field">
+      <label>עובי OUTLINE לבן</label>
+      <div class="range-wrap"><input type="range" id="playerOutlineWidth" min="0" max="10" value="2"><div class="val" id="playerOutlineWidthVal">2px</div></div>
+    </div>
+
+    <h3>פייד סביב השחקן</h3>
+    <div class="field">
+      <label>שקיפות פייד</label>
+      <div class="range-wrap"><input type="range" id="fadeOpacity" min="0" max="100" value="45"><div class="val" id="fadeOpacityVal">45%</div></div>
+    </div>
+    <div class="field">
+      <label>טשטוש פייד</label>
+      <div class="range-wrap"><input type="range" id="fadeBlur" min="0" max="120" value="20"><div class="val" id="fadeBlurVal">20</div></div>
+    </div>
+    <div class="field">
+      <label>גודל פייד</label>
+      <div class="range-wrap"><input type="range" id="fadeScale" min="100" max="200" value="112"><div class="val" id="fadeScaleVal">112%</div></div>
+    </div>
+
+    <h3>HAPPY BIRTHDAY</h3>
+    <div class="field">
+      <label>מיקום אופקי HAPPY BIRTHDAY</label>
+      <div class="range-wrap"><input type="range" id="birthdayX" min="-500" max="500" value="2"><div class="val" id="birthdayXVal">2</div></div>
+    </div>
+    <div class="field">
+      <label>מיקום אנכי HAPPY BIRTHDAY</label>
+      <div class="range-wrap"><input type="range" id="birthdayY" min="-500" max="500" value="-60"><div class="val" id="birthdayYVal">-60</div></div>
+    </div>
+    <div class="field">
+      <label>גודל HAPPY BIRTHDAY</label>
+      <div class="range-wrap"><input type="range" id="birthdaySize" min="40" max="300" value="111"><div class="val" id="birthdaySizeVal">111px</div></div>
+    </div>
+
+    <h3>שם שחקן</h3>
+    <div class="field"><label>טקסט</label><input type="text" id="playerName" value="PLAYER NAME"></div>
+    <div class="field">
+      <label>גודל שם שחקן</label>
+      <div class="range-wrap"><input type="range" id="nameSize" min="40" max="220" value="80"><div class="val" id="nameSizeVal">80px</div></div>
+    </div>
+    <div class="field">
+      <label>מיקום שם שחקן למעלה/למטה</label>
+      <div class="range-wrap"><input type="range" id="nameY" min="700" max="1070" value="1070"><div class="val" id="nameYVal">1070</div></div>
+    </div>
+
+    <h3>מספר שחקן</h3>
+    <div class="field"><label>מספר</label><input type="text" id="playerNumber" value="10"></div>
+    <div class="field">
+      <label>מיקום אופקי מספר</label>
+      <div class="range-wrap"><input type="range" id="numberX" min="0" max="1080" value="884"><div class="val" id="numberXVal">884</div></div>
+    </div>
+    <div class="field">
+      <label>מיקום אנכי מספר</label>
+      <div class="range-wrap"><input type="range" id="numberY" min="0" max="1080" value="773"><div class="val" id="numberYVal">773</div></div>
+    </div>
+    <div class="field">
+      <label>גודל מספר</label>
+      <div class="range-wrap"><input type="range" id="numberSize" min="30" max="260" value="144"><div class="val" id="numberSizeVal">144px</div></div>
+    </div>
+    <div class="field">
+      <label>זום מספר</label>
+      <div class="range-wrap"><input type="range" id="numberScale" min="50" max="250" value="100"><div class="val" id="numberScaleVal">100%</div></div>
+    </div>
+
+    <h3>תאריך לידה וחודש</h3>
+    <div class="field"><label>תאריך לידה (אפשר גם 15.03.2026)</label><input type="text" id="birthDate" value="15.03.2026"></div>
+    <div class="field">
+      <label>מיקום אופקי חודש</label>
+      <div class="range-wrap"><input type="range" id="monthX" min="0" max="1080" value="889"><div class="val" id="monthXVal">889</div></div>
+    </div>
+    <div class="field">
+      <label>מיקום אנכי חודש</label>
+      <div class="range-wrap"><input type="range" id="monthY" min="0" max="1080" value="884"><div class="val" id="monthYVal">884</div></div>
+    </div>
+    <div class="field">
+      <label>גודל טקסט חודש</label>
+      <div class="range-wrap"><input type="range" id="monthFontSize" min="18" max="120" value="42"><div class="val" id="monthFontSizeVal">42px</div></div>
+    </div>
+    <div class="field">
+      <label>זום תיבת חודש</label>
+      <div class="range-wrap"><input type="range" id="monthScale" min="50" max="250" value="100"><div class="val" id="monthScaleVal">100%</div></div>
+    </div>
+    <div class="field">
+      <label>מיקום אופקי תאריך לידה</label>
+      <div class="range-wrap"><input type="range" id="birthDateX" min="0" max="1080" value="884"><div class="val" id="birthDateXVal">884</div></div>
+    </div>
+    <div class="field">
+      <label>מיקום אנכי תאריך לידה</label>
+      <div class="range-wrap"><input type="range" id="birthDateY" min="0" max="1080" value="947"><div class="val" id="birthDateYVal">947</div></div>
+    </div>
+    <div class="field">
+      <label>גודל תאריך לידה</label>
+      <div class="range-wrap"><input type="range" id="birthDateSize" min="18" max="100" value="34"><div class="val" id="birthDateSizeVal">34px</div></div>
+    </div>
+    <div class="field">
+      <label>זום תאריך לידה</label>
+      <div class="range-wrap"><input type="range" id="birthDateScale" min="50" max="250" value="100"><div class="val" id="birthDateScaleVal">100%</div></div>
+    </div>
+
+    <h3>אייקון / שכבה מקובץ</h3>
+    <div class="field">
+      <label>טעינת קובץ אייקון / PNG</label>
+      <input type="file" id="customBadgeUpload" accept="image/*">
+    </div>
+    <div class="field">
+      <label>מיקום אופקי</label>
+      <div class="range-wrap"><input type="range" id="customBadgeX" min="0" max="1080" value="213"><div class="val" id="customBadgeXVal">213</div></div>
+    </div>
+    <div class="field">
+      <label>מיקום אנכי</label>
+      <div class="range-wrap"><input type="range" id="customBadgeY" min="0" max="1080" value="800"><div class="val" id="customBadgeYVal">800</div></div>
+    </div>
+    <div class="field">
+      <label>גודל</label>
+      <div class="range-wrap"><input type="range" id="customBadgeSize" min="30" max="320" value="166"><div class="val" id="customBadgeSizeVal">166px</div></div>
+    </div>
+    <button type="button" class="btn-secondary" id="resetCustomBadge">איפוס אייקון / שכבה</button>
+
+    <button type="button" id="resetPlayer" class="btn-secondary">איפוס שחקן</button>
+    <button type="button" id="exportBtn">ייצוא PNG 1080x1080</button>
+  </div>
+
+  <div class="preview-wrap">
+    <div class="preview-box">
+      <div class="preview-title">תצוגה מקדימה</div>
+      <div class="stage" id="stage">
+        <img id="texture" alt="">
+        <div id="birthdayWrap">
+          <div id="birthdayFill">HAPPY BIRTHDAY</div>
+          <div id="birthdayOutline">HAPPY BIRTHDAY</div>
+          <div id="birthdayOutline2">HAPPY BIRTHDAY</div>
+        </div>
+        <img id="playerOutline" alt="">
+        <img id="fade" alt="">
+        <img id="player" alt="">
+        <img id="logo" alt="">
+        <img id="customBadge" alt="">
+        <div id="weare">WE ARE HBS</div>
+        <div id="number">10</div>
+        <div id="monthBox">MARCH</div>
+        <div id="birthDateText">15.03.2026</div>
+        <div id="name">PLAYER NAME</div>
+      </div>
+      <div class="small-note">אפשר לגרור את השחקן עם העכבר בתוך התצוגה.</div>
+    </div>
+  </div>
+
+  <script>
+    const STAGE_SIZE = 1080;
+    const MONTHS = ["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
+
+    const state = {
+      textureSrc:"",
+      logoSrc:"",
+      logoY:0,
+      logoSize:144,
+      weareY:122,
+      weareSize:15,
+      playerSrc:"",
+      playerNaturalW:0,
+      playerNaturalH:0,
+      playerX:0,
+      playerY:0,
+      playerScale:1,
+      playerOpacity:1,
+      playerOutlineWidth:2,
+      fadeOpacity:0.45,
+      fadeBlur:20,
+      fadeScale:1.12,
+      birthdayX:2,
+      birthdayY:-60,
+      birthdaySize:111,
+      playerName:"PLAYER NAME",
+      nameSize:80,
+      nameY:1070,
+      playerNumber:"10",
+      numberX:884,
+      numberY:773,
+      numberSize:144,
+      numberScale:1,
+      birthDate:"15.03.2026",
+      monthX:889,
+      monthY:884,
+      monthFontSize:42,
+      monthScale:1,
+      birthDateX:884,
+      birthDateY:947,
+      birthDateSize:34,
+      birthDateScale:1,
+      customBadgeSrc:"",
+      customBadgeX:213,
+      customBadgeY:800,
+      customBadgeSize:166
+    };
+
+    const ids = [
+      "stage","texture","logo","playerOutline","fade","player","birthdayWrap","birthdayFill","birthdayOutline","birthdayOutline2","weare","number","monthBox","birthDateText","name","customBadge",
+      "textureUpload","logoUpload","playerUpload","customBadgeUpload",
+      "logoY","logoSize","weareY","weareSize","playerX","playerY","playerScale","playerOpacity","playerOutlineWidth",
+      "fadeOpacity","fadeBlur","fadeScale","birthdayX","birthdayY","birthdaySize","playerName","nameSize","nameY",
+      "playerNumber","numberX","numberY","numberSize","numberScale","birthDate","monthX","monthY","monthFontSize","monthScale","birthDateX","birthDateY","birthDateSize","birthDateScale",
+      "customBadgeX","customBadgeY","customBadgeSize",
+      "logoYVal","logoSizeVal","weareYVal","weareSizeVal","playerXVal","playerYVal","playerScaleVal","playerOpacityVal","playerOutlineWidthVal",
+      "fadeOpacityVal","fadeBlurVal","fadeScaleVal","birthdayXVal","birthdayYVal","birthdaySizeVal","nameSizeVal","nameYVal",
+      "numberXVal","numberYVal","numberSizeVal","numberScaleVal","monthXVal","monthYVal","monthFontSizeVal","monthScaleVal","birthDateXVal","birthDateYVal","birthDateSizeVal","birthDateScaleVal","customBadgeXVal","customBadgeYVal","customBadgeSizeVal",
+      "resetTexture","resetLogo","resetPlayer","resetCustomBadge","exportBtn"
+    ];
+    const els = Object.fromEntries(ids.map(id => [id, document.getElementById(id)]));
+
+    function readFileAsDataURL(file){
+      return new Promise((resolve,reject)=>{
+        const reader = new FileReader();
+        reader.onload = ()=>resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+    function loadImage(src){
+      return new Promise((resolve,reject)=>{
+        const img = new Image();
+        img.onload = ()=>resolve(img);
+        img.onerror = reject;
+        img.src = src;
+      });
+    }
+    function fitContain(imgW,imgH,boxW,boxH){
+      const r = Math.min(boxW / imgW, boxH / imgH);
+      const w = imgW * r;
+      const h = imgH * r;
+      return { w, h, x:(boxW-w)/2, y:(boxH-h)/2 };
+    }
+    function parseMonthName(value){
+      const str = String(value || "").trim();
+      if(!str) return "MONTH";
+      let m;
+      if((m = str.match(/^(\d{1,2})[./-](\d{1,2})[./-](\d{2,4})$/))){
+        const month = parseInt(m[2],10);
+        return MONTHS[month - 1] || "MONTH";
+      }
+      if((m = str.match(/^(\d{4})-(\d{2})-(\d{2})$/))){
+        const month = parseInt(m[2],10);
+        return MONTHS[month - 1] || "MONTH";
+      }
+      const d = new Date(str);
+      if(!Number.isNaN(d.getTime())) return MONTHS[d.getMonth()] || "MONTH";
+      return "MONTH";
+    }
+    function getOutlineFilter(px){
+      if(px <= 0) return "none";
+      const shadows = [];
+      for(let x=-px; x<=px; x++){
+        for(let y=-px; y<=px; y++){
+          if(x===0 && y===0) continue;
+          if(Math.hypot(x,y) <= px + 0.25){
+            shadows.push(`drop-shadow(${x}px ${y}px 0 #fff)`);
+          }
+        }
+      }
+      return shadows.join(" ");
+    }
+    function render(){
+      const rect = els.stage.getBoundingClientRect();
+      const scale = rect.width / STAGE_SIZE;
+      const monthName = parseMonthName(state.birthDate);
+
+      if(state.textureSrc){ els.texture.src = state.textureSrc; els.texture.style.display = "block"; }
+      else { els.texture.style.display = "none"; }
+
+      if(state.logoSrc){ els.logo.src = state.logoSrc; els.logo.style.display = "block"; }
+      else { els.logo.style.display = "none"; }
+
+      if(state.customBadgeSrc){ els.customBadge.src = state.customBadgeSrc; els.customBadge.style.display = "block"; }
+      else { els.customBadge.style.display = "none"; }
+
+      if(state.playerSrc){
+        els.player.src = state.playerSrc;
+        els.fade.src = state.playerSrc;
+        els.playerOutline.src = state.playerSrc;
+        els.player.style.display = "block";
+        els.fade.style.display = "block";
+        els.playerOutline.style.display = state.playerOutlineWidth > 0 ? "block" : "none";
+      } else {
+        els.player.style.display = "none";
+        els.fade.style.display = "none";
+        els.playerOutline.style.display = "none";
+      }
+
+      els.logo.style.top = `${state.logoY * scale}px`;
+      els.logo.style.width = `${state.logoSize * scale}px`;
+      els.logo.style.height = `${state.logoSize * scale}px`;
+      els.weare.style.top = `${state.weareY * scale}px`;
+      els.weare.style.fontSize = `${state.weareSize * scale}px`;
+
+      const px = state.playerX * scale;
+      const py = state.playerY * scale;
+      const BASE_PLAYER_SIZE = 900;
+      const naturalW = state.playerNaturalW || BASE_PLAYER_SIZE;
+      const naturalH = state.playerNaturalH || BASE_PLAYER_SIZE;
+      const baseRatio = Math.min(BASE_PLAYER_SIZE / naturalW, BASE_PLAYER_SIZE / naturalH);
+      const baseW = naturalW * baseRatio * scale;
+      const baseH = naturalH * baseRatio * scale;
+      const playerTransform = `translate(calc(-50% + ${px}px), calc(-50% + ${py}px)) scale(${state.playerScale})`;
+
+      [els.playerOutline, els.fade, els.player].forEach(el=>{
+        el.style.left = "50%";
+        el.style.top = "50%";
+        el.style.width = `${baseW}px`;
+        el.style.height = `${baseH}px`;
+      });
+
+      els.playerOutline.style.transform = playerTransform;
+      els.playerOutline.style.filter = getOutlineFilter(Math.round(state.playerOutlineWidth * scale));
+      els.playerOutline.style.opacity = 1;
+
+      els.player.style.transform = playerTransform;
+      els.player.style.opacity = state.playerOpacity;
+
+      els.fade.style.transform = `translate(calc(-50% + ${px}px), calc(-50% + ${py}px)) scale(${state.playerScale * state.fadeScale})`;
+      els.fade.style.opacity = state.fadeOpacity;
+      els.fade.style.filter = `blur(${state.fadeBlur * scale}px)`;
+
+      const bx = state.birthdayX * scale;
+      const by = state.birthdayY * scale;
+      els.birthdayWrap.style.left = "50%";
+      els.birthdayWrap.style.top = `${290 * scale}px`;
+      els.birthdayWrap.style.transform = `translate(calc(-50% + ${bx}px), calc(-50% + ${by}px))`;
+      els.birthdayFill.style.fontSize = `${state.birthdaySize * scale}px`;
+      els.birthdayOutline.style.fontSize = `${state.birthdaySize * scale}px`;
+      els.birthdayOutline2.style.fontSize = `${state.birthdaySize * scale}px`;
+      els.birthdayOutline.style.top = `${Math.round(state.birthdaySize * scale * 1.02)}px`;
+      els.birthdayOutline2.style.top = `${Math.round(state.birthdaySize * scale * 2.04)}px`;
+      const birthdayStroke = `${Math.max(1,2 * scale)}px rgba(255,255,255,.34)`;
+      els.birthdayOutline.style.webkitTextStroke = birthdayStroke;
+      els.birthdayOutline.style.textStroke = birthdayStroke;
+      els.birthdayOutline2.style.webkitTextStroke = birthdayStroke;
+      els.birthdayOutline2.style.textStroke = birthdayStroke;
+
+      els.name.textContent = state.playerName;
+      els.name.style.fontSize = `${state.nameSize * scale}px`;
+      els.name.style.top = `${state.nameY * scale}px`;
+      els.name.style.bottom = "auto";
+      els.name.style.transform = `translate(-50%,-100%)`;
+
+      els.number.textContent = state.playerNumber;
+      els.number.style.left = `${state.numberX * scale}px`;
+      els.number.style.top = `${state.numberY * scale}px`;
+      els.number.style.fontSize = `${state.numberSize * scale}px`;
+      els.number.style.transform = `translate(-50%,-50%) scale(${state.numberScale})`;
+
+      els.monthBox.textContent = monthName;
+      els.monthBox.style.left = `${state.monthX * scale}px`;
+      els.monthBox.style.top = `${state.monthY * scale}px`;
+      els.monthBox.style.fontSize = `${state.monthFontSize * scale}px`;
+      els.monthBox.style.padding = `${14 * scale}px ${26 * scale}px`;
+      els.monthBox.style.borderWidth = `${Math.max(1,2 * scale)}px`;
+      els.monthBox.style.borderRadius = `${18 * scale}px`;
+      els.monthBox.style.transform = `translate(-50%,-50%) scale(${state.monthScale})`;
+
+      els.birthDateText.textContent = state.birthDate || "";
+      els.birthDateText.style.left = `${state.birthDateX * scale}px`;
+      els.birthDateText.style.top = `${state.birthDateY * scale}px`;
+      els.birthDateText.style.fontSize = `${state.birthDateSize * scale}px`;
+      els.birthDateText.style.transform = `translate(-50%,-50%) scale(${state.birthDateScale})`;
+
+      els.customBadge.style.left = `${state.customBadgeX * scale}px`;
+      els.customBadge.style.top = `${state.customBadgeY * scale}px`;
+      els.customBadge.style.width = `${state.customBadgeSize * scale}px`;
+      els.customBadge.style.height = `${state.customBadgeSize * scale}px`;
+
+      els.logoYVal.textContent = Math.round(state.logoY);
+      els.logoSizeVal.textContent = Math.round(state.logoSize) + "px";
+      els.weareYVal.textContent = Math.round(state.weareY);
+      els.weareSizeVal.textContent = Math.round(state.weareSize) + "px";
+      els.playerXVal.textContent = Math.round(state.playerX);
+      els.playerYVal.textContent = Math.round(state.playerY);
+      els.playerScaleVal.textContent = Math.round(state.playerScale * 100) + "%";
+      els.playerOpacityVal.textContent = Math.round(state.playerOpacity * 100) + "%";
+      els.playerOutlineWidthVal.textContent = Math.round(state.playerOutlineWidth) + "px";
+      els.fadeOpacityVal.textContent = Math.round(state.fadeOpacity * 100) + "%";
+      els.fadeBlurVal.textContent = Math.round(state.fadeBlur);
+      els.fadeScaleVal.textContent = Math.round(state.fadeScale * 100) + "%";
+      els.birthdayXVal.textContent = Math.round(state.birthdayX);
+      els.birthdayYVal.textContent = Math.round(state.birthdayY);
+      els.birthdaySizeVal.textContent = Math.round(state.birthdaySize) + "px";
+      els.nameSizeVal.textContent = Math.round(state.nameSize) + "px";
+      els.nameYVal.textContent = Math.round(state.nameY);
+      els.numberXVal.textContent = Math.round(state.numberX);
+      els.numberYVal.textContent = Math.round(state.numberY);
+      els.numberSizeVal.textContent = Math.round(state.numberSize) + "px";
+      els.numberScaleVal.textContent = Math.round(state.numberScale * 100) + "%";
+      els.monthXVal.textContent = Math.round(state.monthX);
+      els.monthYVal.textContent = Math.round(state.monthY);
+      els.monthFontSizeVal.textContent = Math.round(state.monthFontSize) + "px";
+      els.monthScaleVal.textContent = Math.round(state.monthScale * 100) + "%";
+      els.birthDateXVal.textContent = Math.round(state.birthDateX);
+      els.birthDateYVal.textContent = Math.round(state.birthDateY);
+      els.birthDateSizeVal.textContent = Math.round(state.birthDateSize) + "px";
+      els.birthDateScaleVal.textContent = Math.round(state.birthDateScale * 100) + "%";
+      els.customBadgeXVal.textContent = Math.round(state.customBadgeX);
+      els.customBadgeYVal.textContent = Math.round(state.customBadgeY);
+      els.customBadgeSizeVal.textContent = Math.round(state.customBadgeSize) + "px";
+    }
+
+    async function handleImageUpload(file, target){
+      if(!file) return;
+      state[target] = await readFileAsDataURL(file);
+      render();
+    }
+
+    els.textureUpload.addEventListener("change", e=>handleImageUpload(e.target.files?.[0], "textureSrc"));
+    els.logoUpload.addEventListener("change", e=>handleImageUpload(e.target.files?.[0], "logoSrc"));
+    els.customBadgeUpload.addEventListener("change", e=>handleImageUpload(e.target.files?.[0], "customBadgeSrc"));
+    els.playerUpload.addEventListener("change", async e=>{
+      const file = e.target.files?.[0];
+      if(!file) return;
+      state.playerSrc = await readFileAsDataURL(file);
+      try{
+        const img = await loadImage(state.playerSrc);
+        state.playerNaturalW = img.width;
+        state.playerNaturalH = img.height;
+      }catch(err){
+        state.playerNaturalW = 0;
+        state.playerNaturalH = 0;
+      }
+      render();
+    });
+
+    const rangeMap = {
+      logoY:["logoY",v=>+v], logoSize:["logoSize",v=>+v], weareY:["weareY",v=>+v], weareSize:["weareSize",v=>+v],
+      playerX:["playerX",v=>+v], playerY:["playerY",v=>+v], playerScale:["playerScale",v=>+v/100], playerOpacity:["playerOpacity",v=>+v/100], playerOutlineWidth:["playerOutlineWidth",v=>+v],
+      fadeOpacity:["fadeOpacity",v=>+v/100], fadeBlur:["fadeBlur",v=>+v], fadeScale:["fadeScale",v=>+v/100],
+      birthdayX:["birthdayX",v=>+v], birthdayY:["birthdayY",v=>+v], birthdaySize:["birthdaySize",v=>+v],
+      nameSize:["nameSize",v=>+v], nameY:["nameY",v=>+v],
+      numberX:["numberX",v=>+v], numberY:["numberY",v=>+v], numberSize:["numberSize",v=>+v], numberScale:["numberScale",v=>+v/100],
+      monthX:["monthX",v=>+v], monthY:["monthY",v=>+v], monthFontSize:["monthFontSize",v=>+v], monthScale:["monthScale",v=>+v/100],
+      birthDateX:["birthDateX",v=>+v], birthDateY:["birthDateY",v=>+v], birthDateSize:["birthDateSize",v=>+v], birthDateScale:["birthDateScale",v=>+v/100],
+      customBadgeX:["customBadgeX",v=>+v], customBadgeY:["customBadgeY",v=>+v], customBadgeSize:["customBadgeSize",v=>+v]
+    };
+    Object.entries(rangeMap).forEach(([id,[key,parse]])=>{
+      els[id].addEventListener("input", e=>{ state[key] = parse(e.target.value); render(); });
+    });
+
+    els.playerName.addEventListener("input", e=>{ state.playerName = e.target.value; render(); });
+    els.playerNumber.addEventListener("input", e=>{ state.playerNumber = e.target.value; render(); });
+    els.birthDate.addEventListener("input", e=>{ state.birthDate = e.target.value; render(); });
+
+    els.resetTexture.addEventListener("click", ()=>{ state.textureSrc = ""; els.textureUpload.value = ""; render(); });
+    els.resetLogo.addEventListener("click", ()=>{
+      state.logoSrc = ""; state.logoY = 0; state.logoSize = 144;
+      els.logoUpload.value = ""; els.logoY.value = 0; els.logoSize.value = 144; render();
+    });
+    els.resetPlayer.addEventListener("click", ()=>{
+      state.playerSrc = ""; state.playerNaturalW = 0; state.playerNaturalH = 0; state.playerX = 0; state.playerY = 0;
+      state.playerScale = 1; state.playerOpacity = 1; state.playerOutlineWidth = 2; state.fadeOpacity = 0.45; state.fadeBlur = 20; state.fadeScale = 1.12;
+      els.playerUpload.value = ""; els.playerX.value = 0; els.playerY.value = 0; els.playerScale.value = 100; els.playerOpacity.value = 100;
+      els.playerOutlineWidth.value = 2; els.fadeOpacity.value = 45; els.fadeBlur.value = 20; els.fadeScale.value = 112; render();
+    });
+    els.resetCustomBadge.addEventListener("click", ()=>{
+      state.customBadgeSrc = ""; state.customBadgeX = 213; state.customBadgeY = 800; state.customBadgeSize = 166;
+      els.customBadgeUpload.value = ""; els.customBadgeX.value = 213; els.customBadgeY.value = 800; els.customBadgeSize.value = 166; render();
+    });
+
+    let dragging = false, dragStartX = 0, dragStartY = 0, startX = 0, startY = 0;
+    els.stage.addEventListener("pointerdown", e=>{
+      if(!state.playerSrc) return;
+      dragging = true; els.stage.setPointerCapture(e.pointerId);
+      dragStartX = e.clientX; dragStartY = e.clientY; startX = state.playerX; startY = state.playerY;
+    });
+    els.stage.addEventListener("pointermove", e=>{
+      if(!dragging) return;
+      const rect = els.stage.getBoundingClientRect();
+      const ratio = STAGE_SIZE / rect.width;
+      state.playerX = Math.round(startX + (e.clientX - dragStartX) * ratio);
+      state.playerY = Math.round(startY + (e.clientY - dragStartY) * ratio);
+      els.playerX.value = state.playerX; els.playerY.value = state.playerY; render();
+    });
+    function stopDrag(){ dragging = false; }
+    els.stage.addEventListener("pointerup", stopDrag);
+    els.stage.addEventListener("pointercancel", stopDrag);
+    els.stage.addEventListener("pointerleave", stopDrag);
+
+    function drawImageOutline(ctx, img, x, y, w, h, outlinePx){
+      if(outlinePx <= 0) return;
+      for(let ox = -outlinePx; ox <= outlinePx; ox++){
+        for(let oy = -outlinePx; oy <= outlinePx; oy++){
+          if(ox === 0 && oy === 0) continue;
+          if(Math.hypot(ox, oy) <= outlinePx + 0.25){
+            ctx.drawImage(img, x + ox, y + oy, w, h);
+          }
+        }
+      }
+    }
+
+    async function exportPNG(){
+      await document.fonts.ready;
+      const canvas = document.createElement("canvas");
+      canvas.width = 1080; canvas.height = 1080;
+      const ctx = canvas.getContext("2d");
+      const monthName = parseMonthName(state.birthDate);
+
+      ctx.fillStyle = "#AF1419";
+      ctx.fillRect(0,0,1080,1080);
+
+      if(state.textureSrc){
+        try{ const tex = await loadImage(state.textureSrc); ctx.drawImage(tex,0,0,1080,1080); }catch(e){}
+      }
+
+      ctx.save();
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.font = `900 ${state.birthdaySize}px Rubik, Arial, sans-serif`;
+      ctx.fillStyle = "#fff";
+      ctx.fillText("HAPPY BIRTHDAY", 540 + state.birthdayX, 290 + state.birthdayY);
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = "rgba(255,255,255,0.34)";
+      ctx.strokeText("HAPPY BIRTHDAY", 540 + state.birthdayX, 290 + state.birthdayY + Math.round(state.birthdaySize * 1.02));
+      ctx.strokeText("HAPPY BIRTHDAY", 540 + state.birthdayX, 290 + state.birthdayY + Math.round(state.birthdaySize * 2.04));
+      ctx.restore();
+
+      if(state.playerSrc){
+        try{
+          const player = await loadImage(state.playerSrc);
+          const cx = 540 + state.playerX;
+          const cy = 540 + state.playerY;
+          const BASE_PLAYER_SIZE = 900;
+          const ratio = Math.min(BASE_PLAYER_SIZE / player.width, BASE_PLAYER_SIZE / player.height);
+          const pw = player.width * ratio * state.playerScale;
+          const ph = player.height * ratio * state.playerScale;
+          const px = cx - pw/2;
+          const py = cy - ph/2;
+
+          if(state.playerOutlineWidth > 0){
+            const off = document.createElement("canvas");
+            off.width = 1080; off.height = 1080;
+            const octx = off.getContext("2d");
+            octx.save();
+            octx.filter = "brightness(0) saturate(0) invert(1)";
+            drawImageOutline(octx, player, px, py, pw, ph, state.playerOutlineWidth);
+            octx.restore();
+            ctx.drawImage(off,0,0);
+          }
+
+          ctx.save();
+          ctx.globalAlpha = state.fadeOpacity;
+          ctx.filter = `blur(${state.fadeBlur}px)`;
+          const fw = player.width * ratio * state.playerScale * state.fadeScale;
+          const fh = player.height * ratio * state.playerScale * state.fadeScale;
+          ctx.drawImage(player, cx - fw/2, cy - fh/2, fw, fh);
+          ctx.restore();
+
+          ctx.save();
+          ctx.globalAlpha = state.playerOpacity;
+          ctx.drawImage(player, px, py, pw, ph);
+          ctx.restore();
+        }catch(e){}
+      }
+
+      if(state.logoSrc){
+        try{
+          const logo = await loadImage(state.logoSrc);
+          const fit = fitContain(logo.width, logo.height, state.logoSize, state.logoSize);
+          ctx.drawImage(logo, 540 - state.logoSize/2 + fit.x, state.logoY + fit.y, fit.w, fit.h);
+        }catch(e){}
+      }
+
+      ctx.fillStyle = "#fff";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+      ctx.font = `${state.weareSize}px "Courier New", monospace`;
+      ctx.fillText("WE ARE HBS", 540, state.weareY);
+
+      if(state.customBadgeSrc){
+        try{
+          const badge = await loadImage(state.customBadgeSrc);
+          const fit = fitContain(badge.width, badge.height, state.customBadgeSize, state.customBadgeSize);
+          ctx.drawImage(badge, state.customBadgeX - state.customBadgeSize/2 + fit.x, state.customBadgeY - state.customBadgeSize/2 + fit.y, fit.w, fit.h);
+        }catch(e){}
+      }
+
+      ctx.save();
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.translate(state.numberX, state.numberY);
+      ctx.scale(state.numberScale, state.numberScale);
+      ctx.font = `900 ${state.numberSize}px Rubik, Arial, sans-serif`;
+      ctx.fillStyle = "#fff";
+      ctx.shadowColor = "rgba(0,0,0,0.28)";
+      ctx.shadowBlur = 16;
+      ctx.shadowOffsetY = 4;
+      ctx.fillText(state.playerNumber, 0, 0);
+      ctx.restore();
+
+      ctx.save();
+      ctx.translate(state.monthX, state.monthY);
+      ctx.scale(state.monthScale, state.monthScale);
+      ctx.font = `800 ${state.monthFontSize}px Rubik, Arial, sans-serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      const padX = 26, padY = 14;
+      const tw = ctx.measureText(monthName).width;
+      const boxW = tw + padX * 2;
+      const boxH = state.monthFontSize + padY * 2;
+      const radius = 18;
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = "rgba(255,255,255,0.95)";
+      ctx.fillStyle = "rgba(255,255,255,0)";
+      const x = -boxW/2, y = -boxH/2;
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.arcTo(x + boxW, y, x + boxW, y + boxH, radius);
+      ctx.arcTo(x + boxW, y + boxH, x, y + boxH, radius);
+      ctx.arcTo(x, y + boxH, x, y, radius);
+      ctx.arcTo(x, y, x + boxW, y, radius);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "#fff";
+      ctx.shadowColor = "rgba(0,0,0,0.20)";
+      ctx.shadowBlur = 12;
+      ctx.fillText(monthName, 0, 1);
+      ctx.restore();
+
+      ctx.save();
+      ctx.translate(state.birthDateX, state.birthDateY);
+      ctx.scale(state.birthDateScale, state.birthDateScale);
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.font = `700 ${state.birthDateSize}px Rubik, Arial, sans-serif`;
+      ctx.fillStyle = "#fff";
+      ctx.shadowColor = "rgba(0,0,0,0.20)";
+      ctx.shadowBlur = 12;
+      ctx.fillText(state.birthDate || "", 0, 0);
+      ctx.restore();
+
+      ctx.textAlign = "center";
+      ctx.textBaseline = "alphabetic";
+      ctx.font = `900 ${state.nameSize}px Rubik, Arial, sans-serif`;
+      ctx.shadowColor = "rgba(0,0,0,0.28)";
+      ctx.shadowBlur = 16;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 4;
+      ctx.fillStyle = "#fff";
+      ctx.fillText(state.playerName, 540, state.nameY);
+      ctx.shadowColor = "transparent";
+      ctx.shadowBlur = 0;
+
+      const link = document.createElement("a");
+      link.download = "h.birth-1080x1080.png";
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    }
+
+    els.exportBtn.addEventListener("click", exportPNG);
+    window.addEventListener("resize", render);
+    render();
+  </script>
+</body>
+</html>

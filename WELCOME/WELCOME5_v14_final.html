@@ -1,0 +1,1415 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>HBS Welcome Generator V10</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700;900&family=Birthstone&display=swap" rel="stylesheet">
+
+  <style>
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      background:#111;
+      color:#fff;
+      font-family:Rubik,Arial,sans-serif;
+      display:flex;
+      gap:20px;
+      padding:20px;
+      align-items:flex-start;
+      direction:ltr;
+    }
+
+    .controls{
+      width:360px;
+      background:#1b1b1b;
+      padding:18px;
+      border-radius:16px;
+      direction:rtl;
+      max-height:calc(100vh - 40px);
+      overflow:auto;
+    }
+
+    .controls h2{
+      margin:0 0 12px;
+      font-size:22px;
+    }
+
+    .controls h3{
+      margin:18px 0 8px;
+      font-size:15px;
+      border-bottom:1px solid rgba(255,255,255,.12);
+      padding-bottom:6px;
+    }
+
+    .field{
+      margin-bottom:10px;
+    }
+
+    .field label{
+      display:block;
+      font-size:13px;
+      margin-bottom:6px;
+      color:#d7d7d7;
+    }
+
+    .field input[type="text"],
+    .field input[type="file"],
+    .field input[type="range"]{
+      width:100%;
+    }
+
+    .field input[type="text"]{
+      background:#11161d;
+      color:#fff;
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:10px;
+      padding:10px 12px;
+      font-family:inherit;
+    }
+
+    .range-wrap{
+      display:grid;
+      grid-template-columns:1fr 62px;
+      gap:8px;
+      align-items:center;
+    }
+
+    .val{
+      background:#11161d;
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:10px;
+      padding:7px 4px;
+      text-align:center;
+      font-size:12px;
+    }
+
+    button{
+      width:100%;
+      margin-top:10px;
+      border:0;
+      border-radius:10px;
+      padding:12px;
+      background:#AF1419;
+      color:#fff;
+      font-family:inherit;
+      font-size:15px;
+      cursor:pointer;
+    }
+
+    .btn-secondary{
+      background:#2b313b;
+    }
+
+    .preview-wrap{
+      flex:1;
+      display:flex;
+      justify-content:center;
+    }
+
+    .preview-box{
+      background:#1b1b1b;
+      padding:16px;
+      border-radius:16px;
+    }
+
+    .preview-title{
+      text-align:center;
+      color:#cfcfcf;
+      font-size:13px;
+      margin-bottom:10px;
+      direction:rtl;
+    }
+
+    .stage{
+      width:700px;
+      max-width:calc(100vw - 470px);
+      aspect-ratio:1/1;
+      position:relative;
+      background:#AF1419;
+      overflow:hidden;
+    }
+
+    #texture{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:none;
+      z-index:0;
+    }
+
+    #welcomeWrap{
+      position:absolute;
+      left:50%;
+      top:212px;
+      transform:translate(-50%,-50%);
+      width:max-content;
+      pointer-events:none;
+      user-select:none;
+      z-index:1;
+    }
+
+    #welcomeFill,
+    #welcomeOutline{
+      position:absolute;
+      left:50%;
+      top:0;
+      transform:translateX(-50%);
+      font-size:125px;
+      font-weight:900;
+      line-height:.9;
+      letter-spacing:.02em;
+      font-family:Rubik,Arial,sans-serif;
+      white-space:nowrap;
+      text-transform:uppercase;
+    }
+
+    #welcomeFill{
+      color:#ffffff;
+      z-index:1;
+    }
+
+    #welcomeOutline{
+      color:transparent;
+      -webkit-text-stroke:2px rgba(255,255,255,.34);
+      text-stroke:2px rgba(255,255,255,.34);
+      top:157px;
+      z-index:0;
+    }
+
+    #player{
+      position:absolute;
+      left:50%;
+      top:50%;
+      transform:translate(-50%,-50%);
+      object-fit:contain;
+      transform-origin:center center;
+      pointer-events:none;
+      max-width:none;
+    }
+
+    #player{
+      z-index:3;
+    }
+
+    #signatureWindow{
+      position:absolute;
+      right:80px;
+      top:50%;
+      width:200px;
+      height:200px;
+      transform:translateY(-50%);
+      border-radius:0;
+      overflow:hidden;
+      z-index:4;
+      pointer-events:auto;
+      cursor:grab;
+      touch-action:none;
+      background:transparent;
+    }
+
+    #signatureWindow.dragging{
+      cursor:grabbing;
+    }
+
+    #signatureImage{
+      position:absolute;
+      left:50%;
+      top:50%;
+      transform:translate(-50%,-50%) scale(1);
+      transform-origin:center center;
+      user-select:none;
+      -webkit-user-drag:none;
+      pointer-events:none;
+      display:none;
+      z-index:1;
+    }
+
+    #logo{
+      position:absolute;
+      left:50%;
+      top:0px;
+      width:168px;
+      height:168px;
+      transform:translateX(-50%);
+      object-fit:contain;
+      display:none;
+      z-index:5;
+      pointer-events:none;
+    }
+
+    #weare{
+      position:absolute;
+      left:50%;
+      top:145px;
+      transform:translateX(-50%);
+      text-align:center;
+      font-family:"Courier New", monospace;
+      font-size:15px;
+      line-height:1;
+      z-index:5;
+      width:max-content;
+      white-space:nowrap;
+      pointer-events:none;
+    }
+
+    #name{
+      position:absolute;
+      left:50%;
+      bottom:15px;
+      transform:translateX(-50%);
+      width:92%;
+      text-align:center;
+      font-size:96px;
+      font-weight:900;
+      line-height:.9;
+      z-index:6;
+      white-space:nowrap;
+      pointer-events:none;
+      text-shadow:0 4px 16px rgba(0,0,0,.28);
+    }
+
+    #signature{
+      position:absolute;
+      left:165px;
+      top:872px;
+      transform:translate(-50%,-50%) rotate(-10deg);
+      font-family:"Birthstone", cursive;
+      font-size:100px;
+      color:#fff;
+      line-height:1;
+      z-index:7;
+      white-space:nowrap;
+      pointer-events:none;
+      text-shadow:0 2px 12px rgba(0,0,0,.22);
+      user-select:none;
+    }
+
+    #freePen{
+      position:absolute;
+      left:840px;
+      top:850px;
+      width:110px;
+      height:110px;
+      z-index:8;
+      pointer-events:none;
+      transform:translate(-50%,-50%) rotate(-18deg);
+      transform-origin:center center;
+      filter:drop-shadow(0 2px 10px rgba(0,0,0,.18));
+      user-select:none;
+      display:none;
+      object-fit:contain;
+      max-width:none;
+    }
+
+    .small-note{
+      margin-top:10px;
+      font-size:12px;
+      color:#bdbdbd;
+      direction:rtl;
+      text-align:center;
+    }
+
+    @media (max-width:1100px){
+      body{
+        flex-direction:column;
+      }
+      .controls{
+        width:100%;
+        max-height:none;
+      }
+      .stage{
+        max-width:100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute;left:-9999px;top:-9999px" aria-hidden="true" focusable="false">
+    <filter id="sharpFilter">
+      <feConvolveMatrix id="sharpConvolve" order="3" kernelMatrix="0 -0 0 -0 1 -0 0 -0 0" divisor="1" bias="0"/>
+    </filter>
+  </svg>
+
+
+  <div class="controls">
+    <h2>מחולל WELCOME</h2>
+
+    <h3>רקע</h3>
+    <div class="field">
+      <label>טעינת טקסטורה</label>
+      <input type="file" id="textureUpload" accept="image/*">
+    </div>
+    <button type="button" class="btn-secondary" id="resetTexture">איפוס טקסטורה</button>
+
+    <h3>טען לוגו</h3>
+    <div class="field">
+      <label>טעינת לוגו</label>
+      <input type="file" id="logoUpload" accept="image/*">
+    </div>
+    <div class="field">
+      <label>מיקום לוגו למעלה/למטה</label>
+      <div class="range-wrap">
+        <input type="range" id="logoY" min="0" max="300" value="0">
+        <div class="val" id="logoYVal">0</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>גודל לוגו</label>
+      <div class="range-wrap">
+        <input type="range" id="logoSize" min="40" max="300" value="168">
+        <div class="val" id="logoSizeVal">168px</div>
+      </div>
+    </div>
+    <button type="button" class="btn-secondary" id="resetLogo">איפוס לוגו</button>
+
+    <h3>טקסט עליון</h3>
+    <div class="field">
+      <label>טקסט עליון</label>
+      <input type="text" id="weareText" value="WE ARE HBS">
+    </div>
+    <div class="field">
+      <label>מיקום למעלה/למטה</label>
+      <div class="range-wrap">
+        <input type="range" id="weareY" min="0" max="400" value="145">
+        <div class="val" id="weareYVal">145</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>גודל טקסט עליון</label>
+      <div class="range-wrap">
+        <input type="range" id="weareSize" min="8" max="80" value="15">
+        <div class="val" id="weareSizeVal">15px</div>
+      </div>
+    </div>
+
+    <h3>טען תמונת שחקן</h3>
+    <div class="field">
+      <label>טעינת תמונת שחקן</label>
+      <input type="file" id="playerUpload" accept="image/*">
+    </div>
+
+    <div class="field">
+      <label>מיקום אופקי שחקן</label>
+      <div class="range-wrap">
+        <input type="range" id="playerX" min="-500" max="500" value="0">
+        <div class="val" id="playerXVal">0</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>מיקום אנכי שחקן</label>
+      <div class="range-wrap">
+        <input type="range" id="playerY" min="-500" max="500" value="0">
+        <div class="val" id="playerYVal">0</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>גודל שחקן</label>
+      <div class="range-wrap">
+        <input type="range" id="playerScale" min="10" max="250" value="100">
+        <div class="val" id="playerScaleVal">100%</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>שקיפות שחקן</label>
+      <div class="range-wrap">
+        <input type="range" id="playerOpacity" min="0" max="100" value="100">
+        <div class="val" id="playerOpacityVal">100%</div>
+      </div>
+    </div>
+
+    <h3>שיפור תמונת שחקן</h3>
+    <div class="field">
+      <label>בהירות</label>
+      <div class="range-wrap">
+        <input type="range" id="playerBrightness" min="50" max="150" value="100">
+        <div class="val" id="playerBrightnessVal">100%</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>ניגודיות</label>
+      <div class="range-wrap">
+        <input type="range" id="playerContrast" min="50" max="180" value="100">
+        <div class="val" id="playerContrastVal">100%</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>רוויה</label>
+      <div class="range-wrap">
+        <input type="range" id="playerSaturation" min="0" max="200" value="100">
+        <div class="val" id="playerSaturationVal">100%</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>חידוד</label>
+      <div class="range-wrap">
+        <input type="range" id="playerSharpness" min="0" max="100" value="0">
+        <div class="val" id="playerSharpnessVal">0%</div>
+      </div>
+    </div>
+<h3>WELCOME</h3>
+    <div class="field">
+      <label>מיקום אופקי WELCOME</label>
+      <div class="range-wrap">
+        <input type="range" id="welcomeX" min="-500" max="500" value="2">
+        <div class="val" id="welcomeXVal">2</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>מיקום אנכי WELCOME</label>
+      <div class="range-wrap">
+        <input type="range" id="welcomeY" min="-500" max="500" value="-78">
+        <div class="val" id="welcomeYVal">-78</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>גודל WELCOME</label>
+      <div class="range-wrap">
+        <input type="range" id="welcomeSize" min="40" max="300" value="186">
+        <div class="val" id="welcomeSizeVal">186px</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>רווח בין WELCOME עליון לתחתון</label>
+      <div class="range-wrap">
+        <input type="range" id="welcomeGap" min="40" max="260" value="157">
+        <div class="val" id="welcomeGapVal">157px</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>עובי קו WELCOME תחתון</label>
+      <div class="range-wrap">
+        <input type="range" id="welcomeStroke" min="1" max="8" value="2">
+        <div class="val" id="welcomeStrokeVal">2px</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>שקיפות WELCOME תחתון</label>
+      <div class="range-wrap">
+        <input type="range" id="welcomeOutlineOpacity" min="0" max="100" value="34">
+        <div class="val" id="welcomeOutlineOpacityVal">34%</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>צבע WELCOME עליון</label>
+      <input type="color" id="welcomeFillColor" value="#ffffff" style="width:100%;height:42px;border:0;border-radius:10px;background:#11161d;">
+    </div>
+
+    <div class="field">
+      <label>צבע WELCOME תחתון</label>
+      <input type="color" id="welcomeOutlineColor" value="#ffffff" style="width:100%;height:42px;border:0;border-radius:10px;background:#11161d;">
+    </div>
+
+    <h3>שם שחקן</h3>
+    <div class="field">
+      <label>טקסט</label>
+      <input type="text" id="playerName" value="PLAYER NAME">
+    </div>
+
+    <div class="field">
+      <label>גודל שם שחקן</label>
+      <div class="range-wrap">
+        <input type="range" id="nameSize" min="40" max="220" value="96">
+        <div class="val" id="nameSizeVal">96px</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>מיקום שם שחקן למעלה/למטה</label>
+      <div class="range-wrap">
+        <input type="range" id="nameY" min="700" max="1070" value="1065">
+        <div class="val" id="nameYVal">1065</div>
+      </div>
+    </div>
+
+    <h3>חתימת שחקן</h3>
+    <div class="field">
+      <label>טקסט חתימה</label>
+      <input type="text" id="signatureText" value="Signature">
+    </div>
+
+    <div class="field">
+      <label>מיקום אופקי חתימה</label>
+      <div class="range-wrap">
+        <input type="range" id="signatureX" min="0" max="1080" value="165">
+        <div class="val" id="signatureXVal">165</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>מיקום אנכי חתימה</label>
+      <div class="range-wrap">
+        <input type="range" id="signatureY" min="0" max="1080" value="872">
+        <div class="val" id="signatureYVal">872</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>גודל חתימה</label>
+      <div class="range-wrap">
+        <input type="range" id="signatureSize" min="20" max="220" value="100">
+        <div class="val" id="signatureSizeVal">100px</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>זווית חתימה</label>
+      <div class="range-wrap">
+        <input type="range" id="signatureRotate" min="-45" max="45" value="-10">
+        <div class="val" id="signatureRotateVal">-10°</div>
+      </div>
+    </div>
+
+
+    <h3>עט נובע / אייקון עט</h3>
+    <div class="field">
+      <label>טעינת אייקון עט</label>
+      <input type="file" id="penUpload" accept="image/*">
+    </div>
+
+    <div class="field">
+      <label>מיקום אופקי עט</label>
+      <div class="range-wrap">
+        <input type="range" id="penX" min="0" max="1080" value="324">
+        <div class="val" id="penXVal">324</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>מיקום אנכי עט</label>
+      <div class="range-wrap">
+        <input type="range" id="penY" min="0" max="1080" value="794">
+        <div class="val" id="penYVal">794</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>גודל עט</label>
+      <div class="range-wrap">
+        <input type="range" id="penSize" min="30" max="400" value="130">
+        <div class="val" id="penSizeVal">130px</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>זווית עט</label>
+      <div class="range-wrap">
+        <input type="range" id="penRotate" min="-180" max="180" value="-18">
+        <div class="val" id="penRotateVal">-18°</div>
+      </div>
+    </div>
+
+    <button type="button" id="resetPen" class="btn-secondary">איפוס עט</button>
+    <button type="button" id="resetPlayer" class="btn-secondary">איפוס שחקן</button>
+    <button type="button" id="exportBtn">ייצוא PNG 1080x1080</button>
+  </div>
+
+  <div class="preview-wrap">
+    <div class="preview-box">
+      <div class="preview-title">תצוגה מקדימה</div>
+      <div class="stage" id="stage">
+        <img id="texture" alt="">
+        <div id="welcomeWrap">
+          <div id="welcomeFill">WELCOME</div>
+          <div id="welcomeOutline">WELCOME</div>
+        </div>
+        <img id="player" alt="">
+        <div id="signatureWindow" aria-label="חלון חתימה">
+          <img id="signatureImage" alt="">
+        </div>
+        <img id="logo" alt="">
+        <div id="weare">WE ARE HBS</div>
+        <div id="name">PLAYER NAME</div>
+        <div id="signature">Signature</div>
+        <img id="freePen" alt="">
+      </div>
+      <div class="small-note">אפשר לגרור את השחקן עם העכבר בתוך התצוגה. את העט ממקמים בעזרת הפקדים.</div>
+    </div>
+  </div>
+
+  <script>
+    const STAGE_SIZE = 1080;
+
+    const state = {
+      textureSrc: "",
+      logoSrc: "",
+      logoY: 0,
+      logoSize: 168,
+
+      weareY: 145,
+      weareSize: 15,
+      weareText: "WE ARE HBS",
+
+      playerSrc: "",
+      playerNaturalW: 0,
+      playerNaturalH: 0,
+      playerX: 0,
+      playerY: 0,
+      playerScale: 1,
+      playerOpacity: 1,
+      playerBrightness: 1,
+      playerContrast: 1,
+      playerSaturation: 1,
+      playerSharpness: 0,
+
+      signatureSrc: "",
+      signatureNaturalW: 0,
+      signatureNaturalH: 0,
+      signatureX: 0,
+      signatureY: 0,
+      signatureScale: 1,
+
+      welcomeX: 2,
+      welcomeY: -78,
+      welcomeSize: 186,
+      welcomeGap: 157,
+      welcomeStroke: 2,
+      welcomeOutlineOpacity: 0.34,
+      welcomeFillColor: "#ffffff",
+      welcomeOutlineColor: "#ffffff",
+
+      playerName: "PLAYER NAME",
+      nameSize: 96,
+      nameY: 1065,
+
+      signatureText: "Signature",
+      signatureX: 165,
+      signatureY: 872,
+      signatureSize: 100,
+      signatureRotate: -10,
+
+      penSrc: "",
+      penNaturalW: 0,
+      penNaturalH: 0,
+      penX: 324,
+      penY: 794,
+      penSize: 130,
+      penRotate: -18
+    };
+
+    const els = {
+      stage: document.getElementById("stage"),
+      texture: document.getElementById("texture"),
+      logo: document.getElementById("logo"),
+      player: document.getElementById("player"),
+      welcomeWrap: document.getElementById("welcomeWrap"),
+      welcomeFill: document.getElementById("welcomeFill"),
+      welcomeOutline: document.getElementById("welcomeOutline"),
+      weare: document.getElementById("weare"),
+      name: document.getElementById("name"),
+      signature: document.getElementById("signature"),
+      freePen: document.getElementById("freePen"),
+
+      textureUpload: document.getElementById("textureUpload"),
+      logoUpload: document.getElementById("logoUpload"),
+      playerUpload: document.getElementById("playerUpload"),
+      penUpload: document.getElementById("penUpload"),
+
+      logoY: document.getElementById("logoY"),
+      logoSize: document.getElementById("logoSize"),
+      weareText: document.getElementById("weareText"),
+      weareY: document.getElementById("weareY"),
+      weareSize: document.getElementById("weareSize"),
+
+      playerX: document.getElementById("playerX"),
+      playerY: document.getElementById("playerY"),
+      playerScale: document.getElementById("playerScale"),
+      playerOpacity: document.getElementById("playerOpacity"),
+      playerBrightness: document.getElementById("playerBrightness"),
+      playerContrast: document.getElementById("playerContrast"),
+      playerSaturation: document.getElementById("playerSaturation"),
+      playerSharpness: document.getElementById("playerSharpness"),
+
+      signatureUpload: document.getElementById("signatureUpload"),
+      resetSignature: document.getElementById("resetSignature"),
+      signatureWindow: document.getElementById("signatureWindow"),
+      signatureImage: document.getElementById("signatureImage"),
+
+      welcomeX: document.getElementById("welcomeX"),
+      welcomeY: document.getElementById("welcomeY"),
+      welcomeSize: document.getElementById("welcomeSize"),
+      welcomeGap: document.getElementById("welcomeGap"),
+      welcomeStroke: document.getElementById("welcomeStroke"),
+      welcomeOutlineOpacity: document.getElementById("welcomeOutlineOpacity"),
+      welcomeFillColor: document.getElementById("welcomeFillColor"),
+      welcomeOutlineColor: document.getElementById("welcomeOutlineColor"),
+
+      playerName: document.getElementById("playerName"),
+      nameSize: document.getElementById("nameSize"),
+      nameY: document.getElementById("nameY"),
+
+      signatureText: document.getElementById("signatureText"),
+      signatureX: document.getElementById("signatureX"),
+      signatureY: document.getElementById("signatureY"),
+      signatureSize: document.getElementById("signatureSize"),
+      signatureRotate: document.getElementById("signatureRotate"),
+      penX: document.getElementById("penX"),
+      penY: document.getElementById("penY"),
+      penSize: document.getElementById("penSize"),
+      penRotate: document.getElementById("penRotate"),
+
+      logoYVal: document.getElementById("logoYVal"),
+      logoSizeVal: document.getElementById("logoSizeVal"),
+      weareYVal: document.getElementById("weareYVal"),
+      weareSizeVal: document.getElementById("weareSizeVal"),
+
+      playerXVal: document.getElementById("playerXVal"),
+      playerYVal: document.getElementById("playerYVal"),
+      playerScaleVal: document.getElementById("playerScaleVal"),
+      playerOpacityVal: document.getElementById("playerOpacityVal"),
+      playerBrightnessVal: document.getElementById("playerBrightnessVal"),
+      playerContrastVal: document.getElementById("playerContrastVal"),
+      playerSaturationVal: document.getElementById("playerSaturationVal"),
+      playerSharpnessVal: document.getElementById("playerSharpnessVal"),
+
+      welcomeXVal: document.getElementById("welcomeXVal"),
+      welcomeYVal: document.getElementById("welcomeYVal"),
+      welcomeSizeVal: document.getElementById("welcomeSizeVal"),
+      welcomeGapVal: document.getElementById("welcomeGapVal"),
+      welcomeStrokeVal: document.getElementById("welcomeStrokeVal"),
+      welcomeOutlineOpacityVal: document.getElementById("welcomeOutlineOpacityVal"),
+
+      nameSizeVal: document.getElementById("nameSizeVal"),
+      nameYVal: document.getElementById("nameYVal"),
+
+      signatureXVal: document.getElementById("signatureXVal"),
+      signatureYVal: document.getElementById("signatureYVal"),
+      signatureSizeVal: document.getElementById("signatureSizeVal"),
+      signatureRotateVal: document.getElementById("signatureRotateVal"),
+      penXVal: document.getElementById("penXVal"),
+      penYVal: document.getElementById("penYVal"),
+      penSizeVal: document.getElementById("penSizeVal"),
+      penRotateVal: document.getElementById("penRotateVal"),
+
+      resetTexture: document.getElementById("resetTexture"),
+      resetLogo: document.getElementById("resetLogo"),
+      resetPen: document.getElementById("resetPen"),
+      resetPlayer: document.getElementById("resetPlayer"),
+      exportBtn: document.getElementById("exportBtn")
+    };
+
+    function readFileAsDataURL(file){
+      return new Promise((resolve,reject)=>{
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function loadImage(src){
+      return new Promise((resolve,reject)=>{
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = src;
+      });
+    }
+
+    function fitContain(imgW, imgH, boxW, boxH){
+      const r = Math.min(boxW / imgW, boxH / imgH);
+      const w = imgW * r;
+      const h = imgH * r;
+      return { w, h, x:(boxW-w)/2, y:(boxH-h)/2 };
+    }
+
+    function hexToRgb(hex){
+      const safe = (hex || "#ffffff").replace("#", "");
+      const full = safe.length === 3 ? safe.split("").map(ch => ch + ch).join("") : safe;
+      const num = parseInt(full, 16);
+      return {
+        r: (num >> 16) & 255,
+        g: (num >> 8) & 255,
+        b: num & 255
+      };
+    }
+
+    function rgbaFromHex(hex, alpha){
+      const {r,g,b} = hexToRgb(hex);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    function render(){
+      const rect = els.stage.getBoundingClientRect();
+      const scale = rect.width / STAGE_SIZE;
+
+      if(state.textureSrc){
+        els.texture.src = state.textureSrc;
+        els.texture.style.display = "block";
+      } else {
+        els.texture.style.display = "none";
+      }
+
+      if(state.logoSrc){
+        els.logo.src = state.logoSrc;
+        els.logo.style.display = "block";
+      } else {
+        els.logo.style.display = "none";
+      }
+
+      if(state.playerSrc){
+        els.player.src = state.playerSrc;
+        els.player.style.display = "block";
+      } else {
+        els.player.style.display = "none";
+      }
+
+      if(state.penSrc){
+        els.freePen.src = state.penSrc;
+        els.freePen.style.display = "block";
+      } else {
+        els.freePen.style.display = "none";
+      }
+
+      els.logo.style.top = `${state.logoY * scale}px`;
+      els.logo.style.width = `${state.logoSize * scale}px`;
+      els.logo.style.height = `${state.logoSize * scale}px`;
+
+      els.weare.textContent = state.weareText;
+      els.weare.style.top = `${state.weareY * scale}px`;
+      els.weare.style.fontSize = `${state.weareSize * scale}px`;
+
+      const px = state.playerX * scale;
+      const py = state.playerY * scale;
+      const BASE_PLAYER_SIZE = 900;
+      const naturalW = state.playerNaturalW || BASE_PLAYER_SIZE;
+      const naturalH = state.playerNaturalH || BASE_PLAYER_SIZE;
+      const baseRatio = Math.min(BASE_PLAYER_SIZE / naturalW, BASE_PLAYER_SIZE / naturalH);
+      const baseW = naturalW * baseRatio * scale;
+      const baseH = naturalH * baseRatio * scale;
+
+      els.player.style.left = "50%";
+      els.player.style.top = "50%";
+      els.player.style.width = `${baseW}px`;
+      els.player.style.height = `${baseH}px`;
+      els.player.style.transform = `translate(calc(-50% + ${px}px), calc(-50% + ${py}px)) scale(${state.playerScale})`;
+      els.player.style.opacity = state.playerOpacity;
+      const sharpenEnabled = state.playerSharpness > 0.001;
+      const sharpKernelWeight = +(state.playerSharpness * 1.2).toFixed(2);
+      const sharpCenter = +(1 + (4 * sharpKernelWeight)).toFixed(2);
+      const sharpSide = +(-sharpKernelWeight).toFixed(2);
+      const sharpMatrix = `0 ${sharpSide} 0 ${sharpSide} ${sharpCenter} ${sharpSide} 0 ${sharpSide} 0`;
+      document.getElementById("sharpConvolve").setAttribute("kernelMatrix", sharpMatrix);
+      els.player.style.filter = `${sharpenEnabled ? 'url(#sharpFilter) ' : ''}brightness(${state.playerBrightness}) contrast(${state.playerContrast}) saturate(${state.playerSaturation})`;
+
+      const sigWinSize = 200 * scale;
+      els.signatureWindow.style.width = `${sigWinSize}px`;
+      els.signatureWindow.style.height = `${sigWinSize}px`;
+      els.signatureWindow.style.right = `${80 * scale}px`;
+
+      if(state.signatureSrc){
+        const maxBase = 180;
+        const sigRatio = Math.min(
+          maxBase / state.signatureNaturalW || 1,
+          maxBase / state.signatureNaturalH || 1
+        );
+        const sw = state.signatureNaturalW * sigRatio * scale;
+        const sh = state.signatureNaturalH * sigRatio * scale;
+        const sx = state.signatureX * scale;
+        const sy = state.signatureY * scale;
+
+        els.signatureImage.src = state.signatureSrc;
+        els.signatureImage.style.display = "block";
+        els.signatureImage.style.width = `${sw}px`;
+        els.signatureImage.style.height = `${sh}px`;
+        els.signatureImage.style.transform = `translate(calc(-50% + ${sx}px), calc(-50% + ${sy}px)) scale(${state.signatureScale})`;
+      } else {
+        els.signatureImage.style.display = "none";
+      }
+
+      const wx = state.welcomeX * scale;
+      const wy = state.welcomeY * scale;
+      els.welcomeWrap.style.left = "50%";
+      els.welcomeWrap.style.top = `${290 * scale}px`;
+      els.welcomeWrap.style.transform = `translate(calc(-50% + ${wx}px), calc(-50% + ${wy}px))`;
+      els.welcomeFill.style.fontSize = `${state.welcomeSize * scale}px`;
+      els.welcomeOutline.style.fontSize = `${state.welcomeSize * scale}px`;
+      els.welcomeFill.style.color = state.welcomeFillColor;
+      els.welcomeOutline.style.top = `${state.welcomeGap * scale}px`;
+      const outlineColor = rgbaFromHex(state.welcomeOutlineColor, state.welcomeOutlineOpacity);
+      els.welcomeOutline.style.webkitTextStroke = `${Math.max(1,state.welcomeStroke * scale)}px ${outlineColor}`;
+      els.welcomeOutline.style.textStroke = `${Math.max(1,state.welcomeStroke * scale)}px ${outlineColor}`;
+
+      els.name.textContent = state.playerName;
+      els.name.style.fontSize = `${state.nameSize * scale}px`;
+      els.name.style.bottom = "auto";
+      els.name.style.top = `${state.nameY * scale}px`;
+      els.name.style.transform = `translateX(-50%) translateY(-100%)`;
+
+      els.signature.textContent = state.signatureText;
+      els.signature.style.left = `${state.signatureX * scale}px`;
+      els.signature.style.top = `${state.signatureY * scale}px`;
+      els.signature.style.fontSize = `${state.signatureSize * scale}px`;
+      els.signature.style.transform = `translate(-50%,-50%) rotate(${state.signatureRotate}deg)`;
+
+      els.freePen.style.left = `${state.penX * scale}px`;
+      els.freePen.style.top = `${state.penY * scale}px`;
+      els.freePen.style.width = `${state.penSize * scale}px`;
+      els.freePen.style.height = `${state.penSize * scale}px`;
+      els.freePen.style.transform = `translate(-50%,-50%) rotate(${state.penRotate}deg)`;
+
+      els.logoYVal.textContent = Math.round(state.logoY);
+      els.logoSizeVal.textContent = Math.round(state.logoSize) + "px";
+      els.weareYVal.textContent = Math.round(state.weareY);
+      els.weareSizeVal.textContent = Math.round(state.weareSize) + "px";
+
+      els.playerXVal.textContent = Math.round(state.playerX);
+      els.playerYVal.textContent = Math.round(state.playerY);
+      els.playerScaleVal.textContent = Math.round(state.playerScale * 100) + "%";
+      els.playerOpacityVal.textContent = Math.round(state.playerOpacity * 100) + "%";
+      els.playerBrightnessVal.textContent = Math.round(state.playerBrightness * 100) + "%";
+      els.playerContrastVal.textContent = Math.round(state.playerContrast * 100) + "%";
+      els.playerSaturationVal.textContent = Math.round(state.playerSaturation * 100) + "%";
+      els.playerSharpnessVal.textContent = Math.round(state.playerSharpness * 100) + "%";
+
+      els.welcomeXVal.textContent = Math.round(state.welcomeX);
+      els.welcomeYVal.textContent = Math.round(state.welcomeY);
+      els.welcomeSizeVal.textContent = Math.round(state.welcomeSize) + "px";
+      els.welcomeGapVal.textContent = Math.round(state.welcomeGap) + "px";
+      els.welcomeStrokeVal.textContent = Math.round(state.welcomeStroke) + "px";
+      els.welcomeOutlineOpacityVal.textContent = Math.round(state.welcomeOutlineOpacity * 100) + "%";
+
+      els.nameSizeVal.textContent = Math.round(state.nameSize) + "px";
+      els.nameYVal.textContent = Math.round(state.nameY);
+
+      els.signatureXVal.textContent = Math.round(state.signatureX);
+      els.signatureYVal.textContent = Math.round(state.signatureY);
+      els.signatureSizeVal.textContent = Math.round(state.signatureSize) + "px";
+      els.signatureRotateVal.textContent = Math.round(state.signatureRotate) + "°";
+      els.penXVal.textContent = Math.round(state.penX);
+      els.penYVal.textContent = Math.round(state.penY);
+      els.penSizeVal.textContent = Math.round(state.penSize) + "px";
+      els.penRotateVal.textContent = Math.round(state.penRotate) + "°";
+    }
+
+    els.textureUpload.addEventListener("change", async e=>{
+      const file = e.target.files?.[0];
+      if(!file) return;
+      state.textureSrc = await readFileAsDataURL(file);
+      render();
+    });
+
+    els.logoUpload.addEventListener("change", async e=>{
+      const file = e.target.files?.[0];
+      if(!file) return;
+      state.logoSrc = await readFileAsDataURL(file);
+      render();
+    });
+
+    els.playerUpload.addEventListener("change", async e=>{
+      const file = e.target.files?.[0];
+      if(!file) return;
+      state.playerSrc = await readFileAsDataURL(file);
+      try{
+        const img = await loadImage(state.playerSrc);
+        state.playerNaturalW = img.width;
+        state.playerNaturalH = img.height;
+      }catch(err){
+        state.playerNaturalW = 0;
+        state.playerNaturalH = 0;
+      }
+      render();
+    });
+
+
+    els.penUpload.addEventListener("change", async e=>{
+      const file = e.target.files?.[0];
+      if(!file) return;
+      state.penSrc = await readFileAsDataURL(file);
+      try{
+        const img = await loadImage(state.penSrc);
+        state.penNaturalW = img.width;
+        state.penNaturalH = img.height;
+      }catch(err){
+        state.penNaturalW = 0;
+        state.penNaturalH = 0;
+      }
+      render();
+    });
+
+    els.logoY.addEventListener("input", e=>{ state.logoY = +e.target.value; render(); });
+    els.logoSize.addEventListener("input", e=>{ state.logoSize = +e.target.value; render(); });
+
+    els.weareText.addEventListener("input", e=>{ state.weareText = e.target.value; render(); });
+    els.weareY.addEventListener("input", e=>{ state.weareY = +e.target.value; render(); });
+    els.weareSize.addEventListener("input", e=>{ state.weareSize = +e.target.value; render(); });
+
+    els.playerX.addEventListener("input", e=>{ state.playerX = +e.target.value; render(); });
+    els.playerY.addEventListener("input", e=>{ state.playerY = +e.target.value; render(); });
+    els.playerScale.addEventListener("input", e=>{ state.playerScale = +e.target.value / 100; render(); });
+    els.playerOpacity.addEventListener("input", e=>{ state.playerOpacity = +e.target.value / 100; render(); });
+    els.playerBrightness.addEventListener("input", e=>{ state.playerBrightness = +e.target.value / 100; render(); });
+    els.playerContrast.addEventListener("input", e=>{ state.playerContrast = +e.target.value / 100; render(); });
+    els.playerSaturation.addEventListener("input", e=>{ state.playerSaturation = +e.target.value / 100; render(); });
+    els.playerSharpness.addEventListener("input", e=>{ state.playerSharpness = +e.target.value / 100; render(); });
+
+    els.welcomeX.addEventListener("input", e=>{ state.welcomeX = +e.target.value; render(); });
+    els.welcomeY.addEventListener("input", e=>{ state.welcomeY = +e.target.value; render(); });
+    els.welcomeSize.addEventListener("input", e=>{ state.welcomeSize = +e.target.value; render(); });
+    els.welcomeGap.addEventListener("input", e=>{ state.welcomeGap = +e.target.value; render(); });
+    els.welcomeStroke.addEventListener("input", e=>{ state.welcomeStroke = +e.target.value; render(); });
+    els.welcomeOutlineOpacity.addEventListener("input", e=>{ state.welcomeOutlineOpacity = +e.target.value / 100; render(); });
+    els.welcomeFillColor.addEventListener("input", e=>{ state.welcomeFillColor = e.target.value; render(); });
+    els.welcomeOutlineColor.addEventListener("input", e=>{ state.welcomeOutlineColor = e.target.value; render(); });
+
+    els.playerName.addEventListener("input", e=>{ state.playerName = e.target.value; render(); });
+    els.nameSize.addEventListener("input", e=>{ state.nameSize = +e.target.value; render(); });
+    els.nameY.addEventListener("input", e=>{ state.nameY = +e.target.value; render(); });
+
+    els.signatureText.addEventListener("input", e=>{ state.signatureText = e.target.value; render(); });
+    els.signatureX.addEventListener("input", e=>{ state.signatureX = +e.target.value; render(); });
+    els.signatureY.addEventListener("input", e=>{ state.signatureY = +e.target.value; render(); });
+    els.signatureSize.addEventListener("input", e=>{ state.signatureSize = +e.target.value; render(); });
+    els.signatureRotate.addEventListener("input", e=>{ state.signatureRotate = +e.target.value; render(); });
+    els.penX.addEventListener("input", e=>{ state.penX = +e.target.value; render(); });
+    els.penY.addEventListener("input", e=>{ state.penY = +e.target.value; render(); });
+    els.penSize.addEventListener("input", e=>{ state.penSize = +e.target.value; render(); });
+    els.penRotate.addEventListener("input", e=>{ state.penRotate = +e.target.value; render(); });
+
+    els.resetTexture.addEventListener("click", ()=>{
+      state.textureSrc = "";
+      els.textureUpload.value = "";
+      render();
+    });
+
+    els.resetLogo.addEventListener("click", ()=>{
+      state.logoSrc = "";
+      state.logoY = 0;
+      state.logoSize = 168;
+      els.logoUpload.value = "";
+      els.logoY.value = 0;
+      els.logoSize.value = 168;
+      render();
+    });
+
+    els.resetPen.addEventListener("click", ()=>{
+      state.penSrc = "";
+      state.penNaturalW = 0;
+      state.penNaturalH = 0;
+      state.penX = 840;
+      state.penY = 850;
+      state.penSize = 110;
+      state.penRotate = -18;
+
+      els.penUpload.value = "";
+      els.penX.value = 840;
+      els.penY.value = 850;
+      els.penSize.value = 110;
+      els.penRotate.value = -18;
+      render();
+    });
+
+    els.resetPlayer.addEventListener("click", ()=>{
+      state.playerSrc = "";
+      state.playerNaturalW = 0;
+      state.playerNaturalH = 0;
+      state.playerX = 0;
+      state.playerY = 0;
+      state.playerScale = 1;
+      state.playerOpacity = 1;
+      state.playerBrightness = 1;
+      state.playerContrast = 1;
+      state.playerSaturation = 1;
+      state.playerSharpness = 0;
+
+      els.playerUpload.value = "";
+      els.playerX.value = 0;
+      els.playerY.value = 0;
+      els.playerScale.value = 100;
+      els.playerOpacity.value = 100;
+      els.playerBrightness.value = 100;
+      els.playerContrast.value = 100;
+      els.playerSaturation.value = 100;
+      els.playerSharpness.value = 0;
+      render();
+    });
+
+    let dragging = false;
+    let dragStartX = 0;
+    let dragStartY = 0;
+    let startX = 0;
+    let startY = 0;
+
+    els.stage.addEventListener("pointerdown", e=>{
+      if(!state.playerSrc) return;
+      dragging = true;
+      els.stage.setPointerCapture(e.pointerId);
+      dragStartX = e.clientX;
+      dragStartY = e.clientY;
+      startX = state.playerX;
+      startY = state.playerY;
+    });
+
+    els.stage.addEventListener("pointermove", e=>{
+      if(!dragging) return;
+      const rect = els.stage.getBoundingClientRect();
+      const ratio = STAGE_SIZE / rect.width;
+      const dx = (e.clientX - dragStartX) * ratio;
+      const dy = (e.clientY - dragStartY) * ratio;
+      state.playerX = Math.round(startX + dx);
+      state.playerY = Math.round(startY + dy);
+      els.playerX.value = state.playerX;
+      els.playerY.value = state.playerY;
+      render();
+    });
+
+    function stopDrag(){ dragging = false; }
+    els.stage.addEventListener("pointerup", stopDrag);
+    els.stage.addEventListener("pointercancel", stopDrag);
+    els.stage.addEventListener("pointerleave", stopDrag);
+    async function exportPNG(){
+      await document.fonts.ready;
+
+      const canvas = document.createElement("canvas");
+      canvas.width = 1080;
+      canvas.height = 1080;
+      const ctx = canvas.getContext("2d");
+
+      ctx.fillStyle = "#AF1419";
+      ctx.fillRect(0,0,1080,1080);
+
+      if(state.textureSrc){
+        try{
+          const tex = await loadImage(state.textureSrc);
+          ctx.drawImage(tex,0,0,1080,1080);
+        }catch(e){}
+      }
+
+      ctx.save();
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.font = `900 ${state.welcomeSize}px Rubik, Arial, sans-serif`;
+      ctx.fillStyle = state.welcomeFillColor;
+      ctx.fillText("WELCOME", 540 + state.welcomeX, 290 + state.welcomeY);
+      ctx.lineWidth = state.welcomeStroke;
+      ctx.strokeStyle = rgbaFromHex(state.welcomeOutlineColor, state.welcomeOutlineOpacity);
+      ctx.strokeText("WELCOME", 540 + state.welcomeX, 290 + state.welcomeY + state.welcomeGap);
+      ctx.restore();
+
+      if(state.playerSrc){
+        try{
+          const player = await loadImage(state.playerSrc);
+          const cx = 540 + state.playerX;
+          const cy = 540 + state.playerY;
+
+          const BASE_PLAYER_SIZE = 900;
+          const ratio = Math.min(
+            BASE_PLAYER_SIZE / player.width,
+            BASE_PLAYER_SIZE / player.height
+          );
+
+          const pw = Math.round(player.width * ratio * state.playerScale);
+          const ph = Math.round(player.height * ratio * state.playerScale);
+
+          const off = document.createElement("canvas");
+          off.width = Math.max(1, pw);
+          off.height = Math.max(1, ph);
+          const octx = off.getContext("2d");
+
+          octx.filter = `brightness(${state.playerBrightness}) contrast(${state.playerContrast}) saturate(${state.playerSaturation})`;
+          octx.drawImage(player, 0, 0, off.width, off.height);
+          octx.filter = "none";
+
+          if(state.playerSharpness > 0.001){
+            const srcData = octx.getImageData(0, 0, off.width, off.height);
+            const outData = octx.createImageData(off.width, off.height);
+            const srcPx = srcData.data;
+            const outPx = outData.data;
+            const amt = state.playerSharpness * 1.2;
+            const center = 1 + (4 * amt);
+            const side = -amt;
+
+            for(let y = 0; y < off.height; y++){
+              for(let x = 0; x < off.width; x++){
+                const i = (y * off.width + x) * 4;
+                for(let c = 0; c < 3; c++){
+                  const idx = i + c;
+                  const left = x > 0 ? srcPx[idx - 4] : srcPx[idx];
+                  const right = x < off.width - 1 ? srcPx[idx + 4] : srcPx[idx];
+                  const up = y > 0 ? srcPx[idx - off.width * 4] : srcPx[idx];
+                  const down = y < off.height - 1 ? srcPx[idx + off.width * 4] : srcPx[idx];
+                  const val = srcPx[idx] * center + (left + right + up + down) * side;
+                  outPx[idx] = Math.max(0, Math.min(255, val));
+                }
+                outPx[i + 3] = srcPx[i + 3];
+              }
+            }
+            octx.putImageData(outData, 0, 0);
+          }
+
+          ctx.save();
+          ctx.globalAlpha = state.playerOpacity;
+          ctx.drawImage(off, cx - pw/2, cy - ph/2, pw, ph);
+          ctx.restore();
+        }catch(e){}
+      }
+
+      if(state.logoSrc){
+        try{
+          const logo = await loadImage(state.logoSrc);
+          const fit = fitContain(logo.width, logo.height, state.logoSize, state.logoSize);
+          ctx.drawImage(
+            logo,
+            540 - state.logoSize/2 + fit.x,
+            state.logoY + fit.y,
+            fit.w,
+            fit.h
+          );
+        }catch(e){}
+      }
+
+      ctx.fillStyle = "#fff";
+      ctx.textAlign = "center";
+
+      ctx.textBaseline = "top";
+      ctx.font = `${state.weareSize}px "Courier New", monospace`;
+      ctx.fillText(state.weareText, 540, state.weareY);
+
+      ctx.textBaseline = "alphabetic";
+      ctx.font = `900 ${state.nameSize}px Rubik, Arial, sans-serif`;
+      ctx.shadowColor = "rgba(0,0,0,0.28)";
+      ctx.shadowBlur = 16;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 4;
+      ctx.fillText(state.playerName, 540, state.nameY);
+      ctx.shadowColor = "transparent";
+      ctx.shadowBlur = 0;
+
+      ctx.save();
+      ctx.translate(state.signatureX, state.signatureY);
+      ctx.rotate(state.signatureRotate * Math.PI / 180);
+      ctx.fillStyle = "#fff";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.font = `${state.signatureSize}px "Birthstone", cursive`;
+      ctx.fillText(state.signatureText, 0, 0);
+      ctx.restore();
+
+      if(state.penSrc){
+        try{
+          const pen = await loadImage(state.penSrc);
+          const fit = fitContain(pen.width, pen.height, state.penSize, state.penSize);
+          ctx.save();
+          ctx.translate(state.penX, state.penY);
+          ctx.rotate(state.penRotate * Math.PI / 180);
+          ctx.shadowColor = "rgba(0,0,0,0.18)";
+          ctx.shadowBlur = 10;
+          ctx.drawImage(
+            pen,
+            -state.penSize / 2 + fit.x,
+            -state.penSize / 2 + fit.y,
+            fit.w,
+            fit.h
+          );
+          ctx.restore();
+        }catch(e){}
+      }
+
+      const link = document.createElement("a");
+      link.download = "welcome-hbs-v14-1080x1080.png";
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    }
+
+    els.exportBtn.addEventListener("click", exportPNG);
+    window.addEventListener("resize", render);
+
+    els.signatureUpload.addEventListener("change", e=>{
+      const file = e.target.files?.[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = ()=>{
+        const img = new Image();
+        img.onload = ()=>{
+          state.signatureSrc = reader.result;
+          state.signatureNaturalW = img.naturalWidth || img.width;
+          state.signatureNaturalH = img.naturalHeight || img.height;
+          state.signatureX = 0;
+          state.signatureY = 0;
+          state.signatureScale = 1;
+          render();
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    els.resetSignature.addEventListener("click", ()=>{
+      state.signatureSrc = "";
+      state.signatureNaturalW = 0;
+      state.signatureNaturalH = 0;
+      state.signatureX = 0;
+      state.signatureY = 0;
+      state.signatureScale = 1;
+      els.signatureUpload.value = "";
+      render();
+    });
+
+    let sigDragging = false;
+    let sigStartX = 0;
+    let sigStartY = 0;
+    let sigOrigX = 0;
+    let sigOrigY = 0;
+
+    els.signatureWindow.addEventListener("pointerdown", e=>{
+      if(!state.signatureSrc) return;
+      sigDragging = true;
+      sigStartX = e.clientX;
+      sigStartY = e.clientY;
+      sigOrigX = state.signatureX;
+      sigOrigY = state.signatureY;
+      els.signatureWindow.classList.add("dragging");
+      els.signatureWindow.setPointerCapture(e.pointerId);
+    });
+
+    els.signatureWindow.addEventListener("pointermove", e=>{
+      if(!sigDragging) return;
+      const scale = getScale();
+      state.signatureX = sigOrigX + ((e.clientX - sigStartX) / scale);
+      state.signatureY = sigOrigY + ((e.clientY - sigStartY) / scale);
+      render();
+    });
+
+    function stopSignatureDrag(e){
+      sigDragging = false;
+      els.signatureWindow.classList.remove("dragging");
+      try{
+        els.signatureWindow.releasePointerCapture(e.pointerId);
+      }catch(err){}
+    }
+
+    els.signatureWindow.addEventListener("pointerup", stopSignatureDrag);
+    els.signatureWindow.addEventListener("pointercancel", stopSignatureDrag);
+    els.signatureWindow.addEventListener("wheel", e=>{
+      if(!state.signatureSrc) return;
+      e.preventDefault();
+      const delta = e.deltaY < 0 ? 0.05 : -0.05;
+      state.signatureScale = Math.max(0.2, Math.min(6, state.signatureScale + delta));
+      render();
+    }, { passive:false });
+
+    render();
+  </script>
+
+
+
+</body>
+</html>
