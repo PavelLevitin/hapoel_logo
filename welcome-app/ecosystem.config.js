@@ -8,7 +8,6 @@ module.exports = {
       env: {
         NODE_ENV: 'production',
         PORT: 4009,
-        BETTER_AUTH_URL: 'http://localhost:4009',
       },
       watch: false,
       autorestart: true,
