@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { signOut } from '../../lib/auth-client';
+import { signOut, useSession } from '../../lib/auth-client';
 
 const TOOLS = [
   { label: 'Welcome',   src: '/tools/welcome.html' },
@@ -21,6 +21,8 @@ export default function Studio() {
   const [showAbout, setShowAbout] = useState(false);
   const [closeHovered, setCloseHovered] = useState(false);
   const router = useRouter();
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.role === 'admin';
 
   // Persist theme preference
   useEffect(() => {
@@ -118,6 +120,28 @@ export default function Studio() {
 
         {/* Spacer */}
         <div style={{ flex: 1 }} />
+
+        {/* Admin/Settings button — admin only */}
+        {isAdmin && (
+          <button
+            onClick={() => router.push('/admin')}
+            style={{
+              background: dark ? 'rgba(175,20,25,0.15)' : 'rgba(175,20,25,0.10)',
+              border: '1px solid rgba(175,20,25,0.35)',
+              borderRadius: 8,
+              padding: '5px 12px',
+              color: '#e8373e',
+              fontFamily: 'Rubik, sans-serif',
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: 'pointer',
+              flexShrink: 0,
+              letterSpacing: '0.02em',
+            }}
+          >
+            Admin / Settings
+          </button>
+        )}
 
         {/* Logout button */}
         <button
