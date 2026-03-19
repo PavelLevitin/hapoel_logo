@@ -121,7 +121,7 @@ export default function Studio() {
 
         {/* Logout button */}
         <button
-          onClick={() => signOut({ fetchOptions: { onSuccess: () => { window.location.href = '/'; } } })}
+          onClick={async () => { try { await signOut(); } finally { window.location.href = '/'; } }}
           title="Logout"
           style={{
             background: dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)',
