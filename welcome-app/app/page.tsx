@@ -44,6 +44,7 @@ export default function AuthPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [inviteCode, setInviteCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -60,6 +61,7 @@ export default function AuthPage() {
     setName('');
     setEmail('');
     setPassword('');
+    setInviteCode('');
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -77,6 +79,19 @@ export default function AuthPage() {
         router.push('/studio');
       }
     } else {
+      // Validate invite code / whitelist before calling signUp
+      const pre = await fetch('/api/pre-signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, inviteCode }),
+      });
+      if (!pre.ok) {
+        const data = await pre.json();
+        setError(data.error ?? 'קוד הזמנה שגוי');
+        setLoading(false);
+        return;
+      }
+
       const result = await signUp.email({ email, password, name });
       if (result.error) {
         setError(result.error.message ?? 'שגיאה ביצירת החשבון');
@@ -191,9 +206,10 @@ export default function AuthPage() {
 
           {/* Form */}
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            {!isLogin && <Field label="Name" type="text" value={name} onChange={setName} />}
-            <Field label="Email" type="email" value={email} onChange={setEmail} />
-            <Field label="Password" type="password" value={password} onChange={setPassword} />
+            {!isLogin && <Field label="שם" type="text" value={name} onChange={setName} />}
+            <Field label="אימייל" type="email" value={email} onChange={setEmail} />
+            <Field label="סיסמה" type="password" value={password} onChange={setPassword} />
+            {!isLogin && <Field label="קוד הזמנה" type="text" value={inviteCode} onChange={setInviteCode} />}
 
             {error && (
               <p style={{ margin: 0, padding: '10px 14px', background: 'rgba(175,20,25,0.12)', border: '1px solid rgba(175,20,25,0.3)', borderRadius: 8, color: '#e8373e', fontSize: 13, textAlign: 'center', direction: 'rtl' }}>

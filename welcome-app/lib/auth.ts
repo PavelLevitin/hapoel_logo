@@ -5,6 +5,13 @@ import path from 'path';
 
 const sqlite = new Database(path.join(process.cwd(), 'hbs-studio.db'));
 
+// Ensure allowed_emails table exists and seed the admin email
+sqlite.exec(`CREATE TABLE IF NOT EXISTS allowed_emails (
+  email TEXT PRIMARY KEY NOT NULL
+)`);
+const adminEmail = 'tomer@tomer.com';
+sqlite.prepare('INSERT OR IGNORE INTO allowed_emails (email) VALUES (?)').run(adminEmail);
+
 export const auth = betterAuth({
   database: sqlite,
   emailAndPassword: {
@@ -12,6 +19,19 @@ export const auth = betterAuth({
     minPasswordLength: 6,
   },
   plugins: [admin()],
+  databaseHooks: {
+    user: {
+      create: {
+        before: async (user) => {
+          const allowed = sqlite.prepare('SELECT 1 FROM allowed_emails WHERE email = ?').get(user.email);
+          if (!allowed) {
+            throw new Error('כתובת האימייל אינה מורשית להרשמה');
+          }
+          return { data: user };
+        },
+      },
+    },
+  },
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days
     updateAge: 60 * 60 * 24,      // refresh session if older than 1 day

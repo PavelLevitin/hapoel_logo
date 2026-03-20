@@ -94,6 +94,9 @@ export default function AdminPage() {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [fileList, setFileList] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [allowedEmails, setAllowedEmails] = useState<string[]>([]);
+  const [newEmail, setNewEmail] = useState('');
+  const [emailLoading, setEmailLoading] = useState(false);
 
   function fetchCounts() {
     fetch('/api/uploads/counts')
@@ -103,6 +106,32 @@ export default function AdminPage() {
   }
 
   useEffect(() => { fetchCounts(); }, []);
+
+  async function fetchAllowedEmails() {
+    const res = await fetch('/api/allowed-emails');
+    const data = await res.json();
+    setAllowedEmails(data.emails ?? []);
+  }
+
+  useEffect(() => { if (active === SECTIONS.length) fetchAllowedEmails(); }, [active]);
+
+  async function handleAddEmail() {
+    if (!newEmail.trim()) return;
+    setEmailLoading(true);
+    await fetch('/api/allowed-emails', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: newEmail.trim() }),
+    });
+    setNewEmail('');
+    await fetchAllowedEmails();
+    setEmailLoading(false);
+  }
+
+  async function handleRemoveEmail(email: string) {
+    await fetch(`/api/allowed-emails?email=${encodeURIComponent(email)}`, { method: 'DELETE' });
+    await fetchAllowedEmails();
+  }
 
   async function toggleExpand(key: string, sectionTitle: string, fieldId: string) {
     if (expanded === key) { setExpanded(null); setFileList([]); return; }
@@ -154,7 +183,7 @@ export default function AdminPage() {
 
   if (isPending || !session || (session.user as { role?: string }).role !== 'admin') return null;
 
-  const section = SECTIONS[active];
+  const section = SECTIONS[active] ?? SECTIONS[0];
 
   return (
     <div style={{
@@ -292,6 +321,31 @@ export default function AdminPage() {
               {s.title}
             </button>
           ))}
+
+          {/* Divider */}
+          <div style={{ margin: '8px 4px', height: 1, background: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.10)' }} />
+
+          {/* Allowed Emails */}
+          <button
+            onClick={() => setActive(SECTIONS.length)}
+            style={{
+              background: active === SECTIONS.length ? 'linear-gradient(135deg, #1a5fa8, #1e75d0)' : 'transparent',
+              border: active === SECTIONS.length ? '1px solid rgba(30,117,208,0.5)' : `1px solid ${dark ? 'transparent' : 'rgba(0,0,0,0.08)'}`,
+              borderRadius: 8,
+              padding: '9px 12px',
+              color: active === SECTIONS.length ? '#fff' : dark ? '#b0b8c8' : '#333',
+              fontFamily: 'Rubik, Arial, sans-serif',
+              fontSize: 13,
+              fontWeight: active === SECTIONS.length ? 700 : 400,
+              cursor: 'pointer',
+              textAlign: 'left',
+              letterSpacing: '0.02em',
+              boxShadow: active === SECTIONS.length ? '0 2px 12px rgba(30,117,208,0.35)' : 'none',
+              transition: 'all 0.15s',
+            }}
+          >
+            🔒 Allowed Emails
+          </button>
         </div>
 
         {/* Content panel */}
@@ -301,7 +355,83 @@ export default function AdminPage() {
           display: 'flex',
           flexDirection: 'column',
           gap: 20,
+          overflowY: 'auto',
         }}>
+          {/* Allowed Emails panel */}
+          {active === SECTIONS.length ? (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ width: 3, height: 20, borderRadius: 2, background: 'linear-gradient(180deg, #1a5fa8, #1e75d0)', flexShrink: 0 }} />
+                <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', color: dark ? '#e8eaf0' : '#1a1a1a' }}>
+                  Allowed Emails
+                </h2>
+                <span style={{ fontSize: 12, color: dark ? '#8a90a0' : '#888', letterSpacing: '0.04em' }}>
+                  — רק אימיילים ברשימה יכולים להירשם
+                </span>
+              </div>
+
+              {/* Add email row */}
+              <div style={{ display: 'flex', gap: 10, maxWidth: 480 }}>
+                <input
+                  type="email"
+                  placeholder="הכנס אימייל חדש..."
+                  value={newEmail}
+                  onChange={e => setNewEmail(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleAddEmail()}
+                  style={{
+                    flex: 1,
+                    background: dark ? 'rgba(255,255,255,0.06)' : '#fff',
+                    border: `1px solid ${dark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.20)'}`,
+                    borderRadius: 8, padding: '9px 14px',
+                    color: dark ? '#e8eaf0' : '#1a1a1a',
+                    fontSize: 13, fontFamily: 'Rubik, Arial, sans-serif',
+                    outline: 'none', direction: 'rtl',
+                  }}
+                />
+                <button
+                  onClick={handleAddEmail}
+                  disabled={emailLoading || !newEmail.trim()}
+                  style={{
+                    background: 'linear-gradient(135deg, #1a5fa8, #1e75d0)',
+                    border: 'none', borderRadius: 8, padding: '9px 20px',
+                    color: '#fff', fontSize: 13, fontWeight: 700,
+                    fontFamily: 'Rubik, Arial, sans-serif', cursor: 'pointer',
+                    opacity: emailLoading || !newEmail.trim() ? 0.5 : 1,
+                  }}
+                >
+                  + הוסף
+                </button>
+              </div>
+
+              {/* Email list */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 480 }}>
+                {allowedEmails.length === 0 && (
+                  <p style={{ color: dark ? '#5a6070' : '#aaa', fontSize: 13 }}>אין אימיילים ברשימה</p>
+                )}
+                {allowedEmails.map(email => (
+                  <div key={email} style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    background: dark ? 'rgba(255,255,255,0.06)' : '#fff',
+                    border: `1px solid ${dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.12)'}`,
+                    borderRadius: 8, padding: '10px 14px',
+                    boxShadow: dark ? 'none' : '0 1px 3px rgba(0,0,0,0.06)',
+                  }}>
+                    <span style={{ fontSize: 13, color: dark ? '#c8cad4' : '#333', direction: 'ltr' }}>{email}</span>
+                    <button
+                      onClick={() => handleRemoveEmail(email)}
+                      style={{
+                        background: 'transparent', border: 'none',
+                        color: '#e8373e', cursor: 'pointer',
+                        fontSize: 16, lineHeight: 1, padding: '0 4px', flexShrink: 0,
+                      }}
+                      title="הסר"
+                    >×</button>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+          <>
           {/* Section title */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ width: 3, height: 20, borderRadius: 2, background: 'linear-gradient(180deg, #AF1419, #e8373e)', flexShrink: 0 }} />
@@ -417,6 +547,8 @@ export default function AdminPage() {
               </div>
             ))}
           </div>
+          </>
+          )}
         </div>
       </div>
     </div>
