@@ -310,10 +310,13 @@ export default function AdminPage() {
                   <input
                     type="file"
                     accept=".png,image/png"
+                    multiple
                     style={{ display: 'none' }}
-                    onChange={e => {
-                      const file = e.target.files?.[0];
-                      if (file) handleUpload(file, section.title, field.id);
+                    onChange={async e => {
+                      const files = Array.from(e.target.files ?? []);
+                      for (const file of files) {
+                        await handleUpload(file, section.title, field.id);
+                      }
                       e.target.value = '';
                     }}
                   />
