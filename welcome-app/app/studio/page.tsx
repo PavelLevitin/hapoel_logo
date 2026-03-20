@@ -438,7 +438,7 @@ export default function Studio() {
                   gap: 12,
                 }}>
                   {gallery.files.map(file => {
-                    const url = `/uploads/${gallery.section}/${gallery.fieldId}/${file}`;
+                    const url = `/api/uploads/image?section=${encodeURIComponent(gallery.section)}&fieldId=${encodeURIComponent(gallery.fieldId)}&filename=${encodeURIComponent(file)}`;
                     return (
                       <div
                         key={file}
