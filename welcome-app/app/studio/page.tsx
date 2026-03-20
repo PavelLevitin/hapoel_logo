@@ -31,7 +31,7 @@ export default function Studio() {
   const [gallery, setGallery] = useState<GalleryState>({ open: false, fieldId: '', section: '', source: null, files: [] });
   const router = useRouter();
   const { data: session } = useSession();
-  const isAdmin = session?.user?.role === 'admin';
+  const isAdmin = (session?.user as { role?: string } | undefined)?.role === 'admin';
 
   // Persist theme preference
   useEffect(() => {

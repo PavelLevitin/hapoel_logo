@@ -147,12 +147,12 @@ export default function AdminPage() {
   }
 
   useEffect(() => {
-    if (!isPending && (!session || session.user.role !== 'admin')) {
+    if (!isPending && (!session || (session.user as { role?: string }).role !== 'admin')) {
       router.replace('/studio');
     }
   }, [session, isPending]);
 
-  if (isPending || !session || session.user.role !== 'admin') return null;
+  if (isPending || !session || (session.user as { role?: string }).role !== 'admin') return null;
 
   const section = SECTIONS[active];
 
