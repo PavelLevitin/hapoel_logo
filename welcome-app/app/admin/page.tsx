@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSession } from '../../lib/auth-client';
+import { useSession, signOut } from '../../lib/auth-client';
 
 const SECTIONS = [
   {
@@ -77,6 +77,18 @@ export default function AdminPage() {
   const router = useRouter();
   const { data: session, isPending } = useSession();
   const [active, setActive] = useState(0);
+  const [dark, setDark] = useState(true);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('hbs-theme');
+    if (saved === 'light') setDark(false);
+  }, []);
+
+  function toggleTheme() {
+    const next = !dark;
+    setDark(next);
+    localStorage.setItem('hbs-theme', next ? 'dark' : 'light');
+  }
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [uploading, setUploading] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -149,9 +161,9 @@ export default function AdminPage() {
       height: '100vh',
       display: 'flex',
       flexDirection: 'column',
-      background: '#111827',
+      background: dark ? '#111827' : '#f0f2f5',
       fontFamily: 'Rubik, Arial, sans-serif',
-      color: '#e8eaf0',
+      color: dark ? '#e8eaf0' : '#1a1a1a',
       overflow: 'hidden',
     }}>
 
@@ -206,6 +218,37 @@ export default function AdminPage() {
               </div>
             </div>
           </div>
+
+          {/* Spacer */}
+          <div style={{ flex: 1 }} />
+
+          {/* Theme toggle */}
+          <button
+            onClick={toggleTheme}
+            title={dark ? 'Switch to light mode' : 'Switch to dark mode'}
+            style={{
+              background: dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)',
+              border: `1px solid ${dark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)'}`,
+              borderRadius: 8, padding: '5px 12px',
+              color: dark ? '#b0b8c8' : '#555',
+              fontFamily: 'Rubik, sans-serif', fontSize: 13,
+              cursor: 'pointer', flexShrink: 0,
+            }}
+          >{dark ? '☀ Light' : '☾ Dark'}</button>
+
+          {/* Logout */}
+          <button
+            onClick={async () => { try { await signOut(); } finally { window.location.href = '/'; } }}
+            style={{
+              background: dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)',
+              border: `1px solid ${dark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)'}`,
+              borderRadius: 8, padding: '5px 12px',
+              color: dark ? '#b0b8c8' : '#555',
+              fontFamily: 'Rubik, sans-serif', fontSize: 13,
+              cursor: 'pointer', flexShrink: 0, direction: 'rtl',
+            }}
+          >יציאה</button>
+
         </div>
       </div>
 
