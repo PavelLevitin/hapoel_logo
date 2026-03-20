@@ -185,11 +185,11 @@ export default function AdminPage() {
           <button
             onClick={() => router.push('/studio')}
             style={{
-              background: 'rgba(255,255,255,0.08)',
-              border: '1px solid rgba(255,255,255,0.25)',
+              background: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)',
+              border: `1px solid ${dark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.25)'}`,
               borderRadius: 7,
               padding: '6px 14px',
-              color: '#e8eaf0',
+              color: dark ? '#e8eaf0' : '#1a1a1a',
               fontSize: 13,
               fontWeight: 600,
               cursor: 'pointer',
