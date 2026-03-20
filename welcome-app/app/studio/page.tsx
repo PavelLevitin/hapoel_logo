@@ -443,7 +443,7 @@ export default function Studio() {
                       <div
                         key={file}
                         onClick={() => {
-                          gallery.source?.postMessage({ type: 'imageSelected', fieldId: gallery.fieldId, url }, '*');
+                          (gallery.source as Window)?.postMessage({ type: 'imageSelected', fieldId: gallery.fieldId, url }, '*');
                           setGallery(g => ({ ...g, open: false }));
                         }}
                         title={file}
