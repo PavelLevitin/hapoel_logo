@@ -12,12 +12,16 @@ async function requireAdmin(req: NextRequest) {
   return session;
 }
 
+function generateCode(): string {
+  return Math.floor(10000 + Math.random() * 90000).toString();
+}
+
 export async function GET(req: NextRequest) {
   if (!await requireAdmin(req)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  const rows = sqlite.prepare('SELECT email FROM allowed_emails ORDER BY email').all() as { email: string }[];
-  return NextResponse.json({ emails: rows.map(r => r.email) });
+  const rows = sqlite.prepare('SELECT email, code FROM allowed_emails ORDER BY email').all() as { email: string; code: string | null }[];
+  return NextResponse.json({ emails: rows });
 }
 
 export async function POST(req: NextRequest) {
@@ -26,8 +30,14 @@ export async function POST(req: NextRequest) {
   }
   const { email } = await req.json();
   if (!email) return NextResponse.json({ error: 'Missing email' }, { status: 400 });
-  sqlite.prepare('INSERT OR IGNORE INTO allowed_emails (email) VALUES (?)').run(email.toLowerCase().trim());
-  return NextResponse.json({ ok: true });
+
+  const code = generateCode();
+  const normalizedEmail = email.toLowerCase().trim();
+
+  // Insert or replace with a fresh code
+  sqlite.prepare('INSERT INTO allowed_emails (email, code) VALUES (?, ?) ON CONFLICT(email) DO UPDATE SET code = excluded.code').run(normalizedEmail, code);
+
+  return NextResponse.json({ ok: true, code });
 }
 
 export async function DELETE(req: NextRequest) {

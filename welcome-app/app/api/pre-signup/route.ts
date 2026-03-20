@@ -11,13 +11,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'חסרים פרטים' }, { status: 400 });
   }
 
-  const expectedCode = process.env.INVITE_CODE;
-  if (!expectedCode || inviteCode !== expectedCode) {
-    return NextResponse.json({ error: 'קוד הזמנה שגוי' }, { status: 403 });
+  const row = sqlite.prepare('SELECT code FROM allowed_emails WHERE email = ?').get(email.toLowerCase().trim()) as { code: string | null } | undefined;
+
+  if (!row) {
+    return NextResponse.json({ error: 'האימייל אינו ברשימת המורשים' }, { status: 403 });
   }
 
-  // Add email to whitelist so the signup can proceed
-  sqlite.prepare('INSERT OR IGNORE INTO allowed_emails (email) VALUES (?)').run(email.toLowerCase().trim());
+  if (!row.code || row.code !== inviteCode.trim()) {
+    return NextResponse.json({ error: 'קוד הרישום שגוי' }, { status: 403 });
+  }
+
+  // Invalidate the code after successful validation (one-time use)
+  sqlite.prepare('UPDATE allowed_emails SET code = NULL WHERE email = ?').run(email.toLowerCase().trim());
 
   return NextResponse.json({ ok: true });
 }

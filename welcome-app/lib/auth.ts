@@ -5,12 +5,11 @@ import path from 'path';
 
 const sqlite = new Database(path.join(process.cwd(), 'hbs-studio.db'));
 
-// Ensure allowed_emails table exists and seed the admin email
-sqlite.exec(`CREATE TABLE IF NOT EXISTS allowed_emails (
-  email TEXT PRIMARY KEY NOT NULL
-)`);
-const adminEmail = 'tomer@tomer.com';
-sqlite.prepare('INSERT OR IGNORE INTO allowed_emails (email) VALUES (?)').run(adminEmail);
+// Ensure allowed_emails table exists with code column
+sqlite.exec(`CREATE TABLE IF NOT EXISTS allowed_emails (email TEXT PRIMARY KEY NOT NULL, code TEXT)`);
+try { sqlite.exec(`ALTER TABLE allowed_emails ADD COLUMN code TEXT`); } catch {}
+// Seed the admin email (no code needed — already registered)
+sqlite.prepare('INSERT OR IGNORE INTO allowed_emails (email, code) VALUES (?, NULL)').run('tomer@tomer.com');
 
 export const auth = betterAuth({
   database: sqlite,

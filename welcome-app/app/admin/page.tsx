@@ -94,9 +94,10 @@ export default function AdminPage() {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [fileList, setFileList] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [allowedEmails, setAllowedEmails] = useState<string[]>([]);
+  const [allowedEmails, setAllowedEmails] = useState<{ email: string; code: string | null }[]>([]);
   const [newEmail, setNewEmail] = useState('');
   const [emailLoading, setEmailLoading] = useState(false);
+  const [lastGeneratedCode, setLastGeneratedCode] = useState<{ email: string; code: string } | null>(null);
 
   function fetchCounts() {
     fetch('/api/uploads/counts')
@@ -118,11 +119,15 @@ export default function AdminPage() {
   async function handleAddEmail() {
     if (!newEmail.trim()) return;
     setEmailLoading(true);
-    await fetch('/api/allowed-emails', {
+    const res = await fetch('/api/allowed-emails', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: newEmail.trim() }),
     });
+    const data = await res.json();
+    if (data.code) {
+      setLastGeneratedCode({ email: newEmail.trim().toLowerCase(), code: data.code });
+    }
     setNewEmail('');
     await fetchAllowedEmails();
     setEmailLoading(false);
@@ -371,7 +376,7 @@ export default function AdminPage() {
               </div>
 
               {/* Add email row */}
-              <div style={{ display: 'flex', gap: 10, maxWidth: 480 }}>
+              <div style={{ display: 'flex', gap: 10, maxWidth: 500 }}>
                 <input
                   type="email"
                   placeholder="הכנס אימייל חדש..."
@@ -385,7 +390,7 @@ export default function AdminPage() {
                     borderRadius: 8, padding: '9px 14px',
                     color: dark ? '#e8eaf0' : '#1a1a1a',
                     fontSize: 13, fontFamily: 'Rubik, Arial, sans-serif',
-                    outline: 'none', direction: 'rtl',
+                    outline: 'none', direction: 'ltr',
                   }}
                 />
                 <button
@@ -397,26 +402,71 @@ export default function AdminPage() {
                     color: '#fff', fontSize: 13, fontWeight: 700,
                     fontFamily: 'Rubik, Arial, sans-serif', cursor: 'pointer',
                     opacity: emailLoading || !newEmail.trim() ? 0.5 : 1,
+                    whiteSpace: 'nowrap',
                   }}
                 >
-                  + הוסף
+                  + צור קוד
                 </button>
               </div>
 
+              {/* Generated code banner */}
+              {lastGeneratedCode && (
+                <div style={{
+                  maxWidth: 500,
+                  background: dark ? 'rgba(30,117,208,0.12)' : 'rgba(30,117,208,0.08)',
+                  border: '1px solid rgba(30,117,208,0.40)',
+                  borderRadius: 10, padding: '14px 18px',
+                }}>
+                  <div style={{ fontSize: 11, color: '#1e75d0', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 6 }}>
+                    קוד חדש נוצר עבור {lastGeneratedCode.email}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <span style={{
+                      fontSize: 32, fontWeight: 900, letterSpacing: '0.18em',
+                      color: dark ? '#e8eaf0' : '#1a1a1a',
+                      fontFamily: 'monospace',
+                    }}>{lastGeneratedCode.code}</span>
+                    <button
+                      onClick={() => navigator.clipboard.writeText(lastGeneratedCode.code)}
+                      style={{
+                        background: 'rgba(30,117,208,0.20)', border: '1px solid rgba(30,117,208,0.35)',
+                        borderRadius: 6, padding: '5px 12px', cursor: 'pointer',
+                        color: '#1e75d0', fontSize: 12, fontWeight: 600, fontFamily: 'Rubik, sans-serif',
+                      }}
+                    >העתק</button>
+                    <button
+                      onClick={() => setLastGeneratedCode(null)}
+                      style={{ background: 'transparent', border: 'none', color: dark ? '#5a6070' : '#aaa', cursor: 'pointer', fontSize: 18, lineHeight: 1 }}
+                    >×</button>
+                  </div>
+                  <div style={{ fontSize: 11, color: dark ? '#7a8090' : '#888', marginTop: 6 }}>
+                    שתף קוד זה עם המשתמש — הוא תקף לשימוש חד פעמי בלבד
+                  </div>
+                </div>
+              )}
+
               {/* Email list */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 480 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 500 }}>
                 {allowedEmails.length === 0 && (
                   <p style={{ color: dark ? '#5a6070' : '#aaa', fontSize: 13 }}>אין אימיילים ברשימה</p>
                 )}
-                {allowedEmails.map(email => (
+                {allowedEmails.map(({ email, code }) => (
                   <div key={email} style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     background: dark ? 'rgba(255,255,255,0.06)' : '#fff',
                     border: `1px solid ${dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.12)'}`,
-                    borderRadius: 8, padding: '10px 14px',
+                    borderRadius: 8, padding: '10px 14px', gap: 10,
                     boxShadow: dark ? 'none' : '0 1px 3px rgba(0,0,0,0.06)',
                   }}>
-                    <span style={{ fontSize: 13, color: dark ? '#c8cad4' : '#333', direction: 'ltr' }}>{email}</span>
+                    <span style={{ fontSize: 13, color: dark ? '#c8cad4' : '#333', direction: 'ltr', flex: 1 }}>{email}</span>
+                    <span style={{
+                      fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 4,
+                      background: code ? 'rgba(255,170,0,0.15)' : 'rgba(40,180,80,0.15)',
+                      color: code ? '#ffaa00' : '#28b450',
+                      whiteSpace: 'nowrap',
+                    }}>
+                      {code ? `ממתין · ${code}` : '✓ נרשם'}
+                    </span>
                     <button
                       onClick={() => handleRemoveEmail(email)}
                       style={{

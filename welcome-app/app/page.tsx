@@ -209,7 +209,7 @@ export default function AuthPage() {
             {!isLogin && <Field label="שם" type="text" value={name} onChange={setName} />}
             <Field label="אימייל" type="email" value={email} onChange={setEmail} />
             <Field label="סיסמה" type="password" value={password} onChange={setPassword} />
-            {!isLogin && <Field label="קוד הזמנה" type="text" value={inviteCode} onChange={setInviteCode} />}
+            {!isLogin && <Field label="קוד רישום" type="text" value={inviteCode} onChange={setInviteCode} />}
 
             {error && (
               <p style={{ margin: 0, padding: '10px 14px', background: 'rgba(175,20,25,0.12)', border: '1px solid rgba(175,20,25,0.3)', borderRadius: 8, color: '#e8373e', fontSize: 13, textAlign: 'center', direction: 'rtl' }}>
