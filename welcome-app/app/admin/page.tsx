@@ -251,6 +251,13 @@ export default function AdminPage() {
                   <span>Choose file</span>
                   <input type="file" accept="image/*" style={{ display: 'none' }} />
                 </label>
+                <span style={{
+                  display: 'block',
+                  marginTop: 6,
+                  fontSize: 11,
+                  color: '#4a5060',
+                  letterSpacing: '0.03em',
+                }}>Total 0 files</span>
               </div>
             ))}
           </div>
