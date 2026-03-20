@@ -77,6 +77,14 @@ export default function AdminPage() {
   const router = useRouter();
   const { data: session, isPending } = useSession();
   const [active, setActive] = useState(0);
+  const [counts, setCounts] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    fetch('/api/uploads/counts')
+      .then(r => r.json())
+      .then(setCounts)
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!isPending && (!session || session.user.role !== 'admin')) {
@@ -257,7 +265,9 @@ export default function AdminPage() {
                   fontSize: 11,
                   color: '#4a5060',
                   letterSpacing: '0.03em',
-                }}>Total 0 files</span>
+                }}>
+                  Total {counts[`${section.title}__${field.id}`] ?? 0} files
+                </span>
               </div>
             ))}
           </div>
