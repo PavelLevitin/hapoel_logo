@@ -259,14 +259,14 @@ export default function AdminPage() {
         <div style={{
           width: 200,
           flexShrink: 0,
-          borderRight: '1px solid rgba(255,255,255,0.10)',
-          background: 'rgba(255,255,255,0.04)',
+          borderRight: `1px solid ${dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.12)'}`,
+          background: dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)',
           display: 'flex',
           flexDirection: 'column',
           padding: '16px 10px',
           gap: 4,
         }}>
-          <div style={{ fontSize: 10, color: '#8a90a0', letterSpacing: '0.10em', textTransform: 'uppercase', fontWeight: 600, padding: '0 8px 10px' }}>
+          <div style={{ fontSize: 10, color: dark ? '#8a90a0' : '#666', letterSpacing: '0.10em', textTransform: 'uppercase', fontWeight: 600, padding: '0 8px 10px' }}>
             Tool Pages
           </div>
           {SECTIONS.map((s, i) => (
@@ -275,10 +275,10 @@ export default function AdminPage() {
               onClick={() => setActive(i)}
               style={{
                 background: active === i ? 'linear-gradient(135deg, #AF1419, #c9181f)' : 'transparent',
-                border: active === i ? '1px solid rgba(175,20,25,0.5)' : '1px solid transparent',
+                border: active === i ? '1px solid rgba(175,20,25,0.5)' : `1px solid ${dark ? 'transparent' : 'rgba(0,0,0,0.08)'}`,
                 borderRadius: 8,
                 padding: '9px 12px',
-                color: active === i ? '#fff' : '#b0b8c8',
+                color: active === i ? '#fff' : dark ? '#b0b8c8' : '#333',
                 fontFamily: 'Rubik, Arial, sans-serif',
                 fontSize: 13,
                 fontWeight: active === i ? 700 : 400,
@@ -307,9 +307,9 @@ export default function AdminPage() {
             <div style={{ width: 3, height: 20, borderRadius: 2, background: 'linear-gradient(180deg, #AF1419, #e8373e)', flexShrink: 0 }} />
             <h2 style={{
               margin: 0, fontSize: 18, fontWeight: 800, letterSpacing: '0.06em',
-              textTransform: 'uppercase', color: '#e8eaf0',
+              textTransform: 'uppercase', color: dark ? '#e8eaf0' : '#1a1a1a',
             }}>{section.title}</h2>
-            <span style={{ fontSize: 12, color: '#8a90a0', letterSpacing: '0.04em' }}>
+            <span style={{ fontSize: 12, color: dark ? '#8a90a0' : '#888', letterSpacing: '0.04em' }}>
               — {section.fields.length} upload{section.fields.length !== 1 ? 's' : ''}
             </span>
           </div>
@@ -322,21 +322,22 @@ export default function AdminPage() {
           }}>
             {section.fields.map(field => (
               <div key={field.id} style={{
-                background: 'rgba(255,255,255,0.06)',
-                border: '1px solid rgba(255,255,255,0.12)',
+                background: dark ? 'rgba(255,255,255,0.06)' : '#fff',
+                border: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.15)'}`,
                 borderRadius: 12,
                 padding: '16px',
+                boxShadow: dark ? 'none' : '0 1px 4px rgba(0,0,0,0.08)',
               }}>
                 <div style={{
-                  fontSize: 11, fontWeight: 600, color: '#a0a8b8',
+                  fontSize: 11, fontWeight: 600, color: dark ? '#a0a8b8' : '#555',
                   letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: 10,
                 }}>{field.label}</div>
                 <label style={{
                   display: 'flex', alignItems: 'center', gap: 8,
-                  background: 'rgba(255,255,255,0.07)',
-                  border: '1px dashed rgba(255,255,255,0.20)',
+                  background: dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.04)',
+                  border: `1px dashed ${dark ? 'rgba(255,255,255,0.20)' : 'rgba(0,0,0,0.25)'}`,
                   borderRadius: 8, padding: '10px 12px',
-                  cursor: 'pointer', fontSize: 12, color: '#b0b8c8',
+                  cursor: 'pointer', fontSize: 12, color: dark ? '#b0b8c8' : '#555',
                   transition: 'border-color 0.15s, background 0.15s',
                 }}
                   onMouseEnter={e => {
@@ -344,8 +345,8 @@ export default function AdminPage() {
                     (e.currentTarget as HTMLElement).style.background = 'rgba(175,20,25,0.07)';
                   }}
                   onMouseLeave={e => {
-                    (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.20)';
-                    (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.07)';
+                    (e.currentTarget as HTMLElement).style.borderColor = dark ? 'rgba(255,255,255,0.20)' : 'rgba(0,0,0,0.25)';
+                    (e.currentTarget as HTMLElement).style.background = dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.04)';
                   }}
                 >
                   <span style={{ fontSize: 15, opacity: 0.6 }}>↑</span>
@@ -383,7 +384,7 @@ export default function AdminPage() {
                     Total {counts[`${section.title}__${field.id}`]} files {expanded === `${section.title}__${field.id}` ? '▴' : '▾'}
                   </span>
                 ) : (
-                  <span style={{ display: 'block', marginTop: 6, fontSize: 11, color: '#9aa0b0', letterSpacing: '0.03em' }}>
+                  <span style={{ display: 'block', marginTop: 6, fontSize: 11, color: dark ? '#9aa0b0' : '#888', letterSpacing: '0.03em' }}>
                     Total 0 files
                   </span>
                 )}
@@ -394,11 +395,11 @@ export default function AdminPage() {
                     {fileList.map(filename => (
                       <div key={filename} style={{
                         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                        background: 'rgba(255,255,255,0.05)',
-                        border: '1px solid rgba(255,255,255,0.08)',
+                        background: dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+                        border: `1px solid ${dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.12)'}`,
                         borderRadius: 6, padding: '5px 8px',
                       }}>
-                        <span style={{ fontSize: 11, color: '#c0c8d8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
+                        <span style={{ fontSize: 11, color: dark ? '#c0c8d8' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
                           {filename.replace(/^\d+_/, '')}
                         </span>
                         <button
