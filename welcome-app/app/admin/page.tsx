@@ -79,6 +79,9 @@ export default function AdminPage() {
   const [active, setActive] = useState(0);
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [uploading, setUploading] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const [fileList, setFileList] = useState<string[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   function fetchCounts() {
     fetch('/api/uploads/counts')
@@ -89,16 +92,46 @@ export default function AdminPage() {
 
   useEffect(() => { fetchCounts(); }, []);
 
+  async function toggleExpand(key: string, sectionTitle: string, fieldId: string) {
+    if (expanded === key) { setExpanded(null); setFileList([]); return; }
+    const res = await fetch(`/api/uploads/files?section=${encodeURIComponent(sectionTitle)}&fieldId=${encodeURIComponent(fieldId)}`);
+    const data = await res.json();
+    setFileList(data.files ?? []);
+    setExpanded(key);
+  }
+
   async function handleUpload(file: File, sectionTitle: string, fieldId: string) {
+    setError(null);
+    if (!file.name.toLowerCase().endsWith('.png')) {
+      setError('Only PNG files are allowed');
+      return;
+    }
     const key = `${sectionTitle}__${fieldId}`;
     setUploading(key);
     const form = new FormData();
     form.append('file', file);
     form.append('section', sectionTitle);
     form.append('fieldId', fieldId);
-    await fetch('/api/uploads', { method: 'POST', body: form });
+    const res = await fetch('/api/uploads', { method: 'POST', body: form });
+    const data = await res.json();
+    if (data.error) { setError(data.error); setUploading(null); return; }
     await fetchCounts();
+    if (expanded === key) {
+      const r = await fetch(`/api/uploads/files?section=${encodeURIComponent(sectionTitle)}&fieldId=${encodeURIComponent(fieldId)}`);
+      const d = await r.json();
+      setFileList(d.files ?? []);
+    }
     setUploading(null);
+  }
+
+  async function handleDelete(sectionTitle: string, fieldId: string, filename: string) {
+    const key = `${sectionTitle}__${fieldId}`;
+    await fetch(`/api/uploads/files?section=${encodeURIComponent(sectionTitle)}&fieldId=${encodeURIComponent(fieldId)}&filename=${encodeURIComponent(filename)}`, { method: 'DELETE' });
+    await fetchCounts();
+    const r = await fetch(`/api/uploads/files?section=${encodeURIComponent(sectionTitle)}&fieldId=${encodeURIComponent(fieldId)}`);
+    const d = await r.json();
+    setFileList(d.files ?? []);
+    if ((d.files ?? []).length === 0) setExpanded(null);
   }
 
   useEffect(() => {
@@ -271,10 +304,10 @@ export default function AdminPage() {
                   }}
                 >
                   <span style={{ fontSize: 15, opacity: 0.6 }}>↑</span>
-                  <span>{uploading === `${section.title}__${field.id}` ? 'Uploading...' : 'Choose file'}</span>
+                  <span>{uploading === `${section.title}__${field.id}` ? 'Uploading...' : 'Choose PNG file'}</span>
                   <input
                     type="file"
-                    accept="image/*"
+                    accept=".png,image/png"
                     style={{ display: 'none' }}
                     onChange={e => {
                       const file = e.target.files?.[0];
@@ -283,15 +316,55 @@ export default function AdminPage() {
                     }}
                   />
                 </label>
-                <span style={{
-                  display: 'block',
-                  marginTop: 6,
-                  fontSize: 11,
-                  color: '#9aa0b0',
-                  letterSpacing: '0.03em',
-                }}>
-                  Total {counts[`${section.title}__${field.id}`] ?? 0} files
-                </span>
+
+                {/* Error */}
+                {error && uploading === null && (
+                  <span style={{ display: 'block', marginTop: 5, fontSize: 11, color: '#e8373e' }}>{error}</span>
+                )}
+
+                {/* Total + expand toggle */}
+                {(counts[`${section.title}__${field.id}`] ?? 0) > 0 ? (
+                  <span
+                    onClick={() => toggleExpand(`${section.title}__${field.id}`, section.title, field.id)}
+                    style={{
+                      display: 'block', marginTop: 6, fontSize: 11,
+                      color: '#AF1419', letterSpacing: '0.03em',
+                      cursor: 'pointer', userSelect: 'none',
+                    }}
+                  >
+                    Total {counts[`${section.title}__${field.id}`]} files {expanded === `${section.title}__${field.id}` ? '▴' : '▾'}
+                  </span>
+                ) : (
+                  <span style={{ display: 'block', marginTop: 6, fontSize: 11, color: '#9aa0b0', letterSpacing: '0.03em' }}>
+                    Total 0 files
+                  </span>
+                )}
+
+                {/* File list */}
+                {expanded === `${section.title}__${field.id}` && (
+                  <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    {fileList.map(filename => (
+                      <div key={filename} style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        background: 'rgba(255,255,255,0.05)',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                        borderRadius: 6, padding: '5px 8px',
+                      }}>
+                        <span style={{ fontSize: 11, color: '#c0c8d8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
+                          {filename.replace(/^\d+_/, '')}
+                        </span>
+                        <button
+                          onClick={() => handleDelete(section.title, field.id, filename)}
+                          style={{
+                            background: 'transparent', border: 'none',
+                            color: '#e8373e', cursor: 'pointer',
+                            fontSize: 14, lineHeight: 1, padding: '0 2px', flexShrink: 0,
+                          }}
+                        >×</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>

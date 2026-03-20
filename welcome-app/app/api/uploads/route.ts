@@ -12,6 +12,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
   }
 
+  if (!file.name.toLowerCase().endsWith('.png') || file.type !== 'image/png') {
+    return NextResponse.json({ error: 'Only PNG files are allowed' }, { status: 400 });
+  }
+
   const dir = path.join(process.cwd(), 'public', 'uploads', section, fieldId);
   fs.mkdirSync(dir, { recursive: true });
 
