@@ -78,13 +78,28 @@ export default function AdminPage() {
   const { data: session, isPending } = useSession();
   const [active, setActive] = useState(0);
   const [counts, setCounts] = useState<Record<string, number>>({});
+  const [uploading, setUploading] = useState<string | null>(null);
 
-  useEffect(() => {
+  function fetchCounts() {
     fetch('/api/uploads/counts')
       .then(r => r.json())
       .then(setCounts)
       .catch(() => {});
-  }, []);
+  }
+
+  useEffect(() => { fetchCounts(); }, []);
+
+  async function handleUpload(file: File, sectionTitle: string, fieldId: string) {
+    const key = `${sectionTitle}__${fieldId}`;
+    setUploading(key);
+    const form = new FormData();
+    form.append('file', file);
+    form.append('section', sectionTitle);
+    form.append('fieldId', fieldId);
+    await fetch('/api/uploads', { method: 'POST', body: form });
+    await fetchCounts();
+    setUploading(null);
+  }
 
   useEffect(() => {
     if (!isPending && (!session || session.user.role !== 'admin')) {
@@ -256,8 +271,17 @@ export default function AdminPage() {
                   }}
                 >
                   <span style={{ fontSize: 15, opacity: 0.6 }}>↑</span>
-                  <span>Choose file</span>
-                  <input type="file" accept="image/*" style={{ display: 'none' }} />
+                  <span>{uploading === `${section.title}__${field.id}` ? 'Uploading...' : 'Choose file'}</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={e => {
+                      const file = e.target.files?.[0];
+                      if (file) handleUpload(file, section.title, field.id);
+                      e.target.value = '';
+                    }}
+                  />
                 </label>
                 <span style={{
                   display: 'block',
