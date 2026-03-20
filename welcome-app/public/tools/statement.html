@@ -239,7 +239,8 @@ button{
   <h3>רקע</h3>
   <div class="field">
     <label>טעינת רקע / טקסטורה</label>
-    <input type="file" id="bgTextureUpload" accept="image/*">
+    <button type="button" class="btn-secondary" onclick="openGallery('bgTextureUpload', 'Statement')" style="width:100%;margin-bottom:4px;direction:rtl;">רקע</button>
+    <input type="file" id="bgTextureUpload" accept="image/*" style="display:none">
   </div>
   <div class="field">
     <label>צבע רקע</label>
@@ -298,7 +299,8 @@ button{
   <h3>לוגו מועדון</h3>
   <div class="field">
     <label>טעינת לוגו</label>
-    <input type="file" id="clubLogoUpload" accept="image/*">
+    <button type="button" class="btn-secondary" onclick="openGallery('clubLogoUpload', 'Statement')" style="width:100%;margin-bottom:4px;direction:rtl;">לוגו מועדון</button>
+    <input type="file" id="clubLogoUpload" accept="image/*" style="display:none">
   </div>
   <button type="button" class="dropdown-toggle" id="logoRangesToggle">
     <span>מיקום וגודל לוגו</span>
@@ -393,7 +395,8 @@ button{
   <h3>תמונה שקופה מתחת לטקסטים</h3>
   <div class="field">
     <label>טעינת תמונה</label>
-    <input type="file" id="overlayUpload" accept="image/*">
+    <button type="button" class="btn-secondary" onclick="openGallery('overlayUpload', 'Statement')" style="width:100%;margin-bottom:4px;direction:rtl;">תמונה שקופה מתחת לטקסטים</button>
+    <input type="file" id="overlayUpload" accept="image/*" style="display:none">
   </div>
   <button type="button" class="dropdown-toggle" id="overlayRangesToggle">
     <span>מיקום ועיצוב תמונה</span>
@@ -1057,5 +1060,6 @@ window.addEventListener("resize", render);
 render();
 </script>
 <script src="hbs-utils.js"></script>
+<script src="hbs-gallery.js"></script>
 </body>
 </html>

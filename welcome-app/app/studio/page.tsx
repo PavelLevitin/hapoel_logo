@@ -14,12 +14,21 @@ const TOOLS = [
   { label: 'Birthday',  src: '/tools/birthday.html' },
 ];
 
+interface GalleryState {
+  open: boolean;
+  fieldId: string;
+  section: string;
+  source: MessageEventSource | null;
+  files: string[];
+}
+
 export default function Studio() {
   const [selected, setSelected] = useState(TOOLS[0]);
   const [dark, setDark] = useState(true);
   const [hovered, setHovered] = useState<string | null>(null);
   const [showAbout, setShowAbout] = useState(false);
   const [closeHovered, setCloseHovered] = useState(false);
+  const [gallery, setGallery] = useState<GalleryState>({ open: false, fieldId: '', section: '', source: null, files: [] });
   const router = useRouter();
   const { data: session } = useSession();
   const isAdmin = session?.user?.role === 'admin';
@@ -28,6 +37,19 @@ export default function Studio() {
   useEffect(() => {
     const saved = localStorage.getItem('hbs-theme');
     if (saved === 'light') setDark(false);
+  }, []);
+
+  // Gallery postMessage listener
+  useEffect(() => {
+    const handler = async (event: MessageEvent) => {
+      if (event.data?.type !== 'openGallery') return;
+      const { fieldId, section } = event.data;
+      const res = await fetch(`/api/uploads/files?section=${encodeURIComponent(section)}&fieldId=${encodeURIComponent(fieldId)}`);
+      const data = await res.json();
+      setGallery({ open: true, fieldId, section, source: event.source, files: data.files ?? [] });
+    };
+    window.addEventListener('message', handler);
+    return () => window.removeEventListener('message', handler);
   }, []);
   function toggleTheme() {
     const next = !dark;
@@ -333,6 +355,127 @@ export default function Studio() {
                   fontWeight: 500,
                 }}>All rights reserved</p>
               </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ── Gallery modal ── */}
+      {gallery.open && (
+        <>
+          <div
+            onClick={() => setGallery(g => ({ ...g, open: false }))}
+            style={{
+              position: 'fixed', inset: 0,
+              background: 'rgba(0,0,0,0.65)',
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
+              zIndex: 200,
+            }}
+          />
+          <div style={{
+            position: 'fixed',
+            top: '50%', left: '50%',
+            transform: 'translate(-50%, -50%)',
+            zIndex: 201,
+            width: 'min(740px, 92vw)',
+            maxHeight: '80vh',
+            display: 'flex',
+            flexDirection: 'column',
+            background: dark ? 'rgba(12,15,24,0.96)' : 'rgba(245,247,250,0.96)',
+            border: `1px solid ${dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.12)'}`,
+            borderRadius: 18,
+            backdropFilter: 'blur(32px)',
+            WebkitBackdropFilter: 'blur(32px)',
+            boxShadow: '0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(175,20,25,0.12)',
+            fontFamily: 'Rubik, sans-serif',
+            overflow: 'hidden',
+          }}>
+            {/* Modal header */}
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '16px 20px',
+              borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.08)'}`,
+              flexShrink: 0,
+            }}>
+              <span style={{
+                fontSize: 14, fontWeight: 700,
+                color: dark ? '#e8eaf0' : '#1a1a1a',
+                letterSpacing: '0.02em',
+              }}>
+                בחר תמונה — {gallery.section} / {gallery.fieldId}
+              </span>
+              <button
+                onClick={() => setGallery(g => ({ ...g, open: false }))}
+                style={{
+                  background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
+                  border: `1px solid ${dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.12)'}`,
+                  borderRadius: 8,
+                  width: 30, height: 30,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  cursor: 'pointer',
+                  color: dark ? '#7a8090' : '#888',
+                  fontSize: 18,
+                  lineHeight: 1,
+                }}
+              >×</button>
+            </div>
+
+            {/* Thumbnails */}
+            <div style={{
+              overflowY: 'auto',
+              padding: 20,
+              flex: 1,
+            }}>
+              {gallery.files.length === 0 ? (
+                <p style={{ color: dark ? '#5a6070' : '#aaa', textAlign: 'center', margin: '40px 0', fontSize: 14 }}>
+                  אין תמונות בקטגוריה זו
+                </p>
+              ) : (
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
+                  gap: 12,
+                }}>
+                  {gallery.files.map(file => {
+                    const url = `/uploads/${gallery.section}/${gallery.fieldId}/${file}`;
+                    return (
+                      <div
+                        key={file}
+                        onClick={() => {
+                          gallery.source?.postMessage({ type: 'imageSelected', fieldId: gallery.fieldId, url }, '*');
+                          setGallery(g => ({ ...g, open: false }));
+                        }}
+                        title={file}
+                        style={{
+                          borderRadius: 10,
+                          overflow: 'hidden',
+                          border: `1px solid ${dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.12)'}`,
+                          cursor: 'pointer',
+                          aspectRatio: '1',
+                          background: dark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)',
+                          transition: 'transform 0.15s, box-shadow 0.15s',
+                        }}
+                        onMouseEnter={e => {
+                          (e.currentTarget as HTMLDivElement).style.transform = 'scale(1.04)';
+                          (e.currentTarget as HTMLDivElement).style.boxShadow = '0 4px 20px rgba(175,20,25,0.35)';
+                        }}
+                        onMouseLeave={e => {
+                          (e.currentTarget as HTMLDivElement).style.transform = 'scale(1)';
+                          (e.currentTarget as HTMLDivElement).style.boxShadow = 'none';
+                        }}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={url}
+                          alt={file}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         </>

@@ -108,21 +108,24 @@
       <div class="group">
         <h3>רקע תוצאה</h3>
         <label for="textureInput">טען רקע תוצאה</label>
-        <input id="textureInput" type="file" accept="image/*">
+        <button type="button" class="btn-secondary" onclick="openGallery('textureInput', 'Score')" style="width:100%;margin-bottom:4px;direction:rtl;">רקע תוצאה</button>
+        <input id="textureInput" type="file" accept="image/*" style="display:none">
         <button id="resetTextureBtn" type="button">איפוס רקע תוצאה</button>
       </div>
 
       <div class="group">
         <h3>רקע שחקן</h3>
         <label for="leftBgInput">טען רקע שחקן</label>
-        <input id="leftBgInput" type="file" accept="image/*">
+        <button type="button" class="btn-secondary" onclick="openGallery('leftBgInput', 'Score')" style="width:100%;margin-bottom:4px;direction:rtl;">רקע שחקן</button>
+        <input id="leftBgInput" type="file" accept="image/*" style="display:none">
         <button id="resetLeftBgBtn" type="button">איפוס רקע שחקן</button>
       </div>
 
       <div class="group">
         <h3>לוגו מועדון</h3>
         <label for="logoInput">טען לוגו מועדון</label>
-        <input id="logoInput" type="file" accept="image/*">
+        <button type="button" class="btn-secondary" onclick="openGallery('logoInput', 'Score')" style="width:100%;margin-bottom:4px;direction:rtl;">לוגו מועדון</button>
+        <input id="logoInput" type="file" accept="image/*" style="display:none">
         <button id="resetLogoBtn" type="button">איפוס לוגו מועדון</button>
 
         <label for="showClubBehind">הצג לוגו מועדון מאחורי תמונת השחקן</label>
@@ -143,7 +146,8 @@
       <div class="group">
         <h3>לוגו התאחדות</h3>
         <label for="ifaLogoInput">העלאת לוגו התאחדות</label>
-        <input id="ifaLogoInput" type="file" accept="image/*">
+        <button type="button" class="btn-secondary" onclick="openGallery('ifaLogoInput', 'Score')" style="width:100%;margin-bottom:4px;direction:rtl;">לוגו התאחדות</button>
+        <input id="ifaLogoInput" type="file" accept="image/*" style="display:none">
         <button id="resetIfaLogoBtn" type="button">איפוס לוגו התאחדות</button>
 
         <label for="ifaSize">גובה לוגו התאחדות (80-200)</label>
@@ -172,19 +176,22 @@
 
         <div id="continuousWrap">
           <label for="continuousInput">טען תמונת שחקן רציפה</label>
-          <input id="continuousInput" type="file" accept="image/*">
+          <button type="button" class="btn-secondary" onclick="openGallery('continuousInput', 'Score')" style="width:100%;margin-bottom:4px;direction:rtl;">העלאת תמונת שחקן ראשי</button>
+          <input id="continuousInput" type="file" accept="image/*" style="display:none">
           <button id="resetContinuousBtn" type="button">איפוס תמונה רציפה</button>
         </div>
 
         <div id="separateWrap" class="hidden">
           <label for="third2Input">טען תמונת שחקן לשליש 2</label>
-          <input id="third2Input" type="file" accept="image/*">
+          <button type="button" class="btn-secondary" onclick="openGallery('third2Input', 'Score')" style="width:100%;margin-bottom:4px;direction:rtl;">תמונה שלישית 2</button>
+          <input id="third2Input" type="file" accept="image/*" style="display:none">
           <button id="resetThird2Btn" type="button">איפוס תמונת שליש 2</button>
 
           <hr class="sep">
 
           <label for="third3Input">טען תמונת שחקן לשליש 3</label>
-          <input id="third3Input" type="file" accept="image/*">
+          <button type="button" class="btn-secondary" onclick="openGallery('third3Input', 'Score')" style="width:100%;margin-bottom:4px;direction:rtl;">תמונה שלישית 3</button>
+          <input id="third3Input" type="file" accept="image/*" style="display:none">
           <button id="resetThird3Btn" type="button">איפוס תמונת שליש 3</button>
         </div>
 
@@ -1183,5 +1190,6 @@ loadSettings();
 
 </script>
 <script src="hbs-utils.js"></script>
+<script src="hbs-gallery.js"></script>
 </body>
 </html>

@@ -345,14 +345,16 @@
     <h3>רקע</h3>
     <div class="field">
       <label>טעינת טקסטורה</label>
-      <input type="file" id="textureUpload" accept="image/*">
+      <button type="button" class="btn-secondary" onclick="openGallery('textureUpload', 'Welcome')" style="width:100%;margin-bottom:4px;direction:rtl;">רקע</button>
+      <input type="file" id="textureUpload" accept="image/*" style="display:none">
     </div>
     <button type="button" class="btn-secondary" id="resetTexture">איפוס טקסטורה</button>
 
     <h3>טען לוגו</h3>
     <div class="field">
       <label>טעינת לוגו</label>
-      <input type="file" id="logoUpload" accept="image/*">
+      <button type="button" class="btn-secondary" onclick="openGallery('logoUpload', 'Welcome')" style="width:100%;margin-bottom:4px;direction:rtl;">טען לוגו</button>
+      <input type="file" id="logoUpload" accept="image/*" style="display:none">
     </div>
     <button type="button" class="dropdown-toggle" id="logoRangesToggle">
       <span>מיקום וגודל לוגו</span>
@@ -405,7 +407,8 @@
     <h3>טען תמונת שחקן</h3>
     <div class="field">
       <label>טעינת תמונת שחקן</label>
-      <input type="file" id="playerUpload" accept="image/*">
+      <button type="button" class="btn-secondary" onclick="openGallery('playerUpload', 'Welcome')" style="width:100%;margin-bottom:4px;direction:rtl;">טען תמונת שחקן</button>
+      <input type="file" id="playerUpload" accept="image/*" style="display:none">
     </div>
 
     <button type="button" class="dropdown-toggle" id="playerRangesToggle">
@@ -625,7 +628,8 @@
     <h3>עט נובע / אייקון עט</h3>
     <div class="field">
       <label>טעינת אייקון עט</label>
-      <input type="file" id="penUpload" accept="image/*">
+      <button type="button" class="btn-secondary" onclick="openGallery('penUpload', 'Welcome')" style="width:100%;margin-bottom:4px;direction:rtl;">עט נובע / אייקון עט</button>
+      <input type="file" id="penUpload" accept="image/*" style="display:none">
     </div>
 
     <button type="button" class="dropdown-toggle" id="penRangesToggle">
@@ -1461,5 +1465,6 @@
 
 
 <script src="hbs-utils.js"></script>
+<script src="hbs-gallery.js"></script>
 </body>
 </html>

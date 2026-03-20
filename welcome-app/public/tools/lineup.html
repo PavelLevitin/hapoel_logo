@@ -774,7 +774,8 @@
       <div class="box">
         <h2>תמונות ורקע</h2>
         <label>תמונת שחקן</label>
-        <input type="file" id="playerImage" accept="image/*">
+        <button type="button" class="btn-secondary" onclick="openGallery('playerImage', 'Line Up')" style="width:100%;margin-bottom:4px;direction:rtl;">תמונת שחקן</button>
+        <input type="file" id="playerImage" accept="image/*" style="display:none">
 
         <button type="button" class="dropdown-toggle" id="playerImageRangesToggle">
           <span>גודל ומיקום תמונת שחקן</span>
@@ -801,13 +802,16 @@
         </div>
 
         <label>לוגו קבוצה ביתית</label>
-        <input type="file" id="teamLogo" accept="image/*">
+        <button type="button" class="btn-secondary" onclick="openGallery('teamLogo', 'Line Up')" style="width:100%;margin-bottom:4px;direction:rtl;">לוגו קבוצה</button>
+        <input type="file" id="teamLogo" accept="image/*" style="display:none">
 
         <label>לוגו יריבה</label>
-        <input type="file" id="oppLogo" accept="image/*">
+        <button type="button" class="btn-secondary" onclick="openGallery('oppLogo', 'Line Up')" style="width:100%;margin-bottom:4px;direction:rtl;">לוגו יריב</button>
+        <input type="file" id="oppLogo" accept="image/*" style="display:none">
 
         <label>רקע מותאם</label>
-        <input type="file" id="bgImageInput" accept="image/*">
+        <button type="button" class="btn-secondary" onclick="openGallery('bgImageInput', 'Line Up')" style="width:100%;margin-bottom:4px;direction:rtl;">תמונת רקע</button>
+        <input type="file" id="bgImageInput" accept="image/*" style="display:none">
 
         <button type="button" class="dropdown-toggle" id="backgroundRangesToggle">
           <span>הגדרות רקע</span>
@@ -1839,5 +1843,6 @@
     applyLeftFade();
   </script>
 <script src="hbs-utils.js"></script>
+<script src="hbs-gallery.js"></script>
 </body>
 </html>

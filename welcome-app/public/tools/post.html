@@ -443,7 +443,8 @@
     <h3>תמונה מרכזית</h3>
     <div class="field">
       <label>טעינת תמונה</label>
-      <input type="file" id="mainImageUpload" accept="image/*">
+      <button type="button" class="btn-secondary" onclick="openGallery('mainImageUpload', 'Post')" style="width:100%;margin-bottom:4px;direction:rtl;">תמונה מרכזית</button>
+      <input type="file" id="mainImageUpload" accept="image/*" style="display:none">
     </div>
     <div class="checks">
       <label><input type="checkbox" id="useOriginalSize"> התאמה אישית</label>
@@ -475,7 +476,8 @@
     <h3>לוגואים בתחתית</h3>
     <div class="field">
       <label>טעינת לוגואים</label>
-      <input type="file" id="bottomLogosUpload" accept="image/*" multiple>
+      <button type="button" class="btn-secondary" onclick="openGallery('bottomLogosUpload', 'Post')" style="width:100%;margin-bottom:4px;direction:rtl;">לוגואים בתחתית</button>
+      <input type="file" id="bottomLogosUpload" accept="image/*" multiple style="display:none">
     </div>
     <button type="button" class="dropdown-toggle" id="logoRangesToggle">
       <span>עיצוב לוגואים</span>
@@ -1264,5 +1266,6 @@
     render();
   </script>
   <script src="hbs-utils.js"></script>
+<script src="hbs-gallery.js"></script>
 </body>
 </html>

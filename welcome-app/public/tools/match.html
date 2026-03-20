@@ -430,14 +430,16 @@
     <h3>רקע</h3>
     <div class="field">
       <label>טעינת טקסטורה</label>
-      <input type="file" id="textureUpload" accept="image/*">
+      <button type="button" class="btn-secondary" onclick="openGallery('textureUpload', 'Match')" style="width:100%;margin-bottom:4px;direction:rtl;">רקע</button>
+      <input type="file" id="textureUpload" accept="image/*" style="display:none">
     </div>
     <button type="button" class="btn-secondary" id="resetTexture">איפוס טקסטורה</button>
 
     <h3>לוגו עליון</h3>
     <div class="field">
       <label>טעינת לוגו עליון</label>
-      <input type="file" id="mainLogoUpload" accept="image/*">
+      <button type="button" class="btn-secondary" onclick="openGallery('mainLogoUpload', 'Match')" style="width:100%;margin-bottom:4px;direction:rtl;">לוגו עליון</button>
+      <input type="file" id="mainLogoUpload" accept="image/*" style="display:none">
     </div>
     <button type="button" class="dropdown-toggle" id="mainLogoRangesToggle">
       <span>מיקום וגודל לוגו</span>
@@ -486,7 +488,8 @@
     <h3>שחקן</h3>
     <div class="field">
       <label>טעינת תמונת שחקן</label>
-      <input type="file" id="playerUpload" accept="image/*">
+      <button type="button" class="btn-secondary" onclick="openGallery('playerUpload', 'Match')" style="width:100%;margin-bottom:4px;direction:rtl;">שחקן</button>
+      <input type="file" id="playerUpload" accept="image/*" style="display:none">
     </div>
     <button type="button" class="dropdown-toggle" id="playerRangesToggle">
       <span>מיקום ועיצוב שחקן</span>
@@ -598,7 +601,8 @@
     <h3>לוגו קבוצה ביתית</h3>
     <div class="field">
       <label>טעינת לוגו ביתית</label>
-      <input type="file" id="homeLogoUpload" accept="image/*">
+      <button type="button" class="btn-secondary" onclick="openGallery('homeLogoUpload', 'Match')" style="width:100%;margin-bottom:4px;direction:rtl;">לוגו קבוצה ביתית</button>
+      <input type="file" id="homeLogoUpload" accept="image/*" style="display:none">
     </div>
     <button type="button" class="dropdown-toggle" id="homeLogoRangesToggle">
       <span>גודל לוגו ביתי</span>
@@ -621,7 +625,8 @@
     <h3>לוגו קבוצה אורחת</h3>
     <div class="field">
       <label>טעינת לוגו אורחת</label>
-      <input type="file" id="awayLogoUpload" accept="image/*">
+      <button type="button" class="btn-secondary" onclick="openGallery('awayLogoUpload', 'Match')" style="width:100%;margin-bottom:4px;direction:rtl;">לוגו קבוצה אורחת</button>
+      <input type="file" id="awayLogoUpload" accept="image/*" style="display:none">
     </div>
     <button type="button" class="dropdown-toggle" id="awayLogoRangesToggle">
       <span>גודל לוגו אורחת</span>
@@ -1748,5 +1753,6 @@
     render();
   </script>
 <script src="hbs-utils.js"></script>
+<script src="hbs-gallery.js"></script>
 </body>
 </html>
