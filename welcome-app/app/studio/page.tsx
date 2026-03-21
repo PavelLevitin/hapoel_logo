@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { signOut, useSession } from '../../lib/auth-client';
+import { signOut, useSession, authClient } from '../../lib/auth-client';
 
 const TOOLS = [
   { label: 'Welcome',   src: '/tools/welcome.html' },
@@ -37,6 +37,15 @@ export default function Studio() {
   useEffect(() => {
     const saved = localStorage.getItem('hbs-theme');
     if (saved === 'light') setDark(false);
+  }, []);
+
+  // Poll session every 20s — redirect to login if deleted by admin
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      const { data } = await authClient.getSession();
+      if (!data) window.location.href = '/';
+    }, 20000);
+    return () => clearInterval(interval);
   }, []);
 
   // Gallery postMessage listener
