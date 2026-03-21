@@ -118,6 +118,22 @@ export default function AdminPage() {
 
   useEffect(() => { if (active === SECTIONS.length) fetchAllowedEmails(); }, [active]);
 
+  // Poll while a code is displayed — clear banner when user registers (code becomes null)
+  useEffect(() => {
+    if (!lastGeneratedCode) return;
+    const interval = setInterval(async () => {
+      const res = await fetch('/api/allowed-emails');
+      const data = await res.json();
+      const emails: { email: string; code: string | null }[] = data.emails ?? [];
+      setAllowedEmails(emails);
+      const entry = emails.find(e => e.email === lastGeneratedCode.email);
+      if (entry && entry.code === null) {
+        setLastGeneratedCode(null);
+      }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [lastGeneratedCode]);
+
   async function fetchUsers() {
     const res = await fetch('/api/users');
     const data = await res.json();
