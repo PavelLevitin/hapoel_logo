@@ -134,9 +134,9 @@ export default function AdminPage() {
 
   async function handleAddEmail() {
     if (!newEmail.trim()) return;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(newEmail.trim())) {
-      setEmailError('כתובת אימייל לא תקינה');
+      setEmailError('פורמט אימייל לא תקין — דוגמה: user@example.com');
       return;
     }
     setEmailError(null);

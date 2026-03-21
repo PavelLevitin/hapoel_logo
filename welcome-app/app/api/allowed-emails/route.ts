@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ emails: rows });
 }
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAIL_REGEX = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
 
 export async function POST(req: NextRequest) {
   if (!await requireAdmin(req)) {
