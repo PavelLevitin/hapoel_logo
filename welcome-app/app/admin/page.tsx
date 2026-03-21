@@ -466,7 +466,8 @@ export default function AdminPage() {
               </div>
 
               {/* Add email row */}
-              <div style={{ display: 'flex', gap: 10, maxWidth: 500 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxWidth: 500 }}>
+              <div style={{ display: 'flex', gap: 10 }}>
                 <input
                   type="email"
                   placeholder="הכנס אימייל חדש..."
@@ -498,10 +499,10 @@ export default function AdminPage() {
                   + צור קוד
                 </button>
               </div>
-
               {emailError && (
-                <p style={{ margin: 0, fontSize: 12, color: '#e8373e', direction: 'rtl' }}>{emailError}</p>
+                <span style={{ fontSize: 12, color: '#e8373e', direction: 'rtl' }}>{emailError}</span>
               )}
+              </div>
 
               {/* Generated code banner */}
               {lastGeneratedCode && (
