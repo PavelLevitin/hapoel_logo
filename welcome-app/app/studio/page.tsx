@@ -147,12 +147,20 @@ export default function Studio() {
         {session?.user?.name && (
           <span style={{
             fontSize: 13,
-            color: inactiveColor,
             fontFamily: 'Rubik, sans-serif',
             flexShrink: 0,
             whiteSpace: 'nowrap',
+            background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
+            border: `1px solid ${dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.10)'}`,
+            borderRadius: 8,
+            padding: '5px 12px',
+            color: dark ? '#9aa0b0' : '#666',
           }}>
-            Hello, <span style={{ fontWeight: 600, color: dark ? '#c8cad4' : '#333' }}>{session.user.name}</span>
+            Hello,{' '}
+            <span style={{
+              fontWeight: 700,
+              color: dark ? '#e8eaf0' : '#1a1a1a',
+            }}>{session.user.name}</span>
           </span>
         )}
 
