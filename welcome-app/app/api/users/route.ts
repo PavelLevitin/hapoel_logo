@@ -35,6 +35,13 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ error: 'Cannot delete your own account' }, { status: 400 });
   }
 
+  // Prevent deleting the protected admin account
+  const target = sqlite.prepare('SELECT email FROM user WHERE id = ?').get(userId) as { email: string } | undefined;
+  if (!target) return NextResponse.json({ error: 'User not found' }, { status: 404 });
+  if (target.email === 'tomer@tomer.com') {
+    return NextResponse.json({ error: 'This account cannot be deleted' }, { status: 403 });
+  }
+
   // Delete sessions first, then user
   sqlite.prepare('DELETE FROM session WHERE userId = ?').run(userId);
   sqlite.prepare('DELETE FROM user WHERE id = ?').run(userId);

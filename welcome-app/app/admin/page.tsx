@@ -429,14 +429,14 @@ export default function AdminPage() {
                     </span>
                     <button
                       onClick={() => handleDeleteUser(user.id)}
-                      disabled={user.role === 'admin'}
-                      title={user.role === 'admin' ? 'לא ניתן למחוק אדמין' : 'מחק משתמש'}
+                      disabled={user.email === 'tomer@tomer.com' || user.role === 'admin'}
+                      title={user.email === 'tomer@tomer.com' ? 'משתמש מוגן' : user.role === 'admin' ? 'לא ניתן למחוק אדמין' : 'מחק משתמש'}
                       style={{
-                        background: user.role === 'admin' ? 'transparent' : 'rgba(175,20,25,0.10)',
-                        border: `1px solid ${user.role === 'admin' ? 'transparent' : 'rgba(175,20,25,0.30)'}`,
+                        background: (user.email === 'tomer@tomer.com' || user.role === 'admin') ? 'transparent' : 'rgba(175,20,25,0.10)',
+                        border: `1px solid ${(user.email === 'tomer@tomer.com' || user.role === 'admin') ? 'transparent' : 'rgba(175,20,25,0.30)'}`,
                         borderRadius: 6, padding: '5px 12px',
-                        color: user.role === 'admin' ? (dark ? '#3a4050' : '#ccc') : '#e8373e',
-                        cursor: user.role === 'admin' ? 'not-allowed' : 'pointer',
+                        color: (user.email === 'tomer@tomer.com' || user.role === 'admin') ? (dark ? '#3a4050' : '#ccc') : '#e8373e',
+                        cursor: (user.email === 'tomer@tomer.com' || user.role === 'admin') ? 'not-allowed' : 'pointer',
                         fontSize: 12, fontWeight: 600, fontFamily: 'Rubik, sans-serif', flexShrink: 0,
                       }}
                     >
