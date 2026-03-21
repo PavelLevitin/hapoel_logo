@@ -232,6 +232,71 @@ button[data-hbs-export]::after {
 }
 
 /* ════════════════════════════════════════
+   Mobile responsive  (≤ 767 px)
+   ════════════════════════════════════════ */
+
+@media (max-width: 767px) {
+  body {
+    flex-direction: column !important;
+    overflow-y: auto !important;
+    padding: 12px !important;
+    gap: 14px !important;
+    align-items: stretch !important;
+  }
+
+  /* Controls panel: full width */
+  .controls, .panel {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    flex-shrink: 1 !important;
+  }
+
+  /* Preview wrapper: full width, below controls */
+  .preview-wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    padding: 10px !important;
+    box-sizing: border-box !important;
+    justify-content: flex-start !important;
+    overflow-x: auto !important;
+  }
+
+  /* Preview box: fill available space */
+  .preview-box {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  /*
+   * Stage containers — override the fixed pixel widths so the
+   * JS-based scale calculations read the correct viewport size.
+   * Covers: welcome / statement / match / birthday (.stage),
+   *         score (.stage-scale), post (.stage-view / .stage-root)
+   */
+  .stage, .stage-scale, .stage-view, .stage-root {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  /*
+   * Line-Up poster — uses a fixed transform: scale(.62).
+   * On mobile, recompute to fit ~90 vw inside the 1024 px poster.
+   * margin-bottom correction = -1536 × (1 − scale)
+   */
+  .poster-scale {
+    transform: scale(0.32) !important;
+    transform-origin: top center !important;
+    margin-bottom: -1044px !important;
+  }
+}
+
+/* ════════════════════════════════════════
    Light mode overrides  (html.hbs-light)
    ════════════════════════════════════════ */
 

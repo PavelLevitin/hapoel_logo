@@ -29,6 +29,8 @@ export default function Studio() {
   const [showAbout, setShowAbout] = useState(false);
   const [closeHovered, setCloseHovered] = useState(false);
   const [gallery, setGallery] = useState<GalleryState>({ open: false, fieldId: '', section: '', source: null, files: [] });
+  const [isMobile, setIsMobile] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const router = useRouter();
   const { data: session } = useSession();
   const isAdmin = (session?.user as { role?: string } | undefined)?.role === 'admin';
@@ -37,6 +39,14 @@ export default function Studio() {
   useEffect(() => {
     const saved = localStorage.getItem('hbs-theme');
     if (saved === 'light') setDark(false);
+  }, []);
+
+  // Detect mobile viewport
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
   }, []);
 
   // Poll session every 20s — redirect to login if deleted by admin
@@ -94,11 +104,8 @@ export default function Studio() {
 
       {/* ── Top nav ── */}
       <nav style={{
-        height: 56,
         display: 'flex',
-        alignItems: 'center',
-        padding: '0 20px',
-        gap: 6,
+        flexDirection: 'column',
         flexShrink: 0,
         background: navBg,
         backdropFilter: 'blur(24px)',
@@ -107,171 +114,6 @@ export default function Studio() {
         position: 'relative',
         zIndex: 10,
       }}>
-        {/* Brand + current tool */}
-        <div style={{ display: 'flex', flexDirection: 'column', marginRight: 16, paddingRight: 16, borderRight: `1px solid ${navBorder}`, flexShrink: 0 }}>
-          <span style={{
-            fontFamily: 'Rubik, sans-serif',
-            fontWeight: 900,
-            fontSize: 15,
-            letterSpacing: '0.06em',
-            background: 'linear-gradient(135deg, #AF1419, #e8373e)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            lineHeight: 1.1,
-          }}>HBS STUDIO</span>
-          <span style={{
-            fontFamily: 'Rubik, sans-serif',
-            fontSize: 9,
-            fontWeight: 500,
-            letterSpacing: '0.10em',
-            textTransform: 'uppercase',
-            color: inactiveColor,
-            lineHeight: 1.2,
-          }}>{selected.label}</span>
-        </div>
-
-        {/* Tool tabs */}
-        {TOOLS.map(tool => {
-          const active = tool.src === selected.src;
-          return (
-            <button
-              key={tool.src}
-              className={`nav-btn${active ? ' active' : ''}`}
-              onClick={() => setSelected(tool)}
-              onMouseEnter={() => !active && setHovered(tool.src)}
-              onMouseLeave={() => setHovered(null)}
-              style={{
-                background: active
-                  ? 'linear-gradient(135deg, #AF1419, #c9181f)'
-                  : hovered === tool.src
-                    ? (dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)')
-                    : 'transparent',
-                color: active ? '#fff' : hovered === tool.src ? (dark ? '#e8eaf0' : '#1a1a1a') : inactiveColor,
-                border: active ? '1px solid rgba(175,20,25,0.5)' : `1px solid ${inactiveBorder}`,
-                borderRadius: 8,
-                padding: '5px 14px',
-                fontFamily: 'Rubik, sans-serif',
-                fontSize: 13,
-                fontWeight: active ? 700 : 400,
-                cursor: 'pointer',
-                letterSpacing: '0.02em',
-                whiteSpace: 'nowrap',
-                transition: 'background 0.15s, color 0.15s',
-                boxShadow: active ? '0 0 18px rgba(175,20,25,0.45), inset 0 1px 0 rgba(255,255,255,0.15)' : 'none',
-              }}
-            >
-              {tool.label}
-            </button>
-          );
-        })}
-
-        {/* Spacer */}
-        <div style={{ flex: 1 }} />
-
-        {/* Hello user */}
-        {session?.user?.name && (
-          <span style={{
-            fontSize: 13,
-            fontFamily: 'Rubik, sans-serif',
-            flexShrink: 0,
-            whiteSpace: 'nowrap',
-            background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
-            border: `1px solid ${dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.10)'}`,
-            borderRadius: 8,
-            padding: '5px 12px',
-            color: dark ? '#9aa0b0' : '#666',
-          }}>
-            Hello,{' '}
-            <span style={{
-              fontWeight: 700,
-              color: dark ? '#e8eaf0' : '#1a1a1a',
-            }}>{session.user.name}</span>
-          </span>
-        )}
-
-        {/* Admin/Settings button — admin only */}
-        {isAdmin && (
-          <button
-            onClick={() => router.push('/admin')}
-            style={{
-              background: dark ? 'rgba(175,20,25,0.15)' : 'rgba(175,20,25,0.10)',
-              border: '1px solid rgba(175,20,25,0.35)',
-              borderRadius: 8,
-              padding: '5px 12px',
-              color: '#e8373e',
-              fontFamily: 'Rubik, sans-serif',
-              fontSize: 13,
-              fontWeight: 600,
-              cursor: 'pointer',
-              flexShrink: 0,
-              letterSpacing: '0.02em',
-            }}
-          >
-            Admin / Settings
-          </button>
-        )}
-
-        {/* Logout button */}
-        <button
-          onClick={async () => { try { await signOut(); } finally { window.location.href = '/'; } }}
-          title="Logout"
-          style={{
-            background: dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)',
-            border: `1px solid ${inactiveBorder}`,
-            borderRadius: 8,
-            padding: '5px 12px',
-            color: inactiveColor,
-            fontFamily: 'Rubik, sans-serif',
-            fontSize: 13,
-            cursor: 'pointer',
-            flexShrink: 0,
-            letterSpacing: '0.02em',
-          }}
-        >
-          יציאה
-        </button>
-
-        {/* About button */}
-        <button
-          onClick={() => setShowAbout(true)}
-          title="About HBS Studio"
-          style={{
-            background: dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)',
-            border: `1px solid ${inactiveBorder}`,
-            borderRadius: 8,
-            padding: '5px 12px',
-            color: inactiveColor,
-            fontFamily: 'Rubik, sans-serif',
-            fontSize: 13,
-            cursor: 'pointer',
-            flexShrink: 0,
-            letterSpacing: '0.02em',
-          }}
-        >
-          ℹ
-        </button>
-
-        {/* Dark / Light toggle */}
-        <button
-          onClick={toggleTheme}
-          title={dark ? 'Switch to light mode' : 'Switch to dark mode'}
-          style={{
-            background: dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)',
-            border: `1px solid ${inactiveBorder}`,
-            borderRadius: 8,
-            padding: '5px 12px',
-            color: inactiveColor,
-            fontFamily: 'Rubik, sans-serif',
-            fontSize: 13,
-            cursor: 'pointer',
-            flexShrink: 0,
-            letterSpacing: '0.02em',
-          }}
-        >
-          {dark ? '☀ Light' : '☾ Dark'}
-        </button>
-
         {/* Top accent line */}
         <div style={{
           position: 'absolute',
@@ -280,6 +122,299 @@ export default function Studio() {
           background: 'linear-gradient(90deg, transparent, rgba(175,20,25,0.4), transparent)',
           pointerEvents: 'none',
         }} />
+
+        {/* Single nav row */}
+        <div style={{ height: 56, display: 'flex', alignItems: 'center', padding: '0 12px', gap: 6 }}>
+          {/* Brand + current tool */}
+          <div style={{ display: 'flex', flexDirection: 'column', marginRight: isMobile ? 6 : 16, paddingRight: isMobile ? 6 : 16, borderRight: `1px solid ${navBorder}`, flexShrink: 0 }}>
+            <span style={{
+              fontFamily: 'Rubik, sans-serif',
+              fontWeight: 900,
+              fontSize: 15,
+              letterSpacing: '0.06em',
+              background: 'linear-gradient(135deg, #AF1419, #e8373e)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              lineHeight: 1.1,
+            }}>HBS STUDIO</span>
+            <span style={{
+              fontFamily: 'Rubik, sans-serif',
+              fontSize: 9,
+              fontWeight: 500,
+              letterSpacing: '0.10em',
+              textTransform: 'uppercase',
+              color: inactiveColor,
+              lineHeight: 1.2,
+            }}>{selected.label}</span>
+          </div>
+
+          {/* Desktop: Tool tabs inline — hidden on mobile via CSS */}
+          {TOOLS.map(tool => {
+            const active = tool.src === selected.src;
+            return (
+              <button
+                key={tool.src}
+                className={`nav-btn hide-on-mobile${active ? ' active' : ''}`}
+                onClick={() => setSelected(tool)}
+                onMouseEnter={() => !active && setHovered(tool.src)}
+                onMouseLeave={() => setHovered(null)}
+                style={{
+                  background: active
+                    ? 'linear-gradient(135deg, #AF1419, #c9181f)'
+                    : hovered === tool.src
+                      ? (dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)')
+                      : 'transparent',
+                  color: active ? '#fff' : hovered === tool.src ? (dark ? '#e8eaf0' : '#1a1a1a') : inactiveColor,
+                  border: active ? '1px solid rgba(175,20,25,0.5)' : `1px solid ${inactiveBorder}`,
+                  borderRadius: 8,
+                  padding: '5px 14px',
+                  fontFamily: 'Rubik, sans-serif',
+                  fontSize: 13,
+                  fontWeight: active ? 700 : 400,
+                  cursor: 'pointer',
+                  letterSpacing: '0.02em',
+                  whiteSpace: 'nowrap',
+                  transition: 'background 0.15s, color 0.15s',
+                  boxShadow: active ? '0 0 18px rgba(175,20,25,0.45), inset 0 1px 0 rgba(255,255,255,0.15)' : 'none',
+                }}
+              >
+                {tool.label}
+              </button>
+            );
+          })}
+
+          {/* Spacer */}
+          <div style={{ flex: 1 }} />
+
+          {/* Hello user — hidden on mobile via CSS */}
+          {session?.user?.name && (
+            <span className="hide-on-mobile" style={{
+              fontSize: 13,
+              fontFamily: 'Rubik, sans-serif',
+              flexShrink: 0,
+              whiteSpace: 'nowrap',
+              background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
+              border: `1px solid ${dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.10)'}`,
+              borderRadius: 8,
+              padding: '5px 12px',
+              color: dark ? '#9aa0b0' : '#666',
+            }}>
+              Hello,{' '}
+              <span style={{ fontWeight: 700, color: dark ? '#e8eaf0' : '#1a1a1a' }}>{session.user.name}</span>
+            </span>
+          )}
+
+          {/* Desktop: Admin/Settings button — hidden on mobile via CSS */}
+          {isAdmin && (
+            <button
+              className="hide-on-mobile"
+              onClick={() => router.push('/admin')}
+              style={{
+                background: dark ? 'rgba(175,20,25,0.15)' : 'rgba(175,20,25,0.10)',
+                border: '1px solid rgba(175,20,25,0.35)',
+                borderRadius: 8,
+                padding: '5px 12px',
+                color: '#e8373e',
+                fontFamily: 'Rubik, sans-serif',
+                fontSize: 13,
+                fontWeight: 600,
+                cursor: 'pointer',
+                flexShrink: 0,
+                letterSpacing: '0.02em',
+              }}
+            >
+              Admin / Settings
+            </button>
+          )}
+
+          {/* Logout button */}
+          <button
+            onClick={async () => { try { await signOut(); } finally { window.location.href = '/'; } }}
+            title="Logout"
+            style={{
+              background: dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)',
+              border: `1px solid ${inactiveBorder}`,
+              borderRadius: 8,
+              padding: '5px 12px',
+              color: inactiveColor,
+              fontFamily: 'Rubik, sans-serif',
+              fontSize: 13,
+              cursor: 'pointer',
+              flexShrink: 0,
+              letterSpacing: '0.02em',
+            }}
+          >
+            יציאה
+          </button>
+
+          {/* Desktop: About button — hidden on mobile via CSS */}
+          <button
+            className="hide-on-mobile"
+            onClick={() => setShowAbout(true)}
+            title="About HBS Studio"
+            style={{
+                background: dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)',
+                border: `1px solid ${inactiveBorder}`,
+                borderRadius: 8,
+                padding: '5px 12px',
+                color: inactiveColor,
+                fontFamily: 'Rubik, sans-serif',
+                fontSize: 13,
+                cursor: 'pointer',
+                flexShrink: 0,
+                letterSpacing: '0.02em',
+              }}
+            >
+              ℹ
+            </button>
+
+          {/* Dark / Light toggle */}
+          <button
+            onClick={toggleTheme}
+            title={dark ? 'Switch to light mode' : 'Switch to dark mode'}
+            style={{
+              background: dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)',
+              border: `1px solid ${inactiveBorder}`,
+              borderRadius: 8,
+              padding: '5px 12px',
+              color: inactiveColor,
+              fontFamily: 'Rubik, sans-serif',
+              fontSize: 13,
+              cursor: 'pointer',
+              flexShrink: 0,
+              letterSpacing: '0.02em',
+            }}
+          >
+            {dark ? '☀' : '☾'}{!isMobile && (dark ? ' Light' : ' Dark')}
+          </button>
+
+          {/* Mobile: Hamburger button — CSS controls visibility */}
+          <button
+            className="show-on-mobile"
+            onClick={() => setShowMenu(m => !m)}
+            title="Menu"
+            style={{
+              background: showMenu
+                ? 'linear-gradient(135deg, #AF1419, #c9181f)'
+                : (dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)'),
+              border: showMenu ? '1px solid rgba(175,20,25,0.5)' : `1px solid ${inactiveBorder}`,
+              borderRadius: 8,
+              padding: '5px 10px',
+              color: showMenu ? '#fff' : inactiveColor,
+              fontFamily: 'Rubik, sans-serif',
+              fontSize: 18,
+              lineHeight: 1,
+              cursor: 'pointer',
+              flexShrink: 0,
+            }}
+          >
+            {showMenu ? '✕' : '☰'}
+          </button>
+        </div>
+
+        {/* Mobile: Hamburger dropdown menu */}
+        {showMenu && (
+          <>
+            {/* Backdrop */}
+            <div
+              onClick={() => setShowMenu(false)}
+              style={{
+                position: 'fixed', inset: 0, top: 56,
+                zIndex: 50,
+              }}
+            />
+            {/* Drawer */}
+            <div style={{
+              position: 'absolute',
+              top: '100%',
+              left: 0, right: 0,
+              zIndex: 51,
+              background: dark ? 'rgba(10,13,20,0.97)' : 'rgba(244,246,249,0.97)',
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+              borderBottom: `1px solid ${navBorder}`,
+              padding: '12px 14px 18px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 8,
+            }}>
+              {/* Section label: Pages */}
+              <div style={{ fontSize: 10, color: dark ? '#5a6070' : '#aaa', letterSpacing: '0.10em', textTransform: 'uppercase', fontWeight: 600, paddingBottom: 4 }}>
+                Pages
+              </div>
+
+              {/* Tool buttons */}
+              {TOOLS.map(tool => {
+                const active = tool.src === selected.src;
+                return (
+                  <button
+                    key={tool.src}
+                    onClick={() => { setSelected(tool); setShowMenu(false); }}
+                    style={{
+                      background: active ? 'linear-gradient(135deg, #AF1419, #c9181f)' : (dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'),
+                      color: active ? '#fff' : (dark ? '#c8cad4' : '#333'),
+                      border: active ? '1px solid rgba(175,20,25,0.5)' : `1px solid ${inactiveBorder}`,
+                      borderRadius: 9,
+                      padding: '11px 16px',
+                      fontFamily: 'Rubik, sans-serif',
+                      fontSize: 14,
+                      fontWeight: active ? 700 : 400,
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      letterSpacing: '0.02em',
+                      boxShadow: active ? '0 0 18px rgba(175,20,25,0.35)' : 'none',
+                    }}
+                  >
+                    {tool.label}
+                  </button>
+                );
+              })}
+
+              {/* Divider */}
+              <div style={{ height: 1, background: dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.08)', margin: '4px 0' }} />
+
+              {/* Admin button — admin only */}
+              {isAdmin && (
+                <button
+                  onClick={() => { setShowMenu(false); router.push('/admin'); }}
+                  style={{
+                    background: dark ? 'rgba(175,20,25,0.12)' : 'rgba(175,20,25,0.08)',
+                    border: '1px solid rgba(175,20,25,0.35)',
+                    borderRadius: 9,
+                    padding: '11px 16px',
+                    color: '#e8373e',
+                    fontFamily: 'Rubik, sans-serif',
+                    fontSize: 14,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    letterSpacing: '0.02em',
+                  }}
+                >
+                  ⚙ Admin / Settings
+                </button>
+              )}
+
+              {/* Credits */}
+              <div style={{
+                marginTop: 4,
+                padding: '10px 16px',
+                background: dark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)',
+                border: `1px solid ${inactiveBorder}`,
+                borderRadius: 9,
+                textAlign: 'center',
+              }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: dark ? '#e8eaf0' : '#1a1a1a', fontFamily: 'Rubik, sans-serif' }}>
+                  © 2026 HBS Studio
+                </div>
+                <div style={{ fontSize: 11, color: dark ? '#5a6070' : '#aaa', fontFamily: 'Rubik, sans-serif', marginTop: 3 }}>
+                  Tomer Bez-Ezri &amp; Pavel Levitin
+                </div>
+              </div>
+            </div>
+          </>
+        )}
       </nav>
 
       {/* ── About dialog ── */}

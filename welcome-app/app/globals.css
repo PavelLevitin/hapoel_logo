@@ -73,6 +73,13 @@ input[type="color"] {
 
 /* Nav hover is handled via inline React state (dark/light aware) */
 
+/* ── Mobile / desktop visibility helpers ── */
+.show-on-mobile { display: none !important; }
+@media (max-width: 767px) {
+  .show-on-mobile { display: flex !important; }
+  .hide-on-mobile { display: none !important; }
+}
+
 /* ── Animated dialog accent line ── */
 @keyframes accentShimmer {
   0%   { background-position: -200% center; }
