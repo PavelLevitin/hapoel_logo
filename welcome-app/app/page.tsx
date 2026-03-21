@@ -18,7 +18,7 @@ const inputStyle: React.CSSProperties = {
   boxSizing: 'border-box',
 };
 
-function Field({ label, type, value, onChange }: { label: string; type: string; value: string; onChange: (v: string) => void }) {
+function Field({ label, type, value, onChange, placeholder, hint }: { label: string; type: string; value: string; onChange: (v: string) => void; placeholder?: string; hint?: string }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
       <label style={{ fontSize: 11, color: '#7a8090', letterSpacing: '0.04em', textTransform: 'uppercase', fontWeight: 600 }}>
@@ -29,10 +29,12 @@ function Field({ label, type, value, onChange }: { label: string; type: string; 
         value={value}
         onChange={e => onChange(e.target.value)}
         required
+        placeholder={placeholder}
         style={inputStyle}
         onFocus={e => { e.target.style.borderColor = 'rgba(175,20,25,0.55)'; e.target.style.boxShadow = '0 0 0 3px rgba(175,20,25,0.12)'; }}
         onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.10)'; e.target.style.boxShadow = 'none'; }}
       />
+      {hint && <span style={{ fontSize: 11, color: '#5a6070', direction: 'rtl' }}>{hint}</span>}
     </div>
   );
 }
@@ -209,7 +211,7 @@ export default function AuthPage() {
             {!isLogin && <Field label="שם" type="text" value={name} onChange={setName} />}
             <Field label="אימייל" type="email" value={email} onChange={setEmail} />
             <Field label="סיסמה" type="password" value={password} onChange={setPassword} />
-            {!isLogin && <Field label="קוד רישום" type="text" value={inviteCode} onChange={setInviteCode} />}
+            {!isLogin && <Field label="קוד רישום" type="text" value={inviteCode} onChange={setInviteCode} placeholder="12345" hint="קוד בן 5 ספרות שקיבלת מהמנהל" />}
 
             {error && (
               <p style={{ margin: 0, padding: '10px 14px', background: 'rgba(175,20,25,0.12)', border: '1px solid rgba(175,20,25,0.3)', borderRadius: 8, color: '#e8373e', fontSize: 13, textAlign: 'center', direction: 'rtl' }}>
