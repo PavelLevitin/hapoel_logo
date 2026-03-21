@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession, signOut } from '../../lib/auth-client';
 
@@ -110,6 +110,23 @@ export default function AdminPage() {
   }
 
   useEffect(() => { fetchCounts(); }, []);
+
+  // Auto-logout after 30 minutes of inactivity
+  const lastActivity = useRef(Date.now());
+  useEffect(() => {
+    const update = () => { lastActivity.current = Date.now(); };
+    const events = ['mousemove', 'mousedown', 'keypress', 'touchstart', 'scroll'];
+    events.forEach(e => window.addEventListener(e, update));
+    const check = setInterval(async () => {
+      if (Date.now() - lastActivity.current > 30 * 60 * 1000) {
+        try { await signOut(); } finally { window.location.href = '/'; }
+      }
+    }, 60000);
+    return () => {
+      events.forEach(e => window.removeEventListener(e, update));
+      clearInterval(check);
+    };
+  }, []);
 
   async function fetchAllowedEmails() {
     const res = await fetch('/api/allowed-emails');

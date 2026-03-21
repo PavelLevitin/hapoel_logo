@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { signOut, useSession, authClient } from '../../lib/auth-client';
 
@@ -46,6 +46,23 @@ export default function Studio() {
       if (!data) window.location.href = '/';
     }, 20000);
     return () => clearInterval(interval);
+  }, []);
+
+  // Auto-logout after 30 minutes of inactivity
+  const lastActivity = useRef(Date.now());
+  useEffect(() => {
+    const update = () => { lastActivity.current = Date.now(); };
+    const events = ['mousemove', 'mousedown', 'keypress', 'touchstart', 'scroll'];
+    events.forEach(e => window.addEventListener(e, update));
+    const check = setInterval(async () => {
+      if (Date.now() - lastActivity.current > 30 * 60 * 1000) {
+        try { await signOut(); } finally { window.location.href = '/'; }
+      }
+    }, 60000);
+    return () => {
+      events.forEach(e => window.removeEventListener(e, update));
+      clearInterval(check);
+    };
   }, []);
 
   // Gallery postMessage listener
