@@ -98,6 +98,7 @@ export default function AdminPage() {
   const [newEmail, setNewEmail] = useState('');
   const [emailLoading, setEmailLoading] = useState(false);
   const [lastGeneratedCode, setLastGeneratedCode] = useState<{ email: string; code: string } | null>(null);
+  const [users, setUsers] = useState<{ id: string; name: string; email: string; role: string | null; createdAt: string }[]>([]);
 
   function fetchCounts() {
     fetch('/api/uploads/counts')
@@ -115,6 +116,20 @@ export default function AdminPage() {
   }
 
   useEffect(() => { if (active === SECTIONS.length) fetchAllowedEmails(); }, [active]);
+
+  async function fetchUsers() {
+    const res = await fetch('/api/users');
+    const data = await res.json();
+    setUsers(data.users ?? []);
+  }
+
+  async function handleDeleteUser(id: string) {
+    if (!confirm('האם אתה בטוח שברצונך למחוק משתמש זה?')) return;
+    await fetch(`/api/users?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+    await fetchUsers();
+  }
+
+  useEffect(() => { if (active === SECTIONS.length + 1) fetchUsers(); }, [active]);
 
   async function handleAddEmail() {
     if (!newEmail.trim()) return;
@@ -336,20 +351,34 @@ export default function AdminPage() {
             style={{
               background: active === SECTIONS.length ? 'linear-gradient(135deg, #1a5fa8, #1e75d0)' : 'transparent',
               border: active === SECTIONS.length ? '1px solid rgba(30,117,208,0.5)' : `1px solid ${dark ? 'transparent' : 'rgba(0,0,0,0.08)'}`,
-              borderRadius: 8,
-              padding: '9px 12px',
+              borderRadius: 8, padding: '9px 12px',
               color: active === SECTIONS.length ? '#fff' : dark ? '#b0b8c8' : '#333',
-              fontFamily: 'Rubik, Arial, sans-serif',
-              fontSize: 13,
+              fontFamily: 'Rubik, Arial, sans-serif', fontSize: 13,
               fontWeight: active === SECTIONS.length ? 700 : 400,
-              cursor: 'pointer',
-              textAlign: 'left',
-              letterSpacing: '0.02em',
+              cursor: 'pointer', textAlign: 'left', letterSpacing: '0.02em',
               boxShadow: active === SECTIONS.length ? '0 2px 12px rgba(30,117,208,0.35)' : 'none',
               transition: 'all 0.15s',
             }}
           >
             🔒 Allowed Emails
+          </button>
+
+          {/* Users */}
+          <button
+            onClick={() => setActive(SECTIONS.length + 1)}
+            style={{
+              background: active === SECTIONS.length + 1 ? 'linear-gradient(135deg, #1a5fa8, #1e75d0)' : 'transparent',
+              border: active === SECTIONS.length + 1 ? '1px solid rgba(30,117,208,0.5)' : `1px solid ${dark ? 'transparent' : 'rgba(0,0,0,0.08)'}`,
+              borderRadius: 8, padding: '9px 12px',
+              color: active === SECTIONS.length + 1 ? '#fff' : dark ? '#b0b8c8' : '#333',
+              fontFamily: 'Rubik, Arial, sans-serif', fontSize: 13,
+              fontWeight: active === SECTIONS.length + 1 ? 700 : 400,
+              cursor: 'pointer', textAlign: 'left', letterSpacing: '0.02em',
+              boxShadow: active === SECTIONS.length + 1 ? '0 2px 12px rgba(30,117,208,0.35)' : 'none',
+              transition: 'all 0.15s',
+            }}
+          >
+            👥 Users
           </button>
         </div>
 
@@ -363,7 +392,61 @@ export default function AdminPage() {
           overflowY: 'auto',
         }}>
           {/* Allowed Emails panel */}
-          {active === SECTIONS.length ? (
+          {active === SECTIONS.length + 1 ? (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ width: 3, height: 20, borderRadius: 2, background: 'linear-gradient(180deg, #1a5fa8, #1e75d0)', flexShrink: 0 }} />
+                <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', color: dark ? '#e8eaf0' : '#1a1a1a' }}>
+                  Users
+                </h2>
+                <span style={{ fontSize: 12, color: dark ? '#8a90a0' : '#888', letterSpacing: '0.04em' }}>
+                  — {users.length} רשומים
+                </span>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 560 }}>
+                {users.length === 0 && (
+                  <p style={{ color: dark ? '#5a6070' : '#aaa', fontSize: 13 }}>אין משתמשים</p>
+                )}
+                {users.map(user => (
+                  <div key={user.id} style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    background: dark ? 'rgba(255,255,255,0.06)' : '#fff',
+                    border: `1px solid ${dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.12)'}`,
+                    borderRadius: 8, padding: '12px 14px', gap: 12,
+                    boxShadow: dark ? 'none' : '0 1px 3px rgba(0,0,0,0.06)',
+                  }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: dark ? '#e8eaf0' : '#1a1a1a', marginBottom: 2 }}>{user.name}</div>
+                      <div style={{ fontSize: 12, color: dark ? '#7a8090' : '#888', direction: 'ltr' }}>{user.email}</div>
+                    </div>
+                    <span style={{
+                      fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 4, whiteSpace: 'nowrap',
+                      background: user.role === 'admin' ? 'rgba(175,20,25,0.15)' : 'rgba(255,255,255,0.07)',
+                      color: user.role === 'admin' ? '#e8373e' : dark ? '#7a8090' : '#888',
+                    }}>
+                      {user.role === 'admin' ? 'Admin' : 'User'}
+                    </span>
+                    <button
+                      onClick={() => handleDeleteUser(user.id)}
+                      disabled={user.role === 'admin'}
+                      title={user.role === 'admin' ? 'לא ניתן למחוק אדמין' : 'מחק משתמש'}
+                      style={{
+                        background: user.role === 'admin' ? 'transparent' : 'rgba(175,20,25,0.10)',
+                        border: `1px solid ${user.role === 'admin' ? 'transparent' : 'rgba(175,20,25,0.30)'}`,
+                        borderRadius: 6, padding: '5px 12px',
+                        color: user.role === 'admin' ? (dark ? '#3a4050' : '#ccc') : '#e8373e',
+                        cursor: user.role === 'admin' ? 'not-allowed' : 'pointer',
+                        fontSize: 12, fontWeight: 600, fontFamily: 'Rubik, sans-serif', flexShrink: 0,
+                      }}
+                    >
+                      מחק
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : active === SECTIONS.length ? (
             <>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <div style={{ width: 3, height: 20, borderRadius: 2, background: 'linear-gradient(180deg, #1a5fa8, #1e75d0)', flexShrink: 0 }} />
