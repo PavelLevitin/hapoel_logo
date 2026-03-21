@@ -143,6 +143,19 @@ export default function Studio() {
         {/* Spacer */}
         <div style={{ flex: 1 }} />
 
+        {/* Hello user */}
+        {session?.user?.name && (
+          <span style={{
+            fontSize: 13,
+            color: inactiveColor,
+            fontFamily: 'Rubik, sans-serif',
+            flexShrink: 0,
+            whiteSpace: 'nowrap',
+          }}>
+            שלום, <span style={{ fontWeight: 600, color: dark ? '#c8cad4' : '#333' }}>{session.user.name}</span>
+          </span>
+        )}
+
         {/* Admin/Settings button — admin only */}
         {isAdmin && (
           <button
