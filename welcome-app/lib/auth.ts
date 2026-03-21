@@ -28,6 +28,12 @@ export const auth = betterAuth({
           }
           return { data: user };
         },
+        after: async (user) => {
+          // Remove from whitelist once registered — they now exist in Users
+          if (user.email !== 'tomer@tomer.com') {
+            sqlite.prepare('DELETE FROM allowed_emails WHERE email = ?').run(user.email);
+          }
+        },
       },
     },
   },
