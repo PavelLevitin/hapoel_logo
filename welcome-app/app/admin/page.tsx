@@ -552,12 +552,14 @@ export default function AdminPage() {
                     </span>
                     <button
                       onClick={() => handleRemoveEmail(email)}
+                      disabled={email === 'tomer@tomer.com'}
+                      title={email === 'tomer@tomer.com' ? 'אימייל מוגן' : 'הסר'}
                       style={{
                         background: 'transparent', border: 'none',
-                        color: '#e8373e', cursor: 'pointer',
+                        color: email === 'tomer@tomer.com' ? (dark ? '#3a4050' : '#ccc') : '#e8373e',
+                        cursor: email === 'tomer@tomer.com' ? 'not-allowed' : 'pointer',
                         fontSize: 16, lineHeight: 1, padding: '0 4px', flexShrink: 0,
                       }}
-                      title="הסר"
                     >×</button>
                   </div>
                 ))}

@@ -47,6 +47,9 @@ export async function DELETE(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const email = searchParams.get('email');
   if (!email) return NextResponse.json({ error: 'Missing email' }, { status: 400 });
+  if (email === 'tomer@tomer.com') {
+    return NextResponse.json({ error: 'This email is protected and cannot be removed' }, { status: 403 });
+  }
   sqlite.prepare('DELETE FROM allowed_emails WHERE email = ?').run(email);
   return NextResponse.json({ ok: true });
 }
