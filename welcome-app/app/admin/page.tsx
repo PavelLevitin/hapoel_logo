@@ -100,6 +100,7 @@ export default function AdminPage() {
   const [lastGeneratedCode, setLastGeneratedCode] = useState<{ email: string; code: string } | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
   const [users, setUsers] = useState<{ id: string; name: string; email: string; role: string | null; createdAt: string }[]>([]);
+  const [confirmDelete, setConfirmDelete] = useState<{ id: string; name: string } | null>(null);
 
   function fetchCounts() {
     fetch('/api/uploads/counts')
@@ -141,9 +142,9 @@ export default function AdminPage() {
   }
 
   async function handleDeleteUser(id: string) {
-    if (!confirm('האם אתה בטוח שברצונך למחוק משתמש זה?')) return;
     await fetch(`/api/users?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
     await fetchUsers();
+    setConfirmDelete(null);
   }
 
   useEffect(() => { if (active === SECTIONS.length + 1) fetchUsers(); }, [active]);
@@ -236,6 +237,7 @@ export default function AdminPage() {
       background: dark ? '#111827' : '#f0f2f5',
       fontFamily: 'Rubik, Arial, sans-serif',
       color: dark ? '#e8eaf0' : '#1a1a1a',
+      position: 'relative',
       overflow: 'hidden',
     }}>
 
@@ -451,7 +453,7 @@ export default function AdminPage() {
                       {user.role === 'admin' ? 'Admin' : 'User'}
                     </span>
                     <button
-                      onClick={() => handleDeleteUser(user.id)}
+                      onClick={() => setConfirmDelete({ id: user.id, name: user.name })}
                       disabled={user.email === 'tomer@tomer.com' || user.role === 'admin'}
                       title={user.email === 'tomer@tomer.com' ? 'משתמש מוגן' : user.role === 'admin' ? 'לא ניתן למחוק אדמין' : 'מחק משתמש'}
                       style={{
@@ -714,6 +716,89 @@ export default function AdminPage() {
           )}
         </div>
       </div>
+
+      {/* ── Delete user confirmation dialog ── */}
+      {confirmDelete && (
+        <>
+          <div
+            onClick={() => setConfirmDelete(null)}
+            style={{
+              position: 'fixed', inset: 0,
+              background: 'rgba(0,0,0,0.55)',
+              backdropFilter: 'blur(6px)',
+              WebkitBackdropFilter: 'blur(6px)',
+              zIndex: 200,
+            }}
+          />
+          <div style={{
+            position: 'fixed',
+            top: '50%', left: '50%',
+            transform: 'translate(-50%, -50%)',
+            zIndex: 201,
+            width: 360,
+            background: dark ? 'rgba(12,15,24,0.97)' : 'rgba(245,247,250,0.97)',
+            border: `1px solid ${dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.12)'}`,
+            borderRadius: 16,
+            backdropFilter: 'blur(32px)',
+            WebkitBackdropFilter: 'blur(32px)',
+            boxShadow: '0 24px 60px rgba(0,0,0,0.5)',
+            fontFamily: 'Rubik, Arial, sans-serif',
+            overflow: 'hidden',
+          }}>
+            {/* Red top accent */}
+            <div style={{ height: 3, background: 'linear-gradient(90deg, transparent, #AF1419, #e8373e, #AF1419, transparent)' }} />
+
+            <div style={{ padding: '28px 28px 24px' }}>
+              {/* Icon */}
+              <div style={{
+                width: 44, height: 44, borderRadius: 12,
+                background: 'rgba(175,20,25,0.12)',
+                border: '1px solid rgba(175,20,25,0.25)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 20, marginBottom: 16,
+              }}>🗑</div>
+
+              <div style={{ fontSize: 16, fontWeight: 700, color: dark ? '#e8eaf0' : '#1a1a1a', marginBottom: 8 }}>
+                מחיקת משתמש
+              </div>
+              <div style={{ fontSize: 13, color: dark ? '#7a8090' : '#666', lineHeight: 1.6, direction: 'rtl', marginBottom: 24 }}>
+                האם אתה בטוח שברצונך למחוק את<br />
+                <span style={{ fontWeight: 700, color: dark ? '#c8cad4' : '#333' }}>{confirmDelete.name}</span>?<br />
+                פעולה זו אינה ניתנת לביטול.
+              </div>
+
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button
+                  onClick={() => handleDeleteUser(confirmDelete.id)}
+                  style={{
+                    flex: 1,
+                    background: 'linear-gradient(135deg, #AF1419, #c9181f)',
+                    border: 'none', borderRadius: 9, padding: '10px 0',
+                    color: '#fff', fontSize: 13, fontWeight: 700,
+                    fontFamily: 'Rubik, Arial, sans-serif', cursor: 'pointer',
+                    boxShadow: '0 4px 16px rgba(175,20,25,0.35)',
+                  }}
+                >
+                  כן, מחק
+                </button>
+                <button
+                  onClick={() => setConfirmDelete(null)}
+                  style={{
+                    flex: 1,
+                    background: dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)',
+                    border: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)'}`,
+                    borderRadius: 9, padding: '10px 0',
+                    color: dark ? '#b0b8c8' : '#555', fontSize: 13, fontWeight: 600,
+                    fontFamily: 'Rubik, Arial, sans-serif', cursor: 'pointer',
+                  }}
+                >
+                  ביטול
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
