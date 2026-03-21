@@ -24,12 +24,17 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ emails: rows });
 }
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export async function POST(req: NextRequest) {
   if (!await requireAdmin(req)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   const { email } = await req.json();
   if (!email) return NextResponse.json({ error: 'Missing email' }, { status: 400 });
+  if (!EMAIL_REGEX.test(email.trim())) {
+    return NextResponse.json({ error: 'כתובת אימייל לא תקינה' }, { status: 400 });
+  }
 
   const code = generateCode();
   const normalizedEmail = email.toLowerCase().trim();

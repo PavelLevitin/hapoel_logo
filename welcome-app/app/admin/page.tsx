@@ -98,6 +98,7 @@ export default function AdminPage() {
   const [newEmail, setNewEmail] = useState('');
   const [emailLoading, setEmailLoading] = useState(false);
   const [lastGeneratedCode, setLastGeneratedCode] = useState<{ email: string; code: string } | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
   const [users, setUsers] = useState<{ id: string; name: string; email: string; role: string | null; createdAt: string }[]>([]);
 
   function fetchCounts() {
@@ -133,6 +134,12 @@ export default function AdminPage() {
 
   async function handleAddEmail() {
     if (!newEmail.trim()) return;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(newEmail.trim())) {
+      setEmailError('כתובת אימייל לא תקינה');
+      return;
+    }
+    setEmailError(null);
     setEmailLoading(true);
     const res = await fetch('/api/allowed-emails', {
       method: 'POST',
@@ -464,7 +471,7 @@ export default function AdminPage() {
                   type="email"
                   placeholder="הכנס אימייל חדש..."
                   value={newEmail}
-                  onChange={e => setNewEmail(e.target.value)}
+                  onChange={e => { setNewEmail(e.target.value); setEmailError(null); }}
                   onKeyDown={e => e.key === 'Enter' && handleAddEmail()}
                   style={{
                     flex: 1,
@@ -491,6 +498,10 @@ export default function AdminPage() {
                   + צור קוד
                 </button>
               </div>
+
+              {emailError && (
+                <p style={{ margin: 0, fontSize: 12, color: '#e8373e', direction: 'rtl' }}>{emailError}</p>
+              )}
 
               {/* Generated code banner */}
               {lastGeneratedCode && (
