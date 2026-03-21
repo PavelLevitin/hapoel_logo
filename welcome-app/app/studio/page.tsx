@@ -140,9 +140,6 @@ export default function Studio() {
           );
         })}
 
-        {/* Spacer */}
-        <div style={{ flex: 1 }} />
-
         {/* Hello user */}
         {session?.user?.name && (
           <span style={{
@@ -151,10 +148,14 @@ export default function Studio() {
             fontFamily: 'Rubik, sans-serif',
             flexShrink: 0,
             whiteSpace: 'nowrap',
+            marginLeft: 8,
           }}>
-            שלום, <span style={{ fontWeight: 600, color: dark ? '#c8cad4' : '#333' }}>{session.user.name}</span>
+            Hello, <span style={{ fontWeight: 600, color: dark ? '#c8cad4' : '#333' }}>{session.user.name}</span>
           </span>
         )}
+
+        {/* Spacer */}
+        <div style={{ flex: 1 }} />
 
         {/* Admin/Settings button — admin only */}
         {isAdmin && (
