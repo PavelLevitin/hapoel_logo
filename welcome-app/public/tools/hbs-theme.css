@@ -274,10 +274,11 @@ button[data-hbs-export]::after {
   /*
    * Stage containers — override the fixed pixel widths so the
    * JS-based scale calculations read the correct viewport size.
-   * Covers: welcome / statement / match / birthday (.stage),
-   *         score (.stage-scale), post (.stage-view / .stage-root)
+   * .stage      → welcome / statement / match / birthday
+   * .stage-view → post (visible container; .stage-root is the raw
+   *               1080 px canvas and must NOT be resized)
    */
-  .stage, .stage-scale, .stage-view, .stage-root {
+  .stage, .stage-view {
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
